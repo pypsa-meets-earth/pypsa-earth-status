@@ -106,17 +106,20 @@ def mock_snakemake(rulename, **wildcards):
     os.chdir(script_dir)
     return snakemake
 
+
 def harmonize_carrier_names(serie):
-    return serie.str.lower().replace({
-        "solar": "pv",
-        "wind": "onwind",
-        "offwind": "offwind",
-        "ror": "hydro",
-        "run of river": "hydro",
-        "storage hydro": "hydro",
-        "wind onshore": "onshore",
-        "wind offshore": "offwind",
-        "offwind-dc": "offwind",
-        "offwind-ac": "offwind",
-        "hard coal": "coal",
-    })
+    return serie.str.lower().replace(
+        {
+            "solar": "pv",
+            "wind": "onwind",
+            "offwind": "offwind",
+            "ror": "hydro",
+            "run of river": "hydro",
+            "storage hydro": "hydro",
+            "wind onshore": "onshore",
+            "wind offshore": "offwind",
+            "offwind-dc": "offwind",
+            "offwind-ac": "offwind",
+            "hard coal": "coal",
+        }
+    )

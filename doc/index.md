@@ -16,7 +16,7 @@
 -   :material-clock-fast:{ .lg .middle } **Getting started**
 
     ---
-    
+
     [:octicons-arrow-right-24: Installation](home/installation.md)
 
     [:octicons-arrow-right-24: Quick Start](home/quick-start.md)
@@ -24,7 +24,7 @@
 -   :material-new-box:{ .lg .middle } **Release notes**
 
     ---
-    
+
     [:octicons-arrow-right-24: Release notes](release-notes.md)
 
 </div>
@@ -36,7 +36,7 @@
 -   :material-bookshelf:{ .lg .middle } **User Guide**
 
     ---
-    
+
     The following section provides a detailed description of the PyPSA-Earth-Status **design and architecture**.
 
 

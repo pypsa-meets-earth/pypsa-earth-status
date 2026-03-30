@@ -44,7 +44,7 @@ rule build_network_geojson:
         buscodes="data/electricity-transmission-database/Input - Center points.csv",
         lineexist="data/electricity-transmission-database/GTD-v1.1_regional_existing.csv",
         lineplan="data/electricity-transmission-database/GTD-v1.1_regional_planned.csv",
-        network_path=config["network_validation"]["network_path"], 
+        network_path=config["network_validation"]["network_path"],
     params:
         countries=config["network_validation"]["countries"],
         shapefile=config["network_validation"].get("shapefile", False),

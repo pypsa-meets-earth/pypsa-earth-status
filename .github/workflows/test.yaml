@@ -49,7 +49,7 @@ jobs:
         activate-environment: pypsa-earth
         channel-priority: strict
         conda-remove-defaults: true
-    
+
     - name: Fill submodules
       run: |
         git submodule update --init --recursive
