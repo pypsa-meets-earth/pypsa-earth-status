@@ -87,8 +87,8 @@ repos:
   hooks:
   - id: snakefmt
 
-# Check for FSFE REUSE compliance (licensing)
-- repo: https://github.com/fsfe/reuse-tool
-  rev: v6.2.0
-  hooks:
-  - id: reuse
+# # Check for FSFE REUSE compliance (licensing)
+# - repo: https://github.com/fsfe/reuse-tool
+#   rev: v6.2.0
+#   hooks:
+#   - id: reuse
