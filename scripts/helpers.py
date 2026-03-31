@@ -107,8 +107,8 @@ def mock_snakemake(rulename, **wildcards):
     return snakemake
 
 
-def harmonize_carrier_names(serie):
-    return serie.str.lower().replace(
+def harmonize_carrier_names(series):
+    return series.str.lower().replace(
         {
             "solar": "pv",
             "wind": "onwind",

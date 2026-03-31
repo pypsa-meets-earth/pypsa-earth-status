@@ -5,6 +5,7 @@ region and carrier combinations for capacities and unique countries for demand.
 It also compares transmission line properties (s_nom and length) by computing
 ratios and outputs a comparison GeoJSON.
 """
+
 import json
 import logging
 import os

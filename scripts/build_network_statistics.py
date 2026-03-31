@@ -2,6 +2,7 @@
 """
 This script reads a PyPSA network and builds reference statistics to be used for comparison.
 """
+
 import os
 import re
 

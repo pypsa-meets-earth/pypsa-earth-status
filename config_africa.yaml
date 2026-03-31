@@ -1,0 +1,20 @@
+version: latest
+
+methodology: network_validation   # technique used in the validation:
+                                  # - network_validation: to validate a single network file specified in    "network_validation" block
+
+datasets:
+  demand: ["ourworldindata"]  # list of datasets sources to use. A subset of 'ourworldindata'
+  installed_capacity: ["irena"]  # list of datasets sources to use. A subset of 'irena'
+  # energy_dispatch: []  # list of datasets sources to validate energy dispatch. Not yet supported
+  # network: []  # list of datasets sources to validate networks. Not yet supported
+
+network_validation:
+  network_path: "Africa_elec_s_100_ec_lcopt_Co2L-3H.nc" # File to the PyPSA network file to validate
+  year: [2021]  # year of the network to validate
+  countries: ['AO', 'BJ', 'BW', 'CD', 'CF', 'CG', 'CI', 'CM', 'CV', 'DZ', 'EG',
+       'EH', 'ER', 'ET', 'GA', 'GH', 'GM', 'GN', 'GQ', 'GW', 'KE', 'KM',
+       'LR', 'LY', 'MA', 'MG', 'ML', 'MR', 'MU', 'MW', 'MZ', 'NA', 'NE',
+       'NG', 'RW', 'SC', 'SD', 'SL', 'SN', 'SO', 'SS', 'ST', 'SZ', 'TD',
+       'TG', 'TN', 'TZ', 'UG', 'ZA', 'ZM', 'ZW']  # country of the network to validate
+  shapefile: False

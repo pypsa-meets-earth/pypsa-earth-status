@@ -24,8 +24,6 @@ rule clean:
 
 
 rule clean_data:
-    params:
-        datasets=config["datasets"],
     input:
         demand_owid="data/electricity_demand/owid-energy-data.csv",  # from https://nyc3.digitaloceanspaces.com/owid-public/data/energy/owid-energy-data.csv
         demand_iea="data/WEO2023_AnnexA_Free_Dataset_Regions.csv",  # from https://www.iea.org/data-and-statistics/data-product/world-energy-outlook-2023-free-dataset-2
@@ -36,6 +34,8 @@ rule clean_data:
         cap_irena="resources/clean/irena_capacity_data.csv",
     log:
         "logs/clean_data.log",
+    params:
+        datasets=config["datasets"],
     script:
         "scripts/clean_data.py"
 
@@ -46,25 +46,23 @@ rule build_network_geojson:
         lineexist="data/electricity_transmission/GTD-v1.1_regional_existing.csv",
         lineplan="data/electricity_transmission/GTD-v1.1_regional_planned.csv",
         network_path=config["network_validation"]["network_path"],
-    params:
-        countries=config["network_validation"]["countries"],
-        shapefile=config["network_validation"].get("shapefile", False),
-        validate_cross_border_capacity=config["network_validation"].get(
-            "validate_cross_border_capacity", True
-        ),
     output:
         network_existing="resources/reference_statistics/network_exist.geojson",
         network_planned="resources/reference_statistics/network_planned.geojson",
         network_model="resources/network_statistics/network_model.geojson",
     log:
         "logs/build_network_geojson.log",
+    params:
+        countries=config["network_validation"]["countries"],
+        shapefile=config["network_validation"].get("shapefile", False),
+        validate_cross_border_capacity=config["network_validation"].get(
+            "validate_cross_border_capacity", True
+        ),
     script:
         "scripts/build_network_geojson.py"
 
 
 rule build_reference_statistics:
-    params:
-        datasets=config["datasets"],
     input:
         demand_owid="resources/clean/owid_demand_data.csv",
         cap_irena="resources/clean/irena_capacity_data.csv",
@@ -75,13 +73,13 @@ rule build_reference_statistics:
         # energy_dispatch="resources/reference_statistics/energy_dispatch.geojson"
     log:
         "logs/build_reference_statistics.log",
+    params:
+        datasets=config["datasets"],
     script:
         "scripts/build_reference_statistics.py"
 
 
 rule build_network_statistics:
-    params:
-        network=config["network_validation"],
     input:
         network_path=config["network_validation"]["network_path"],
         # other sources
@@ -93,6 +91,8 @@ rule build_network_statistics:
         # network="resources/network_statistics/network.geojson",
     log:
         "logs/build_network_statistics.log",
+    params:
+        network=config["network_validation"],
     script:
         "scripts/build_network_statistics.py"
 

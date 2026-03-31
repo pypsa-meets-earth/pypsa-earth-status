@@ -4,6 +4,7 @@
 This script collects clean statistics data and merges the datasets to create reference statistics to be used to validate energy systems.
 
 """
+
 import os
 import shutil
 
