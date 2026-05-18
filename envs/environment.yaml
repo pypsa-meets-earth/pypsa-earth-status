@@ -19,4 +19,4 @@ dependencies:
 - pypsa >=0.25,<=0.30
 - pyyaml
 - shapely
-- snakemake <8
+- snakemake-minimal <8
