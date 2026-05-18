@@ -21,9 +21,6 @@ build:
   - libglpk-dev
 
   jobs:
-    pre_system_dependencies:
-    - git fetch --force --all
-    - git submodule update --init --recursive
     pre_install:
     - pip install mkdocs-material
     post_build:

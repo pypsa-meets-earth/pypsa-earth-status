@@ -1,7 +1,0 @@
-# SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
-#
-# SPDX-License-Identifier: CC0-1.0
-
-[submodule "workflows/pypsa-earth"]
-	path = workflows/pypsa-earth
-	url = https://github.com/pypsa-meets-earth/pypsa-earth

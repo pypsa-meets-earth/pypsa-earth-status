@@ -73,25 +73,18 @@ Improving coverage with regionally focused datasets is of high interest for this
 To install PyPSA-Earth-Status, simply clone the repository:
 
 ```bash
-    git clone https://github.com/pypsa-meets-earth/pypsa-earth-status --recurse-submodules
+    git clone https://github.com/pypsa-meets-earth/pypsa-earth-status
 ```
 
-The Python dependencies required to run the scripts are a proven subset of those used by PyPSA-Earth.
-We recommend using the PyPSA-Earth environment, which provides OS-specific lock files for Conda.
+The Python dependencies required to run the scripts are defined in this repository.
+We recommend using the provided Conda environment file.
 
-For Linux, create the environment as follows:
+Create the environment as follows:
 
 ```bash
     cd pypsa-earth-status
-    conda env create -f workflows/pypsa-earth/envs/linux-64.lock.yaml
+    conda env create -f envs/environment.yaml
 ```
-
-For other operating systems, use the corresponding lock file for your platform.
-You can find all available lock files in: `workflows/pypsa-earth/envs/`. For example:
-
-- `win-64.lock.yaml` for Windows,
-- `osx-arm64.lock.yaml` for macOS platform arm64 (M1/M2)
-- `osx-64.lock.yaml` for macOS platform x86_64 (Intel)
 
 ## Tutorial
 
