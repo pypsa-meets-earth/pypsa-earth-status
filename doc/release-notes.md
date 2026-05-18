@@ -10,6 +10,8 @@ SPDX-License-Identifier: CC-BY-4.0
 
 ### New Features and Major Changes
 
+* [Decompose clean_data into carrier-source-specific rules PR #47](https://github.com/SPSUnipi/pypsa2smspp/pull/47)
+
 * [Add an inventory for data sources available for validation PR #32](https://github.com/pypsa-meets-earth/pypsa-earth-status/pull/32)
 
 * [Add `validate_cross_border_capacity` to `network_validation` config so cross-border capacity checks can be disabled when building network validation GeoJSON outputs PR #36](https://github.com/pypsa-meets-earth/pypsa-earth-status/pull/33)
