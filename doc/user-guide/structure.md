@@ -40,7 +40,8 @@ The actions mentioned above are implemented through the following Snakemake rule
 1. **Create reference statistics**
 
     - `create_example_DE` (for the example workflow only)
-    - `clean_data`
+    - `build_reference_demand_ourworldindata`
+    - `build_reference_installed_capacity_irena`
     - `build_reference_statistics`
 
 2. **Extract network statistics**
@@ -66,9 +67,10 @@ It is primarily intended for tutorials and quick-start demonstrations.
 
 - `resources/example_DE.nc`
 
-### `clean_data`
+### Source-specific reference builders
 
-This rule cleans and harmonizes raw external datasets so they can be used consistently throughout the workflow.
+These rules clean and harmonize raw external datasets so they can be used consistently throughout the workflow.
+Each rule follows the `build_reference_{category}_{source}` naming pattern.
 
 **Typical inputs:**
 
@@ -81,7 +83,10 @@ This rule cleans and harmonizes raw external datasets so they can be used consis
 - Cleaned demand data in `resources/clean/owid_demand_data.csv`
 - Cleaned capacity data in `resources/clean/irena_capacity_data.csv`
 
-The corresponding processing logic is implemented in `scripts/clean_data.py`.
+The corresponding processing logic is implemented in:
+
+- `scripts/build_reference_demand_ourworldindata.py`
+- `scripts/build_reference_installed_capacity_irena.py`
 
 ### `build_reference_statistics`
 

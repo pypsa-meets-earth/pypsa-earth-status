@@ -23,21 +23,26 @@ rule clean:
             pass
 
 
-rule clean_data:
+rule build_reference_demand_ourworldindata:
     input:
         demand_owid="data/electricity_demand/owid-energy-data.csv",  # from https://nyc3.digitaloceanspaces.com/owid-public/data/energy/owid-energy-data.csv
-        demand_iea="data/WEO2023_AnnexA_Free_Dataset_Regions.csv",  # from https://www.iea.org/data-and-statistics/data-product/world-energy-outlook-2023-free-dataset-2
-        cap_irena="data/installed_capacity/ELECSTAT_20240808-144258.csv",  # IRENA capacity data from https://pxweb.irena.org/pxweb/en/IRENASTAT/IRENASTAT__Power%20Capacity%20and%20Generation/Country_ELECSTAT_2024_H2.px/
-        # other sources
     output:
         demand_owid="resources/clean/owid_demand_data.csv",
+    log:
+        "logs/build_reference_demand_ourworldindata.log",
+    script:
+        "scripts/build_reference_demand_ourworldindata.py"
+
+
+rule build_reference_installed_capacity_irena:
+    input:
+        cap_irena="data/installed_capacity/ELECSTAT_20240808-144258.csv",  # IRENA capacity data from https://pxweb.irena.org/pxweb/en/IRENASTAT/IRENASTAT__Power%20Capacity%20and%20Generation/Country_ELECSTAT_2024_H2.px/
+    output:
         cap_irena="resources/clean/irena_capacity_data.csv",
     log:
-        "logs/clean_data.log",
-    params:
-        datasets=config["datasets"],
+        "logs/build_reference_installed_capacity_irena.log",
     script:
-        "scripts/clean_data.py"
+        "scripts/build_reference_installed_capacity_irena.py"
 
 
 rule build_network_geojson:
