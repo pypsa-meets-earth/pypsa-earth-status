@@ -10,6 +10,8 @@ SPDX-License-Identifier: CC-BY-4.0
 
 ### New Features and Major Changes
 
+* [Drop pypsa-earth submodule PR #46](https://github.com/pypsa-meets-earth/pypsa-earth-status/pull/46)
+
 * [Add an inventory for data sources available for validation PR #32](https://github.com/pypsa-meets-earth/pypsa-earth-status/pull/32)
 
 * [Add `validate_cross_border_capacity` to `network_validation` config so cross-border capacity checks can be disabled when building network validation GeoJSON outputs PR #36](https://github.com/pypsa-meets-earth/pypsa-earth-status/pull/33)
