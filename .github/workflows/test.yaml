@@ -39,7 +39,7 @@ jobs:
     - uses: conda-incubator/setup-miniconda@v3
       with:
         miniforge-version: latest
-        activate-environment: pypsa-earth
+        activate-environment: pypsa-earth-status
         channel-priority: strict
         conda-remove-defaults: true
 
@@ -52,7 +52,7 @@ jobs:
 
     - name: Update environment
       if: steps.cache-env.outputs.cache-hit != 'true'
-      run: conda env update -n pypsa-earth -f ${{ matrix.env_file }}
+      run: conda env update -n pypsa-earth-status -f ${{ env.env_file }}
 
     - name: Conda list
       run: conda list
