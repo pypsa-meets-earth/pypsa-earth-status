@@ -5,6 +5,7 @@
 name: pypsa-earth-status
 channels:
 - conda-forge
+- bioconda
 dependencies:
 - python >=3.10,<3.13
 - cartopy
@@ -19,4 +20,4 @@ dependencies:
 - pypsa >=0.25,<=0.30
 - pyyaml
 - shapely
-- snakemake-minimal <8
+- snakemake-minimal
