@@ -10,6 +10,8 @@ SPDX-License-Identifier: CC-BY-4.0
 
 ### New Features and Major Changes
 
+* [Decompose clean_data into carrier-source-specific rules PR #47](https://github.com/SPSUnipi/pypsa2smspp/pull/47)
+
 * [Drop pypsa-earth submodule PR #46](https://github.com/pypsa-meets-earth/pypsa-earth-status/pull/46)
 
 * [Add an inventory for data sources available for validation PR #32](https://github.com/pypsa-meets-earth/pypsa-earth-status/pull/32)

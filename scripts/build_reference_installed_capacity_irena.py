@@ -4,45 +4,21 @@
 
 # -*- coding: utf-8 -*-
 """
-
-This script cleans raw statistics data from different sources, to build statistics for validation.
-
+Build installed capacity reference data from IRENA.
 """
 
 import os
 
 import country_converter as coco
-import geopandas as gpd
 import pandas as pd
-from helpers import (
-    configure_logging,
-    country_name_2_two_digits,
-    read_csv_nafix,
-    three_2_two_digits_country,
-    to_csv_nafix,
-)
+from helpers import configure_logging, read_csv_nafix, to_csv_nafix
 
 cc = coco.CountryConverter()
 
 
-def get_demand_ourworldindata(inputs, outputs):
+def clean_capacity_irena(df_irena):
     """
-    Retrieve the electricity demand data from Our World in Data
-    """
-    fp_input = inputs["demand_owid"]
-    fp_output = outputs["demand_owid"]
-    df = read_csv_nafix(fp_input)
-    df = df.loc[:, ["iso_code", "year", "electricity_demand"]]
-    df = df[df["iso_code"].notna()]  # removes antartica
-    df["region"] = cc.pandas_convert(df["iso_code"], to="ISO2")
-    df = df[["region", "year", "electricity_demand"]]
-    df = df.set_index("region")
-    to_csv_nafix(df, fp_output)
-
-
-def clean_capacity_IRENA(df_irena):
-    """
-    Clean the capacity data from IRENA
+    Clean capacity data from IRENA.
     """
     df = df_irena.copy()
 
@@ -81,19 +57,20 @@ def clean_capacity_IRENA(df_irena):
     return installed_capacity_irena
 
 
-def get_installed_capacity_irena(inputs, outputs):
+def build_reference_installed_capacity_irena(inputs, outputs):
     """
-    Retrieve the electricity demand data from IRENA
+    Retrieve installed capacity data from IRENA.
     """
     fp_input = inputs["cap_irena"]
     fp_output = outputs["cap_irena"]
+
     df_irena = read_csv_nafix(fp_input, skiprows=2, encoding="latin-1")
     df_irena = df_irena.iloc[:, [0, 1, 4, 5]]
-    # df = df[df["iso_code"].notna()]  # removes antartica
     df_irena["region"] = cc.pandas_convert(df_irena["Country/area"], to="ISO2")
-    df_irena = clean_capacity_IRENA(df_irena)
+    df_irena = clean_capacity_irena(df_irena)
     df_irena = df_irena[["region", "Technology", "Year", "p_nom"]]
     df_irena = df_irena.set_index("region")
+
     to_csv_nafix(df_irena, fp_output)
 
 
@@ -102,10 +79,8 @@ if __name__ == "__main__":
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
         from helpers import mock_snakemake
 
-        snakemake = mock_snakemake("clean_data")
+        snakemake = mock_snakemake("build_reference_installed_capacity_irena")
 
     configure_logging(snakemake)
 
-    get_demand_ourworldindata(snakemake.input, snakemake.output)
-
-    get_installed_capacity_irena(snakemake.input, snakemake.output)
+    build_reference_installed_capacity_irena(snakemake.input, snakemake.output)
