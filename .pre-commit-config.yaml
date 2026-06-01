@@ -83,7 +83,7 @@ repos:
 
 # Format Snakemake rule / workflow files
 - repo: https://github.com/snakemake/snakefmt
-  rev: v2.0.0
+  rev: v2.0.1
   hooks:
   - id: snakefmt
 
