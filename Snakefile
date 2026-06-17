@@ -158,6 +158,21 @@ rule visualize_data:
         "scripts/visualize_data.py"
 
 
+rule build_reference_pypsa_network:
+    input:
+        demand="resources/reference_statistics/demand.csv",
+        installed_capacity="resources/reference_statistics/installed_capacity.csv",
+    output:
+        network="resources/reference_statistics/reference_network.nc",
+    log:
+        "logs/build_reference_pypsa_network.log",
+    params:
+        year=config["network_validation"]["year"][0],
+        countries=config["network_validation"]["countries"],
+    script:
+        "scripts/build_reference_pypsa_network.py"
+
+
 rule create_example_DE:
     output:
         "resources/example_DE.nc",
