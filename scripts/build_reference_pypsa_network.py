@@ -26,6 +26,8 @@ logger = logging.getLogger(__name__)
 
 # Hours per year used for unit conversion between TWh/year and MW
 HOURS_PER_YEAR = 8760
+# Conversion factor from TWh to MWh (used to convert demand from TWh/year to MW)
+TWH_TO_MWH = 1e6
 
 
 def build_reference_pypsa_network(inputs, outputs, params):
@@ -90,7 +92,7 @@ def build_reference_pypsa_network(inputs, outputs, params):
         if region not in n.buses.index:
             logger.warning("Region %s has demand but no bus; skipping.", region)
             continue
-        demand_mw = row["demand"] * 1e6 / HOURS_PER_YEAR
+        demand_mw = row["demand"] * TWH_TO_MWH / HOURS_PER_YEAR
         # Store as time-series so that loads_t.p_set.mean() * 8760 * 1e-6
         # correctly recovers the original TWh/year demand value
         n.add(
