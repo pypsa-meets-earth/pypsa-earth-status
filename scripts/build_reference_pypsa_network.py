@@ -69,10 +69,14 @@ def build_reference_pypsa_network(inputs, outputs, params):
     capacity_df = capacity_df[capacity_df["region"].isin(countries)]
 
     if demand_df.empty:
-        logger.warning("No demand data found for the configured countries. The network will have no loads.")
+        logger.warning(
+            "No demand data found for the configured countries. The network will have no loads."
+        )
 
     if capacity_df.empty:
-        logger.warning("No capacity data found for the configured countries. The network will have no generators.")
+        logger.warning(
+            "No capacity data found for the configured countries. The network will have no generators."
+        )
 
     # Create PyPSA network with a single snapshot representing a full year
     n = pypsa.Network()
