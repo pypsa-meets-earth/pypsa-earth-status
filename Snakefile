@@ -80,6 +80,8 @@ rule build_reference_statistics:
         "logs/build_reference_statistics.log",
     params:
         datasets=config["datasets"],
+        year=config["network_validation"]["year"],
+        countries=config["network_validation"]["countries"],
     script:
         "scripts/build_reference_statistics.py"
 

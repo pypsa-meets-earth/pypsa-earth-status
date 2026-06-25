@@ -28,15 +28,10 @@ def filter_data_by_config(df, column, valid_values):
     return df[df[column].isin(valid_values)]
 
 
-def process_reference_statistics(inputs, outputs, config):
+def process_reference_statistics(inputs, outputs, year, countries):
     """
     Processes demand and installed capacity data based on the specified year and countries.
     """
-    year = config["network_validation"]["year"][0]  # Extracting the year from config
-    countries = config["network_validation"][
-        "countries"
-    ]  # Extracting the list of countries
-
     # Process demand data
     df_demand = read_csv_nafix(inputs["demand_owid"])
     df_demand = filter_data_by_config(df_demand, "region", countries)
@@ -68,4 +63,7 @@ if __name__ == "__main__":
 
     configure_logging(snakemake)
 
-    process_reference_statistics(snakemake.input, snakemake.output, snakemake.config)
+    year = snakemake.params["year"][0]
+    countries = snakemake.params["countries"]
+
+    process_reference_statistics(snakemake.input, snakemake.output, year, countries)
