@@ -8,8 +8,9 @@ methodology: network_validation   # technique used in the validation:
                                   # - network_validation: to validate a single network file specified in    "network_validation" block
 
 datasets:
-  demand: ["ourworldindata"]  # list of datasets sources to use. A subset of 'ourworldindata'
-  installed_capacity: ["irena"]  # list of datasets sources to use. A subset of 'irena'
+  demand: ["ourworldindata"]  # list of datasets sources to use. A subset of 'ourworldindata', 'ember'
+  installed_capacity: ["irena"]  # list of datasets sources to use. A subset of 'irena', 'ember'
+  generation: ["ember"]  # list of datasets sources to use. A subset of 'ember'
   # energy_dispatch: []  # list of datasets sources to validate energy dispatch. Not yet supported
   # network: []  # list of datasets sources to validate networks. Not yet supported
 
@@ -19,6 +20,28 @@ network_validation:
   countries: ['DE', 'FR']  # country of the network to validate
   shapefile: false
   validate_cross_border_capacity: true # validation of cross border capacity
+  fallback_pypsa_earth_version: "v0.4.0"
+
+  # Validation of multiple networks against the same datasets.
+  # The networks are specified in the "networks" block, where each network has a unique name
+  # and specifies the path to the network file and the countries it covers.
+  # The validation will be performed for each network in the list.
+  # Uncomment the "networks" block and add the networks you want to validate.
+  #
+  # networks:
+  #   NG_2021:
+  #     path: "results/NG_2021/networks/elec_s_40flex_ec_lc1.0_1H.nc"
+  #     countries: ["NG"]
+  #   ZA_2021:
+  #     path: "results/ZA_2021/networks/elec_s_40flex_ec_lc1.0_1H.nc"
+  #     countries: ["ZA"]
+  #   US_2021:
+  #     path: "results/US_2021/networks/elec_s_60flex_ec_lc1.0_1H.nc"
+  #     countries: ["US"]
+  #   SAPP:
+  #     path: "results/SAPP/networks/elec_s_40flex_ec_lc1.0_1H.nc"
+  #     countries: ["ZA", "BW", "LS", "MW", "MZ"]
+
 
 plot_osm_grid_network:
   grid_path: "tests/fixtures"

@@ -29,6 +29,10 @@ nav:
   - Structure: user-guide/structure.md
   - Release notes: release-notes.md
 
+- Validation Dashboard:
+  - Summary Grid: validation/overview.md
+  - Detailed Tables: validation/statistics.md
+
 - Community:
   - How to join: community/contributing.md
 

@@ -10,6 +10,8 @@ SPDX-License-Identifier: CC-BY-4.0
 
 ### New Features and Major Changes
 
+* [Add multi-scenario health status validation reports with ember dataset source PR #61](https://github.com/pypsa-meets-earth/pypsa-earth-status/pull/61)
+
 * [Decompose clean_data into carrier-source-specific rules PR #47](https://github.com/SPSUnipi/pypsa2smspp/pull/47)
 
 * [Drop pypsa-earth submodule PR #46](https://github.com/pypsa-meets-earth/pypsa-earth-status/pull/46)

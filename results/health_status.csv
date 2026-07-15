@@ -1,0 +1,386 @@
+scenario_key,country_code,country_name,pillar,metric,pypsa_value,reference_value,reference_source,unit,deviation_pct,grade,pypsa_earth_version,year,carrier
+AU_2021,AU,Australia,demand,total_demand,267.3624060313471,267.45,ember,TWh,-0.032751530623618685,A,0.4.0,2021,total
+AU_2021,AU,Australia,demand,total_demand,267.3624060313471,267.45,ourworldindata,TWh,-0.032751530623618685,A,0.4.0,2021,total
+AU_2021,AU,Australia,generation,generation,3.9824336053318845,3.34,ember,TWh,19.234539081792953,,0.4.0,2021,biomass
+AU_2021,AU,Australia,generation,generation,25.054344411355377,47.63,ember,TWh,-47.397975201857285,,0.4.0,2021,ccgt
+AU_2021,AU,Australia,generation,generation,145.0014838889814,137.4,ember,TWh,5.532375465051959,,0.4.0,2021,coal
+AU_2021,AU,Australia,generation,generation,0.0,0.0,ember,TWh,,,0.4.0,2021,geothermal
+AU_2021,AU,Australia,generation,generation,12.749690869965244,15.94,ember,TWh,-20.014486386667222,,0.4.0,2021,hydro
+AU_2021,AU,Australia,generation,generation,0.0,0.0,ember,TWh,,,0.4.0,2021,nuclear
+AU_2021,AU,Australia,generation,generation,0.27699183584958526,5.15,ember,TWh,-94.6215177504935,,0.4.0,2021,oil
+AU_2021,AU,Australia,generation,generation,0.0,0.0,ember,TWh,,,0.4.0,2021,other
+AU_2021,AU,Australia,generation,generation,25.679205603867956,31.19,ember,TWh,-17.668465521423677,,0.4.0,2021,pv
+AU_2021,AU,Australia,generation,generation,16.150799233683166,26.8,ember,TWh,-39.73582375491356,,0.4.0,2021,wind
+AU_2021,AU,Australia,generation,total_generation,228.8949494490346,267.45000000000005,ember,TWh,-14.415797551305076,C,0.4.0,2021,total
+AU_2021,AU,Australia,installed_capacity,capacity,555.7,870.0,ember,MW,-36.126436781609186,,0.4.0,2021,biomass
+AU_2021,AU,Australia,installed_capacity,capacity,555.7,871.0,irena,MW,-36.19977037887485,,0.4.0,2021,biomass
+AU_2021,AU,Australia,installed_capacity,capacity,21812.57251139316,24330.0,ember,MW,-10.347009817537367,,0.4.0,2021,ccgt
+AU_2021,AU,Australia,installed_capacity,capacity,21812.57251139316,24330.0,irena,MW,-10.347009817537367,,0.4.0,2021,ccgt
+AU_2021,AU,Australia,installed_capacity,capacity,28627.412115604184,25100.0,ember,MW,14.053434723522646,,0.4.0,2021,coal
+AU_2021,AU,Australia,installed_capacity,capacity,28627.412115604184,24986.0,irena,MW,14.57380979590244,,0.4.0,2021,coal
+AU_2021,AU,Australia,installed_capacity,capacity,0.0,0.0,ember,MW,,,0.4.0,2021,geothermal
+AU_2021,AU,Australia,installed_capacity,capacity,0.0,0.1,irena,MW,-100.0,,0.4.0,2021,geothermal
+AU_2021,AU,Australia,installed_capacity,capacity,10574.606586399372,7710.0,ember,MW,37.154430433195486,,0.4.0,2021,hydro
+AU_2021,AU,Australia,installed_capacity,capacity,10574.606586399372,8523.0,irena,MW,24.07141366184878,,0.4.0,2021,hydro
+AU_2021,AU,Australia,installed_capacity,capacity,0.0,0.0,ember,MW,,,0.4.0,2021,nuclear
+AU_2021,AU,Australia,installed_capacity,capacity,0.0,0.0,irena,MW,,,0.4.0,2021,nuclear
+AU_2021,AU,Australia,installed_capacity,capacity,1806.3516018638916,2430.0,ember,MW,-25.664543133173183,,0.4.0,2021,oil
+AU_2021,AU,Australia,installed_capacity,capacity,1806.3516018638916,3036.0,irena,MW,-40.50225290303388,,0.4.0,2021,oil
+AU_2021,AU,Australia,installed_capacity,capacity,0.0,0.0,ember,MW,,,0.4.0,2021,other
+AU_2021,AU,Australia,installed_capacity,capacity,0.0,0.0,irena,MW,,,0.4.0,2021,other
+AU_2021,AU,Australia,installed_capacity,capacity,17317.910542191406,24400.0,ember,MW,-29.024956794297513,,0.4.0,2021,pv
+AU_2021,AU,Australia,installed_capacity,capacity,17317.910542191406,24396.0,irena,MW,-29.01331963358171,,0.4.0,2021,pv
+AU_2021,AU,Australia,installed_capacity,capacity,8546.373141475688,10560.0,ember,MW,-19.06843616026811,,0.4.0,2021,wind
+AU_2021,AU,Australia,installed_capacity,capacity,8546.373141475688,10555.0,irena,MW,-19.03009813855341,,0.4.0,2021,wind
+AU_2021,AU,Australia,installed_capacity,total_capacity,89240.9264989277,95400.0,ember,MW,-6.456051887916457,B,0.4.0,2021,total
+AU_2021,AU,Australia,installed_capacity,total_capacity,89240.9264989277,96697.1,irena,MW,-7.710855342168799,B,0.4.0,2021,total
+BR_2021,BR,Brazil,demand,total_demand,685.566933151822,679.5,ember,TWh,0.892852560974542,A,0.4.0,2021,total
+BR_2021,BR,Brazil,demand,total_demand,685.566933151822,679.21,ourworldindata,TWh,0.9359304415161698,A,0.4.0,2021,total
+BR_2021,BR,Brazil,generation,generation,137.1061641341121,56.01,ember,TWh,144.78872368168564,,0.4.0,2021,biomass
+BR_2021,BR,Brazil,generation,generation,190.68546665188123,86.96,ember,TWh,119.27951546904467,,0.4.0,2021,ccgt
+BR_2021,BR,Brazil,generation,generation,34.35625518508455,24.24,ember,TWh,41.733726011074886,,0.4.0,2021,coal
+BR_2021,BR,Brazil,generation,generation,0.0,0.0,ember,TWh,,,0.4.0,2021,geothermal
+BR_2021,BR,Brazil,generation,generation,111.89834552212398,362.82,ember,TWh,-69.1587162995083,,0.4.0,2021,hydro
+BR_2021,BR,Brazil,generation,generation,17.432399999961724,14.7,ember,TWh,18.58775510178044,,0.4.0,2021,nuclear
+BR_2021,BR,Brazil,generation,generation,82.12493546442752,22.63,ember,TWh,262.9029406293748,,0.4.0,2021,oil
+BR_2021,BR,Brazil,generation,generation,0.0,0.0,ember,TWh,,,0.4.0,2021,other
+BR_2021,BR,Brazil,generation,generation,10.197932334895416,16.75,ember,TWh,-39.1168218812214,,0.4.0,2021,pv
+BR_2021,BR,Brazil,generation,generation,20.096491704706352,72.29,ember,TWh,-72.20017747308569,,0.4.0,2021,wind
+BR_2021,BR,Brazil,generation,total_generation,603.8979909971929,656.4,ember,TWh,-7.99847791023874,B,0.4.0,2021,total
+BR_2021,BR,Brazil,installed_capacity,capacity,15651.3886,16370.000000000002,ember,MW,-4.38980696395847,,0.4.0,2021,biomass
+BR_2021,BR,Brazil,installed_capacity,capacity,15651.3886,16334.24,irena,MW,-4.180490797245538,,0.4.0,2021,biomass
+BR_2021,BR,Brazil,installed_capacity,capacity,21790.145819598216,17100.0,ember,MW,27.427753330983716,,0.4.0,2021,ccgt
+BR_2021,BR,Brazil,installed_capacity,capacity,21790.145819598216,17095.48,irena,MW,27.46144489419552,,0.4.0,2021,ccgt
+BR_2021,BR,Brazil,installed_capacity,capacity,3921.946939135076,3180.0,ember,MW,23.33166475267534,,0.4.0,2021,coal
+BR_2021,BR,Brazil,installed_capacity,capacity,3921.946939135076,3582.83,irena,MW,9.465058044480925,,0.4.0,2021,coal
+BR_2021,BR,Brazil,installed_capacity,capacity,0.0,0.0,ember,MW,,,0.4.0,2021,geothermal
+BR_2021,BR,Brazil,installed_capacity,capacity,0.0,0.0,irena,MW,,,0.4.0,2021,geothermal
+BR_2021,BR,Brazil,installed_capacity,capacity,114749.84587782211,109410.0,ember,MW,4.88058301601509,,0.4.0,2021,hydro
+BR_2021,BR,Brazil,installed_capacity,capacity,114749.84587782211,109458.44,irena,MW,4.834168911800778,,0.4.0,2021,hydro
+BR_2021,BR,Brazil,installed_capacity,capacity,1990.0,1990.0,ember,MW,0.0,,0.4.0,2021,nuclear
+BR_2021,BR,Brazil,installed_capacity,capacity,1990.0,1990.0,irena,MW,0.0,,0.4.0,2021,nuclear
+BR_2021,BR,Brazil,installed_capacity,capacity,10156.605822436633,9580.0,ember,MW,6.018849921050453,,0.4.0,2021,oil
+BR_2021,BR,Brazil,installed_capacity,capacity,10156.605822436633,9400.38,irena,MW,8.044630349375602,,0.4.0,2021,oil
+BR_2021,BR,Brazil,installed_capacity,capacity,0.0,0.0,ember,MW,,,0.4.0,2021,other
+BR_2021,BR,Brazil,installed_capacity,capacity,0.0,166.02,irena,MW,-100.0,,0.4.0,2021,other
+BR_2021,BR,Brazil,installed_capacity,capacity,7872.947240476598,14310.0,ember,MW,-44.982898389401825,,0.4.0,2021,pv
+BR_2021,BR,Brazil,installed_capacity,capacity,7872.947240476598,14499.44,irena,MW,-45.70171509743412,,0.4.0,2021,pv
+BR_2021,BR,Brazil,installed_capacity,capacity,17179.048992777836,21000.0,ember,MW,-18.19500479629602,,0.4.0,2021,wind
+BR_2021,BR,Brazil,installed_capacity,capacity,17179.048992777836,21161.35,irena,MW,-18.8187474202835,,0.4.0,2021,wind
+BR_2021,BR,Brazil,installed_capacity,total_capacity,193311.9292922465,192940.0,ember,MW,0.19276940616072125,A,0.4.0,2021,total
+BR_2021,BR,Brazil,installed_capacity,total_capacity,193311.9292922465,193688.17999999996,irena,MW,-0.19425589509564722,A,0.4.0,2021,total
+CN_2021,CN,China,demand,total_demand,8515.636799858248,8520.02,ember,TWh,-0.05144589028842938,A,0.4.0,2021,total
+CN_2021,CN,China,demand,total_demand,8515.636799858248,8520.02,ourworldindata,TWh,-0.05144589028842938,A,0.4.0,2021,total
+CN_2021,CN,China,generation,generation,0.0,166.0,ember,TWh,-100.0,,0.4.0,2021,biomass
+CN_2021,CN,China,generation,generation,0.0,287.1,ember,TWh,-100.0,,0.4.0,2021,ccgt
+CN_2021,CN,China,generation,generation,0.0,5333.8,ember,TWh,-100.0,,0.4.0,2021,coal
+CN_2021,CN,China,generation,generation,0.0,0.0,ember,TWh,,,0.4.0,2021,geothermal
+CN_2021,CN,China,generation,generation,0.0,1300.0,ember,TWh,-100.0,,0.4.0,2021,hydro
+CN_2021,CN,China,generation,generation,0.0,407.5,ember,TWh,-100.0,,0.4.0,2021,nuclear
+CN_2021,CN,China,generation,generation,0.0,57.06,ember,TWh,-100.0,,0.4.0,2021,oil
+CN_2021,CN,China,generation,generation,0.0,0.0,ember,TWh,,,0.4.0,2021,other
+CN_2021,CN,China,generation,generation,0.0,327.0,ember,TWh,-100.0,,0.4.0,2021,pv
+CN_2021,CN,China,generation,generation,0.0,655.8,ember,TWh,-100.0,,0.4.0,2021,wind
+CN_2021,CN,China,generation,total_generation,0.0,8534.26,ember,TWh,-100.0,D,0.4.0,2021,total
+CN_2021,CN,China,installed_capacity,capacity,3105.0,16700.0,ember,MW,-81.40718562874252,,0.4.0,2021,biomass
+CN_2021,CN,China,installed_capacity,capacity,3105.0,16700.0,irena,MW,-81.40718562874252,,0.4.0,2021,biomass
+CN_2021,CN,China,installed_capacity,capacity,164021.17926674586,105060.0,ember,MW,56.12143467232617,,0.4.0,2021,ccgt
+CN_2021,CN,China,installed_capacity,capacity,164021.17926674586,97408.0,irena,MW,68.38573758494772,,0.4.0,2021,ccgt
+CN_2021,CN,China,installed_capacity,capacity,1275539.957782873,1074010.0,ember,MW,18.76425338524529,,0.4.0,2021,coal
+CN_2021,CN,China,installed_capacity,capacity,1275539.957782873,1123286.0,irena,MW,13.55433592004823,,0.4.0,2021,coal
+CN_2021,CN,China,installed_capacity,capacity,26.1,0.0,ember,MW,,,0.4.0,2021,geothermal
+CN_2021,CN,China,installed_capacity,capacity,26.1,25.75,irena,MW,1.3592233009708794,,0.4.0,2021,geothermal
+CN_2021,CN,China,installed_capacity,capacity,452202.2,354530.0,ember,MW,27.54977011818464,,0.4.0,2021,hydro
+CN_2021,CN,China,installed_capacity,capacity,452202.2,390920.0,irena,MW,15.67640437941267,,0.4.0,2021,hydro
+CN_2021,CN,China,installed_capacity,capacity,89352.05159757659,53260.0,ember,MW,67.76577468564888,,0.4.0,2021,nuclear
+CN_2021,CN,China,installed_capacity,capacity,89352.05159757659,53260.0,irena,MW,67.76577468564888,,0.4.0,2021,nuclear
+CN_2021,CN,China,installed_capacity,capacity,1308.5212677335085,12530.0,ember,MW,-89.55689331417791,,0.4.0,2021,oil
+CN_2021,CN,China,installed_capacity,capacity,1308.5212677335085,39026.0,irena,MW,-96.64705256051477,,0.4.0,2021,oil
+CN_2021,CN,China,installed_capacity,capacity,0.0,0.0,ember,MW,,,0.4.0,2021,other
+CN_2021,CN,China,installed_capacity,capacity,0.0,10649.75,irena,MW,-100.0,,0.4.0,2021,other
+CN_2021,CN,China,installed_capacity,capacity,251348.67109333974,306970.0,ember,MW,-18.119467344255224,,0.4.0,2021,pv
+CN_2021,CN,China,installed_capacity,capacity,251348.67109333974,306972.8,irena,MW,-18.120214203558184,,0.4.0,2021,pv
+CN_2021,CN,China,installed_capacity,capacity,280470.1628609745,328970.0,ember,MW,-14.742936176254828,,0.4.0,2021,wind
+CN_2021,CN,China,installed_capacity,capacity,280470.1628609745,328973.43,irena,MW,-14.743825098283924,,0.4.0,2021,wind
+CN_2021,CN,China,installed_capacity,total_capacity,2517373.8438692433,2252030.0,ember,MW,11.782429357923442,C,0.4.0,2021,total
+CN_2021,CN,China,installed_capacity,total_capacity,2517373.8438692433,2367221.73,irena,MW,6.3429678752249075,B,0.4.0,2021,total
+CO_2021,CO,Colombia,demand,total_demand,81.36999999999999,84.48,ember,TWh,-3.681344696969713,A,0.4.0,2021,total
+CO_2021,CO,Colombia,demand,total_demand,81.36999999999999,84.54,ourworldindata,TWh,-3.749704281996707,A,0.4.0,2021,total
+CO_2021,CO,Colombia,generation,generation,0.6140062899336528,2.24,ember,TWh,-72.58900491367622,,0.4.0,2021,biomass
+CO_2021,CO,Colombia,generation,generation,6.611830494525263,13.76,ember,TWh,-51.94890628978733,,0.4.0,2021,ccgt
+CO_2021,CO,Colombia,generation,generation,12.696552430248937,4.44,ember,TWh,185.95838806866976,,0.4.0,2021,coal
+CO_2021,CO,Colombia,generation,generation,0.0,0.0,ember,TWh,,,0.4.0,2021,geothermal
+CO_2021,CO,Colombia,generation,generation,60.26494631522204,60.7,ember,TWh,-0.716727652023002,,0.4.0,2021,hydro
+CO_2021,CO,Colombia,generation,generation,0.0,0.0,ember,TWh,,,0.4.0,2021,nuclear
+CO_2021,CO,Colombia,generation,generation,0.22738077109898722,2.83,ember,TWh,-91.96534377742096,,0.4.0,2021,oil
+CO_2021,CO,Colombia,generation,generation,0.0,0.0,ember,TWh,,,0.4.0,2021,other
+CO_2021,CO,Colombia,generation,generation,0.1322098262478343,0.33,ember,TWh,-59.93641628853506,,0.4.0,2021,pv
+CO_2021,CO,Colombia,generation,generation,0.8230731811947359,0.06,ember,TWh,1271.78863532456,,0.4.0,2021,wind
+CO_2021,CO,Colombia,generation,total_generation,81.36999930847145,84.36000000000001,ember,TWh,-3.5443346272268417,A,0.4.0,2021,total
+CO_2021,CO,Colombia,installed_capacity,capacity,71.0,350.0,ember,MW,-79.71428571428572,,0.4.0,2021,biomass
+CO_2021,CO,Colombia,installed_capacity,capacity,71.0,351.22999999999996,irena,MW,-79.78532585485294,,0.4.0,2021,biomass
+CO_2021,CO,Colombia,installed_capacity,capacity,3958.0,3530.0,ember,MW,12.124645892351275,,0.4.0,2021,ccgt
+CO_2021,CO,Colombia,installed_capacity,capacity,3958.0,2884.11,irena,MW,37.23471018789158,,0.4.0,2021,ccgt
+CO_2021,CO,Colombia,installed_capacity,capacity,1646.0,1610.0,ember,MW,2.236024844720497,,0.4.0,2021,coal
+CO_2021,CO,Colombia,installed_capacity,capacity,1646.0,1657.9,irena,MW,-0.7177754991254051,,0.4.0,2021,coal
+CO_2021,CO,Colombia,installed_capacity,capacity,0.0,0.0,ember,MW,,,0.4.0,2021,geothermal
+CO_2021,CO,Colombia,installed_capacity,capacity,0.0,0.0,irena,MW,,,0.4.0,2021,geothermal
+CO_2021,CO,Colombia,installed_capacity,capacity,13287.491983139851,11950.0,ember,MW,11.192401532551056,,0.4.0,2021,hydro
+CO_2021,CO,Colombia,installed_capacity,capacity,13287.491983139851,11949.07,irena,MW,11.201055673285463,,0.4.0,2021,hydro
+CO_2021,CO,Colombia,installed_capacity,capacity,0.0,0.0,ember,MW,,,0.4.0,2021,nuclear
+CO_2021,CO,Colombia,installed_capacity,capacity,0.0,0.0,irena,MW,,,0.4.0,2021,nuclear
+CO_2021,CO,Colombia,installed_capacity,capacity,2011.0743606095207,1470.0,ember,MW,36.807779633300726,,0.4.0,2021,oil
+CO_2021,CO,Colombia,installed_capacity,capacity,2011.0743606095207,1374.68,irena,MW,46.29400010253445,,0.4.0,2021,oil
+CO_2021,CO,Colombia,installed_capacity,capacity,0.0,0.0,ember,MW,,,0.4.0,2021,other
+CO_2021,CO,Colombia,installed_capacity,capacity,0.0,0.0,irena,MW,,,0.4.0,2021,other
+CO_2021,CO,Colombia,installed_capacity,capacity,109.12650583160098,150.0,ember,MW,-27.24899611226601,,0.4.0,2021,pv
+CO_2021,CO,Colombia,installed_capacity,capacity,109.12650583160098,180.98,irena,MW,-39.70245008752294,,0.4.0,2021,pv
+CO_2021,CO,Colombia,installed_capacity,capacity,509.9343843508263,20.0,ember,MW,2449.6719217541317,,0.4.0,2021,wind
+CO_2021,CO,Colombia,installed_capacity,capacity,509.9343843508263,18.42,irena,MW,2668.373422100034,,0.4.0,2021,wind
+CO_2021,CO,Colombia,installed_capacity,total_capacity,21592.6272339318,19080.0,ember,MW,13.168905838216974,C,0.4.0,2021,total
+CO_2021,CO,Colombia,installed_capacity,total_capacity,21592.6272339318,18416.39,irena,MW,17.24679610896489,C,0.4.0,2021,total
+DE_2021,DE,Germany,demand,total_demand,560.73,560.25,ember,TWh,0.08567603748326964,A,0.4.0,2021,total
+DE_2021,DE,Germany,demand,total_demand,560.73,560.73,ourworldindata,TWh,0.0,A,0.4.0,2021,total
+DE_2021,DE,Germany,generation,generation,4.832500859863549,49.1,ember,TWh,-90.15783938927994,,0.4.0,2021,biomass
+DE_2021,DE,Germany,generation,generation,24.809900204998826,90.31,ember,TWh,-72.52806975418135,,0.4.0,2021,ccgt
+DE_2021,DE,Germany,generation,generation,268.6821513060884,164.65,ember,TWh,63.18381494448124,,0.4.0,2021,coal
+DE_2021,DE,Germany,generation,generation,0.0,0.24,ember,TWh,-100.0,,0.4.0,2021,geothermal
+DE_2021,DE,Germany,generation,generation,5.60292882579213,19.66,ember,TWh,-71.50087067247136,,0.4.0,2021,hydro
+DE_2021,DE,Germany,generation,generation,69.78136339567227,69.13,ember,TWh,0.942229705876287,,0.4.0,2021,nuclear
+DE_2021,DE,Germany,generation,generation,0.699554614896968,22.24,ember,TWh,-96.85452061647047,,0.4.0,2021,oil
+DE_2021,DE,Germany,generation,generation,0.0,0.0,ember,TWh,,,0.4.0,2021,other
+DE_2021,DE,Germany,generation,generation,46.74331555548687,49.34,ember,TWh,-5.262838355316437,,0.4.0,2021,pv
+DE_2021,DE,Germany,generation,generation,138.50494164425407,114.16,ember,TWh,21.32528174864583,,0.4.0,2021,wind
+DE_2021,DE,Germany,generation,total_generation,559.6566564070531,578.83,ember,TWh,-3.312430867948609,A,0.4.0,2021,total
+DE_2021,DE,Germany,installed_capacity,capacity,655.0,8720.0,ember,MW,-92.48853211009175,,0.4.0,2021,biomass
+DE_2021,DE,Germany,installed_capacity,capacity,655.0,8751.0,irena,MW,-92.51514112672837,,0.4.0,2021,biomass
+DE_2021,DE,Germany,installed_capacity,capacity,26303.11698074936,28310.0,ember,MW,-7.088954501061955,,0.4.0,2021,ccgt
+DE_2021,DE,Germany,installed_capacity,capacity,26303.11698074936,0.0,irena,MW,,,0.4.0,2021,ccgt
+DE_2021,DE,Germany,installed_capacity,capacity,50223.049470937825,39710.0,ember,MW,26.47456426828966,,0.4.0,2021,coal
+DE_2021,DE,Germany,installed_capacity,capacity,50223.049470937825,0.0,irena,MW,,,0.4.0,2021,coal
+DE_2021,DE,Germany,installed_capacity,capacity,0.0,1070.0,ember,MW,-100.0,,0.4.0,2021,geothermal
+DE_2021,DE,Germany,installed_capacity,capacity,0.0,46.0,irena,MW,-100.0,,0.4.0,2021,geothermal
+DE_2021,DE,Germany,installed_capacity,capacity,6673.0,5490.0,ember,MW,21.548269581056466,,0.4.0,2021,hydro
+DE_2021,DE,Germany,installed_capacity,capacity,6673.0,10844.0,irena,MW,-38.46366654371081,,0.4.0,2021,hydro
+DE_2021,DE,Germany,installed_capacity,capacity,8541.91756041006,8109.999999999999,ember,MW,5.325740572257227,,0.4.0,2021,nuclear
+DE_2021,DE,Germany,installed_capacity,capacity,8541.91756041006,8113.0,irena,MW,5.286793546284483,,0.4.0,2021,nuclear
+DE_2021,DE,Germany,installed_capacity,capacity,6815.0502399835295,3830.0,ember,MW,77.93864856353862,,0.4.0,2021,oil
+DE_2021,DE,Germany,installed_capacity,capacity,6815.0502399835295,87486.0,irena,MW,-92.21012477426844,,0.4.0,2021,oil
+DE_2021,DE,Germany,installed_capacity,capacity,0.0,0.0,ember,MW,,,0.4.0,2021,other
+DE_2021,DE,Germany,installed_capacity,capacity,0.0,2618.5,irena,MW,-100.0,,0.4.0,2021,other
+DE_2021,DE,Germany,installed_capacity,capacity,53781.0,60040.0,ember,MW,-10.424716855429713,,0.4.0,2021,pv
+DE_2021,DE,Germany,installed_capacity,capacity,53781.0,60038.0,irena,MW,-10.421732902495085,,0.4.0,2021,pv
+DE_2021,DE,Germany,installed_capacity,capacity,62184.00000000001,63710.0,ember,MW,-2.3952283785904767,,0.4.0,2021,wind
+DE_2021,DE,Germany,installed_capacity,capacity,62184.00000000001,63711.0,irena,MW,-2.3967603710505134,,0.4.0,2021,wind
+DE_2021,DE,Germany,installed_capacity,total_capacity,215176.13425208075,218990.0,ember,MW,-1.7415707328733037,A,0.4.0,2021,total
+DE_2021,DE,Germany,installed_capacity,total_capacity,215176.13425208075,241607.5,irena,MW,-10.939795224866467,C,0.4.0,2021,total
+IN_2021,IN,India,demand,total_demand,1712.8799999999994,1678.69,ember,TWh,2.03670719430028,A,0.4.0,2021,total
+IN_2021,IN,India,demand,total_demand,1712.8799999999994,1714.73,ourworldindata,TWh,-0.107888705510523,A,0.4.0,2021,total
+IN_2021,IN,India,generation,generation,11.350857557701078,21.2,ember,TWh,-46.45821906744774,,0.4.0,2021,biomass
+IN_2021,IN,India,generation,generation,8.320999879043117e-08,60.4,ember,TWh,-99.9999998622351,,0.4.0,2021,ccgt
+IN_2021,IN,India,generation,generation,1300.1363184335949,1255.56,ember,TWh,3.5503136794414374,,0.4.0,2021,coal
+IN_2021,IN,India,generation,generation,0.0,0.0,ember,TWh,,,0.4.0,2021,geothermal
+IN_2021,IN,India,generation,generation,136.6679042173353,160.57,ember,TWh,-14.885779275496484,,0.4.0,2021,hydro
+IN_2021,IN,India,generation,generation,166.2647999741029,43.92,ember,TWh,278.56284147109045,,0.4.0,2021,nuclear
+IN_2021,IN,India,generation,generation,1.0317797889806844e-08,3.39,ember,TWh,-99.99999969564018,,0.4.0,2021,oil
+IN_2021,IN,India,generation,generation,0.0,0.0,ember,TWh,,,0.4.0,2021,other
+IN_2021,IN,India,generation,generation,52.13636102442174,65.59,ember,TWh,-20.51172278636723,,0.4.0,2021,pv
+IN_2021,IN,India,generation,generation,46.32375869602728,68.09,ember,TWh,-31.966869296479256,,0.4.0,2021,wind
+IN_2021,IN,India,generation,total_generation,1712.879999996711,1678.7199999999998,ember,TWh,2.034883720734317,A,0.4.0,2021,total
+IN_2021,IN,India,installed_capacity,capacity,1295.76,10370.0,ember,MW,-87.50472516875602,,0.4.0,2021,biomass
+IN_2021,IN,India,installed_capacity,capacity,1295.76,10374.76,irena,MW,-87.510458073247,,0.4.0,2021,biomass
+IN_2021,IN,India,installed_capacity,capacity,30639.127260144214,31000.0,ember,MW,-1.1641056124380185,,0.4.0,2021,ccgt
+IN_2021,IN,India,installed_capacity,capacity,30639.127260144214,31003.73,irena,MW,-1.175996371584275,,0.4.0,2021,ccgt
+IN_2021,IN,India,installed_capacity,capacity,293902.1474048105,231010.0,ember,MW,27.22485927224383,,0.4.0,2021,coal
+IN_2021,IN,India,installed_capacity,capacity,293902.1474048105,255726.43,irena,MW,14.928342527915664,,0.4.0,2021,coal
+IN_2021,IN,India,installed_capacity,capacity,0.0,0.0,ember,MW,,,0.4.0,2021,geothermal
+IN_2021,IN,India,installed_capacity,capacity,0.0,0.0,irena,MW,,,0.4.0,2021,geothermal
+IN_2021,IN,India,installed_capacity,capacity,59992.284060233724,46780.0,ember,MW,28.24344604581814,,0.4.0,2021,hydro
+IN_2021,IN,India,installed_capacity,capacity,59992.284060233724,51566.14,irena,MW,16.340459185492115,,0.4.0,2021,hydro
+IN_2021,IN,India,installed_capacity,capacity,18980.0,6780.0,ember,MW,179.9410029498525,,0.4.0,2021,nuclear
+IN_2021,IN,India,installed_capacity,capacity,18980.0,6780.0,irena,MW,179.9410029498525,,0.4.0,2021,nuclear
+IN_2021,IN,India,installed_capacity,capacity,27462.48398555675,19100.0,ember,MW,43.782638667836395,,0.4.0,2021,oil
+IN_2021,IN,India,installed_capacity,capacity,27462.48398555675,18887.01,irena,MW,45.404084529826335,,0.4.0,2021,oil
+IN_2021,IN,India,installed_capacity,capacity,0.0,0.0,ember,MW,,,0.4.0,2021,other
+IN_2021,IN,India,installed_capacity,capacity,0.0,217.06,irena,MW,-100.0,,0.4.0,2021,other
+IN_2021,IN,India,installed_capacity,capacity,38982.56180657741,49980.0,ember,MW,-22.003677857988375,,0.4.0,2021,pv
+IN_2021,IN,India,installed_capacity,capacity,38982.56180657741,49949.92,irena,MW,-21.956708225804142,,0.4.0,2021,pv
+IN_2021,IN,India,installed_capacity,capacity,38558.4520619004,40070.0,ember,MW,-3.7722683755917057,,0.4.0,2021,wind
+IN_2021,IN,India,installed_capacity,capacity,38558.4520619004,40067.27,irena,MW,-3.765711859329556,,0.4.0,2021,wind
+IN_2021,IN,India,installed_capacity,total_capacity,509812.81657922297,435090.0,ember,MW,17.174105720476906,C,0.4.0,2021,total
+IN_2021,IN,India,installed_capacity,total_capacity,509812.81657922297,464572.32,irena,MW,9.738095584175777,B,0.4.0,2021,total
+IT_2021,IT,Italy,demand,total_demand,328.2800000000001,328.28,ember,TWh,3.463105815816256e-14,A,0.4.0,2021,total
+IT_2021,IT,Italy,demand,total_demand,328.2800000000001,328.28,ourworldindata,TWh,3.463105815816256e-14,A,0.4.0,2021,total
+IT_2021,IT,Italy,generation,generation,5.168113176517722,19.06,ember,TWh,-72.88503055342224,,0.4.0,2021,biomass
+IT_2021,IT,Italy,generation,generation,166.8246405573257,144.01,ember,TWh,15.84240022034977,,0.4.0,2021,ccgt
+IT_2021,IT,Italy,generation,generation,64.4599544621428,14.02,ember,TWh,359.7714298298346,,0.4.0,2021,coal
+IT_2021,IT,Italy,generation,generation,8.418142557513171,5.91,ember,TWh,42.43896036401304,,0.4.0,2021,geothermal
+IT_2021,IT,Italy,generation,generation,43.30217900837381,45.39,ember,TWh,-4.599737809266773,,0.4.0,2021,hydro
+IT_2021,IT,Italy,generation,generation,0.0,0.0,ember,TWh,,,0.4.0,2021,nuclear
+IT_2021,IT,Italy,generation,generation,1.1246753314622797,11.13,ember,TWh,-89.89510034625086,,0.4.0,2021,oil
+IT_2021,IT,Italy,generation,generation,0.0,0.0,ember,TWh,,,0.4.0,2021,other
+IT_2021,IT,Italy,generation,generation,26.142995386172014,25.04,ember,TWh,4.404933650846706,,0.4.0,2021,pv
+IT_2021,IT,Italy,generation,generation,12.510896307782335,20.93,ember,TWh,-40.225053474523,,0.4.0,2021,wind
+IT_2021,IT,Italy,generation,total_generation,327.9515967872899,285.49,ember,TWh,14.873234364527606,C,0.4.0,2021,total
+IT_2021,IT,Italy,installed_capacity,capacity,590.0,2980.0,ember,MW,-80.20134228187919,,0.4.0,2021,biomass
+IT_2021,IT,Italy,installed_capacity,capacity,590.0,3002.7799999999997,irena,MW,-80.35154090542763,,0.4.0,2021,biomass
+IT_2021,IT,Italy,installed_capacity,capacity,50060.76951570896,55630.0,ember,MW,-10.011199863906233,,0.4.0,2021,ccgt
+IT_2021,IT,Italy,installed_capacity,capacity,50060.76951570896,0.0,irena,MW,,,0.4.0,2021,ccgt
+IT_2021,IT,Italy,installed_capacity,capacity,7414.478391331695,6170.0,ember,MW,20.169828060481283,,0.4.0,2021,coal
+IT_2021,IT,Italy,installed_capacity,capacity,7414.478391331695,0.0,irena,MW,,,0.4.0,2021,coal
+IT_2021,IT,Italy,installed_capacity,capacity,962.5,440.0,ember,MW,118.75,,0.4.0,2021,geothermal
+IT_2021,IT,Italy,installed_capacity,capacity,962.5,771.79,irena,MW,24.71008953212662,,0.4.0,2021,geothermal
+IT_2021,IT,Italy,installed_capacity,capacity,13506.6,18810.0,ember,MW,-28.194577352472088,,0.4.0,2021,hydro
+IT_2021,IT,Italy,installed_capacity,capacity,13506.6,22749.66,irena,MW,-40.62944237408383,,0.4.0,2021,hydro
+IT_2021,IT,Italy,installed_capacity,capacity,0.0,0.0,ember,MW,,,0.4.0,2021,nuclear
+IT_2021,IT,Italy,installed_capacity,capacity,0.0,0.0,irena,MW,,,0.4.0,2021,nuclear
+IT_2021,IT,Italy,installed_capacity,capacity,8435.417038491585,3490.0,ember,MW,141.70249393958696,,0.4.0,2021,oil
+IT_2021,IT,Italy,installed_capacity,capacity,8435.417038491585,55630.39,irena,MW,-84.83667463325067,,0.4.0,2021,oil
+IT_2021,IT,Italy,installed_capacity,capacity,0.0,0.0,ember,MW,,,0.4.0,2021,other
+IT_2021,IT,Italy,installed_capacity,capacity,0.0,739.62,irena,MW,-100.0,,0.4.0,2021,other
+IT_2021,IT,Italy,installed_capacity,capacity,21594.27999999999,22290.0,ember,MW,-3.121220278151675,,0.4.0,2021,pv
+IT_2021,IT,Italy,installed_capacity,capacity,21594.27999999999,22600.329999999998,irena,MW,-4.4514836730260425,,0.4.0,2021,pv
+IT_2021,IT,Italy,installed_capacity,capacity,10839.459999999997,11250.0,ember,MW,-3.6492444444444683,,0.4.0,2021,wind
+IT_2021,IT,Italy,installed_capacity,capacity,10839.459999999997,11253.73,irena,MW,-3.68117948449094,,0.4.0,2021,wind
+IT_2021,IT,Italy,installed_capacity,total_capacity,113403.50494553224,121060.0,ember,MW,-6.324545724820549,B,0.4.0,2021,total
+IT_2021,IT,Italy,installed_capacity,total_capacity,113403.50494553224,116748.29999999999,irena,MW,-2.864962534330474,A,0.4.0,2021,total
+MX_2021,MX,Mexico,demand,total_demand,339.1541330446688,327.63,ember,TWh,3.517423021295002,A,0.4.0,2021,total
+MX_2021,MX,Mexico,demand,total_demand,339.1541330446688,329.04,ourworldindata,TWh,3.0738308548105975,A,0.4.0,2021,total
+MX_2021,MX,Mexico,generation,generation,7.683305115687806,6.11,ember,TWh,25.749674561175212,,0.4.0,2021,biomass
+MX_2021,MX,Mexico,generation,generation,168.35534753493664,195.73,ember,TWh,-13.985925747235145,,0.4.0,2021,ccgt
+MX_2021,MX,Mexico,generation,generation,47.11124744833093,7.38,ember,TWh,538.3637865627497,,0.4.0,2021,coal
+MX_2021,MX,Mexico,generation,generation,7.889238008088022,0.0,ember,TWh,,,0.4.0,2021,geothermal
+MX_2021,MX,Mexico,generation,generation,16.17461637669475,34.72,ember,TWh,-53.41412333901281,,0.4.0,2021,hydro
+MX_2021,MX,Mexico,generation,generation,14.08606957481858,11.92,ember,TWh,18.171724620961246,,0.4.0,2021,nuclear
+MX_2021,MX,Mexico,generation,generation,3.6516418550473526,31.47,ember,TWh,-88.39643516031983,,0.4.0,2021,oil
+MX_2021,MX,Mexico,generation,generation,0.0,0.0,ember,TWh,,,0.4.0,2021,other
+MX_2021,MX,Mexico,generation,generation,8.457042449966636,20.19,ember,TWh,-58.112716939244,,0.4.0,2021,pv
+MX_2021,MX,Mexico,generation,generation,10.665346727957907,21.07,ember,TWh,-49.381363417380605,,0.4.0,2021,wind
+MX_2021,MX,Mexico,generation,total_generation,284.07385509152857,328.59,ember,TWh,-13.547626193271679,C,0.4.0,2021,total
+MX_2021,MX,Mexico,installed_capacity,capacity,877.1,880.0,ember,MW,-0.3295454545454519,,0.4.0,2021,biomass
+MX_2021,MX,Mexico,installed_capacity,capacity,877.1,880.23,irena,MW,-0.35558888017904355,,0.4.0,2021,biomass
+MX_2021,MX,Mexico,installed_capacity,capacity,54566.8877798232,42840.0,ember,MW,27.37368762797199,,0.4.0,2021,ccgt
+MX_2021,MX,Mexico,installed_capacity,capacity,54566.8877798232,36145.12,irena,MW,50.96612704515352,,0.4.0,2021,ccgt
+MX_2021,MX,Mexico,installed_capacity,capacity,5378.0,5380.0,ember,MW,-0.03717472118959108,,0.4.0,2021,coal
+MX_2021,MX,Mexico,installed_capacity,capacity,5378.0,6001.0,irena,MW,-10.381603066155641,,0.4.0,2021,coal
+MX_2021,MX,Mexico,installed_capacity,capacity,900.6,0.0,ember,MW,,,0.4.0,2021,geothermal
+MX_2021,MX,Mexico,installed_capacity,capacity,900.6,998.5,irena,MW,-9.804707060590884,,0.4.0,2021,geothermal
+MX_2021,MX,Mexico,installed_capacity,capacity,12615.369707023827,13300.0,ember,MW,-5.147596187790776,,0.4.0,2021,hydro
+MX_2021,MX,Mexico,installed_capacity,capacity,12615.369707023827,13303.01,irena,MW,-5.169057927312491,,0.4.0,2021,hydro
+MX_2021,MX,Mexico,installed_capacity,capacity,1608.0,1610.0,ember,MW,-0.12422360248447205,,0.4.0,2021,nuclear
+MX_2021,MX,Mexico,installed_capacity,capacity,1608.0,1608.0,irena,MW,0.0,,0.4.0,2021,nuclear
+MX_2021,MX,Mexico,installed_capacity,capacity,8114.828297255781,26190.0,ember,MW,-69.01554678405583,,0.4.0,2021,oil
+MX_2021,MX,Mexico,installed_capacity,capacity,8114.828297255781,22184.0,irena,MW,-63.42035567410845,,0.4.0,2021,oil
+MX_2021,MX,Mexico,installed_capacity,capacity,0.0,0.0,ember,MW,,,0.4.0,2021,other
+MX_2021,MX,Mexico,installed_capacity,capacity,0.0,4003.61,irena,MW,-100.0,,0.4.0,2021,other
+MX_2021,MX,Mexico,installed_capacity,capacity,5598.956829375542,8930.0,ember,MW,-37.301715236556085,,0.4.0,2021,pv
+MX_2021,MX,Mexico,installed_capacity,capacity,5598.956829375542,8926.92,irena,MW,-37.28008283511512,,0.4.0,2021,pv
+MX_2021,MX,Mexico,installed_capacity,capacity,8094.833514631364,7470.0,ember,MW,8.36457181568091,,0.4.0,2021,wind
+MX_2021,MX,Mexico,installed_capacity,capacity,8094.833514631364,7468.53,irena,MW,8.385900768040887,,0.4.0,2021,wind
+MX_2021,MX,Mexico,installed_capacity,total_capacity,97754.57612810972,106600.0,ember,MW,-8.297770986763862,B,0.4.0,2021,total
+MX_2021,MX,Mexico,installed_capacity,total_capacity,97754.57612810972,101518.92,irena,MW,-3.708021984365354,A,0.4.0,2021,total
+NG_2021,NG,Nigeria,demand,total_demand,31.469999999999995,36.14,ember,TWh,-12.921970116214734,C,0.4.0,2021,total
+NG_2021,NG,Nigeria,demand,total_demand,31.469999999999995,36.06,ourworldindata,TWh,-12.728785357737124,C,0.4.0,2021,total
+NG_2021,NG,Nigeria,generation,generation,0.0,0.06,ember,TWh,-100.0,,0.4.0,2021,biomass
+NG_2021,NG,Nigeria,generation,generation,23.19547170834301,31.1,ember,TWh,-25.416489683784537,,0.4.0,2021,ccgt
+NG_2021,NG,Nigeria,generation,generation,2.4922199982252713,0.0,ember,TWh,,,0.4.0,2021,coal
+NG_2021,NG,Nigeria,generation,generation,0.0,0.0,ember,TWh,,,0.4.0,2021,geothermal
+NG_2021,NG,Nigeria,generation,generation,5.742297573655948,7.94,ember,TWh,-27.678871868313,,0.4.0,2021,hydro
+NG_2021,NG,Nigeria,generation,generation,0.0,0.0,ember,TWh,,,0.4.0,2021,nuclear
+NG_2021,NG,Nigeria,generation,generation,0.0,0.0,ember,TWh,,,0.4.0,2021,oil
+NG_2021,NG,Nigeria,generation,generation,0.0,0.0,ember,TWh,,,0.4.0,2021,other
+NG_2021,NG,Nigeria,generation,generation,0.03862694071273094,0.1,ember,TWh,-61.37305928726906,,0.4.0,2021,pv
+NG_2021,NG,Nigeria,generation,generation,0.0013837790837490658,0.0,ember,TWh,,,0.4.0,2021,wind
+NG_2021,NG,Nigeria,generation,total_generation,31.47000000002071,39.2,ember,TWh,-19.719387755049212,C,0.4.0,2021,total
+NG_2021,NG,Nigeria,installed_capacity,capacity,0.0,20.0,ember,MW,-100.0,,0.4.0,2021,biomass
+NG_2021,NG,Nigeria,installed_capacity,capacity,0.0,21.05,irena,MW,-100.0,,0.4.0,2021,biomass
+NG_2021,NG,Nigeria,installed_capacity,capacity,14261.30599788664,11290.0,ember,MW,26.318033639385657,,0.4.0,2021,ccgt
+NG_2021,NG,Nigeria,installed_capacity,capacity,14261.30599788664,10977.0,irena,MW,29.919887017278313,,0.4.0,2021,ccgt
+NG_2021,NG,Nigeria,installed_capacity,capacity,284.5,280.0,ember,MW,1.607142857142857,,0.4.0,2021,coal
+NG_2021,NG,Nigeria,installed_capacity,capacity,284.5,0.0,irena,MW,,,0.4.0,2021,coal
+NG_2021,NG,Nigeria,installed_capacity,capacity,0.0,0.0,ember,MW,,,0.4.0,2021,geothermal
+NG_2021,NG,Nigeria,installed_capacity,capacity,0.0,0.0,irena,MW,,,0.4.0,2021,geothermal
+NG_2021,NG,Nigeria,installed_capacity,capacity,2638.0,2110.0,ember,MW,25.023696682464454,,0.4.0,2021,hydro
+NG_2021,NG,Nigeria,installed_capacity,capacity,2638.0,2150.8,irena,MW,22.652036451552902,,0.4.0,2021,hydro
+NG_2021,NG,Nigeria,installed_capacity,capacity,0.0,0.0,ember,MW,,,0.4.0,2021,nuclear
+NG_2021,NG,Nigeria,installed_capacity,capacity,0.0,0.0,irena,MW,,,0.4.0,2021,nuclear
+NG_2021,NG,Nigeria,installed_capacity,capacity,0.0,0.0,ember,MW,,,0.4.0,2021,oil
+NG_2021,NG,Nigeria,installed_capacity,capacity,0.0,33.2,irena,MW,-100.0,,0.4.0,2021,oil
+NG_2021,NG,Nigeria,installed_capacity,capacity,0.0,0.0,ember,MW,,,0.4.0,2021,other
+NG_2021,NG,Nigeria,installed_capacity,capacity,0.0,0.0,irena,MW,,,0.4.0,2021,other
+NG_2021,NG,Nigeria,installed_capacity,capacity,27.116882639244896,100.0,ember,MW,-72.88311736075511,,0.4.0,2021,pv
+NG_2021,NG,Nigeria,installed_capacity,capacity,27.116882639244896,72.81,irena,MW,-62.75665068088876,,0.4.0,2021,pv
+NG_2021,NG,Nigeria,installed_capacity,capacity,1.3643155615188896,0.0,ember,MW,,,0.4.0,2021,wind
+NG_2021,NG,Nigeria,installed_capacity,capacity,1.3643155615188896,0.0,irena,MW,,,0.4.0,2021,wind
+NG_2021,NG,Nigeria,installed_capacity,total_capacity,17212.287196087404,13800.0,ember,MW,24.726718812227563,D,0.4.0,2021,total
+NG_2021,NG,Nigeria,installed_capacity,total_capacity,17212.287196087404,13254.859999999999,irena,MW,29.856423953835844,D,0.4.0,2021,total
+US_2021,US,United States,demand,total_demand,4191.630740963554,4192.93,ember,TWh,-0.03098690024509182,A,0.4.0,2021,total
+US_2021,US,United States,demand,total_demand,4191.630740963554,4192.93,ourworldindata,TWh,-0.03098690024509182,A,0.4.0,2021,total
+US_2021,US,United States,generation,generation,41.71038220194139,54.25,ember,TWh,-23.114502853564254,,0.4.0,2021,biomass
+US_2021,US,United States,generation,generation,641.126676464613,1579.19,ember,TWh,-59.4015491191932,,0.4.0,2021,ccgt
+US_2021,US,United States,generation,generation,1870.4245841189781,898.0,ember,TWh,108.28781560344969,,0.4.0,2021,coal
+US_2021,US,United States,generation,generation,47.9250404844384,18.24,ember,TWh,162.7469324804737,,0.4.0,2021,geothermal
+US_2021,US,United States,generation,generation,181.95489766989664,246.47,ember,TWh,-26.17564098271731,,0.4.0,2021,hydro
+US_2021,US,United States,generation,generation,943.3635945561471,779.65,ember,TWh,20.998344713159376,,0.4.0,2021,nuclear
+US_2021,US,United States,generation,generation,5.760552297684189,35.2,ember,TWh,-83.63479460885173,,0.4.0,2021,oil
+US_2021,US,United States,generation,generation,0.0,0.0,ember,TWh,,,0.4.0,2021,other
+US_2021,US,United States,generation,generation,104.14639452105102,164.42,ember,TWh,-36.6583174060023,,0.4.0,2021,pv
+US_2021,US,United States,generation,generation,345.9773822334564,378.2,ember,TWh,-8.519994121243675,,0.4.0,2021,wind
+US_2021,US,United States,generation,total_generation,4182.389504548206,4153.62,ember,TWh,0.6926368937988066,A,0.4.0,2021,total
+US_2021,US,United States,installed_capacity,capacity,4761.5,10280.0,ember,MW,-53.68190661478599,,0.4.0,2021,biomass
+US_2021,US,United States,installed_capacity,capacity,4761.5,10275.6,irena,MW,-53.6620732609288,,0.4.0,2021,biomass
+US_2021,US,United States,installed_capacity,capacity,626261.7678572626,529280.0,ember,MW,18.323338848485232,,0.4.0,2021,ccgt
+US_2021,US,United States,installed_capacity,capacity,626261.7678572626,492979.1,irena,MW,27.036170064260872,,0.4.0,2021,ccgt
+US_2021,US,United States,installed_capacity,capacity,330009.8373193862,225140.0,ember,MW,46.5798335788337,,0.4.0,2021,coal
+US_2021,US,United States,installed_capacity,capacity,330009.8373193862,210604.8,irena,MW,56.69625636233657,,0.4.0,2021,coal
+US_2021,US,United States,installed_capacity,capacity,5470.9,1060.0,ember,MW,416.12264150943395,,0.4.0,2021,geothermal
+US_2021,US,United States,installed_capacity,capacity,5470.9,2596.7,irena,MW,110.68664073631918,,0.4.0,2021,geothermal
+US_2021,US,United States,installed_capacity,capacity,115216.82425176936,84250.0,ember,MW,36.755874482812295,,0.4.0,2021,hydro
+US_2021,US,United States,installed_capacity,capacity,115216.82425176936,103159.28,irena,MW,11.688278797379507,,0.4.0,2021,hydro
+US_2021,US,United States,installed_capacity,capacity,107689.95421904422,95550.0,ember,MW,12.705341935158781,,0.4.0,2021,nuclear
+US_2021,US,United States,installed_capacity,capacity,107689.95421904422,95546.4,irena,MW,12.709588450265235,,0.4.0,2021,nuclear
+US_2021,US,United States,installed_capacity,capacity,48098.49742679716,31820.0,ember,MW,51.15806859458568,,0.4.0,2021,oil
+US_2021,US,United States,installed_capacity,capacity,48098.49742679716,28204.5,irena,MW,70.53483460723346,,0.4.0,2021,oil
+US_2021,US,United States,installed_capacity,capacity,0.0,0.0,ember,MW,,,0.4.0,2021,other
+US_2021,US,United States,installed_capacity,capacity,0.0,2576.0,irena,MW,-100.0,,0.4.0,2021,other
+US_2021,US,United States,installed_capacity,capacity,73549.40487013155,94790.0,ember,MW,-22.408054784121166,,0.4.0,2021,pv
+US_2021,US,United States,installed_capacity,capacity,73549.40487013155,95390.91,irena,MW,-22.896841145417792,,0.4.0,2021,pv
+US_2021,US,United States,installed_capacity,capacity,117244.68342938453,132850.0,ember,MW,-11.746568739642807,,0.4.0,2021,wind
+US_2021,US,United States,installed_capacity,capacity,117244.68342938453,133019.28,irena,MW,-11.858879833521478,,0.4.0,2021,wind
+US_2021,US,United States,installed_capacity,total_capacity,1428303.3693737756,1205020.0,ember,MW,18.529432654543125,C,0.4.0,2021,total
+US_2021,US,United States,installed_capacity,total_capacity,1428303.3693737756,1174352.57,irena,MW,21.624749318152,D,0.4.0,2021,total
+ZA_2021,ZA,South Africa,demand,total_demand,218.8430712205561,241.89,ember,TWh,-9.527855132268336,B,0.4.0,2021,total
+ZA_2021,ZA,South Africa,demand,total_demand,218.8430712205561,240.74,ourworldindata,TWh,-9.095675325846928,B,0.4.0,2021,total
+ZA_2021,ZA,South Africa,generation,generation,0.1191359962825067,0.41,ember,TWh,-70.94243993109592,,0.4.0,2021,biomass
+ZA_2021,ZA,South Africa,generation,generation,5.502825577847658e-09,0.0,ember,TWh,,,0.4.0,2021,ccgt
+ZA_2021,ZA,South Africa,generation,generation,187.15837665668846,210.92,ember,TWh,-11.265704221179371,,0.4.0,2021,coal
+ZA_2021,ZA,South Africa,generation,generation,0.0,0.0,ember,TWh,,,0.4.0,2021,geothermal
+ZA_2021,ZA,South Africa,generation,generation,0.3975550684860336,2.02,ember,TWh,-80.31905601554288,,0.4.0,2021,hydro
+ZA_2021,ZA,South Africa,generation,generation,17.16088612690058,12.35,ember,TWh,38.95454353765651,,0.4.0,2021,nuclear
+ZA_2021,ZA,South Africa,generation,generation,4.626197373326734e-10,3.27,ember,TWh,-99.99999998585261,,0.4.0,2021,oil
+ZA_2021,ZA,South Africa,generation,generation,0.0,0.0,ember,TWh,,,0.4.0,2021,other
+ZA_2021,ZA,South Africa,generation,generation,8.541537567241829,7.84,ember,TWh,8.948183255635572,,0.4.0,2021,pv
+ZA_2021,ZA,South Africa,generation,generation,5.465579798655636,8.65,ember,TWh,-36.81410637392329,,0.4.0,2021,wind
+ZA_2021,ZA,South Africa,generation,total_generation,218.84307122022048,245.45999999999998,ember,TWh,-10.843692976362544,C,0.4.0,2021,total
+ZA_2021,ZA,South Africa,installed_capacity,capacity,13.6,260.0,ember,MW,-94.76923076923077,,0.4.0,2021,biomass
+ZA_2021,ZA,South Africa,installed_capacity,capacity,13.6,264.69,irena,MW,-94.86191393705845,,0.4.0,2021,biomass
+ZA_2021,ZA,South Africa,installed_capacity,capacity,455.3656000822074,1290.0,ember,MW,-64.70034107889865,,0.4.0,2021,ccgt
+ZA_2021,ZA,South Africa,installed_capacity,capacity,455.3656000822074,0.0,irena,MW,,,0.4.0,2021,ccgt
+ZA_2021,ZA,South Africa,installed_capacity,capacity,49442.15278921799,46270.0,ember,MW,6.85574408735247,,0.4.0,2021,coal
+ZA_2021,ZA,South Africa,installed_capacity,capacity,49442.15278921799,44013.0,irena,MW,12.335339079858196,,0.4.0,2021,coal
+ZA_2021,ZA,South Africa,installed_capacity,capacity,0.0,0.0,ember,MW,,,0.4.0,2021,geothermal
+ZA_2021,ZA,South Africa,installed_capacity,capacity,0.0,0.0,irena,MW,,,0.4.0,2021,geothermal
+ZA_2021,ZA,South Africa,installed_capacity,capacity,3559.420576219575,750.0,ember,MW,374.58941016261,,0.4.0,2021,hydro
+ZA_2021,ZA,South Africa,installed_capacity,capacity,3559.420576219575,3483.65,irena,MW,2.175034122818742,,0.4.0,2021,hydro
+ZA_2021,ZA,South Africa,installed_capacity,capacity,1959.0052664552666,1930.0,ember,MW,1.5028635469050033,,0.4.0,2021,nuclear
+ZA_2021,ZA,South Africa,installed_capacity,capacity,1959.0052664552666,1934.0,irena,MW,1.2929300131988917,,0.4.0,2021,nuclear
+ZA_2021,ZA,South Africa,installed_capacity,capacity,2140.5760628726302,2420.0,ember,MW,-11.546443682949164,,0.4.0,2021,oil
+ZA_2021,ZA,South Africa,installed_capacity,capacity,2140.5760628726302,3445.4,irena,MW,-37.871478990171525,,0.4.0,2021,oil
+ZA_2021,ZA,South Africa,installed_capacity,capacity,0.0,0.0,ember,MW,,,0.4.0,2021,other
+ZA_2021,ZA,South Africa,installed_capacity,capacity,0.0,0.0,irena,MW,,,0.4.0,2021,other
+ZA_2021,ZA,South Africa,installed_capacity,capacity,5451.457880475631,4210.0,ember,MW,29.48831070013376,,0.4.0,2021,pv
+ZA_2021,ZA,South Africa,installed_capacity,capacity,5451.457880475631,6315.91,irena,MW,-13.686897367511076,,0.4.0,2021,pv
+ZA_2021,ZA,South Africa,installed_capacity,capacity,2615.968413377232,2490.0,ember,MW,5.058972424788437,,0.4.0,2021,wind
+ZA_2021,ZA,South Africa,installed_capacity,capacity,2615.968413377232,2495.0,irena,MW,4.848433401893069,,0.4.0,2021,wind
+ZA_2021,ZA,South Africa,installed_capacity,total_capacity,65637.54658870053,59620.0,ember,MW,10.093167709997529,C,0.4.0,2021,total
+ZA_2021,ZA,South Africa,installed_capacity,total_capacity,65637.54658870053,61951.649999999994,irena,MW,5.9496342530029995,B,0.4.0,2021,total
