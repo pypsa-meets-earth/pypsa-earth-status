@@ -49,9 +49,9 @@ def build_one_node_pypsa_network(inputs, outputs, params):
     Parameters
     ----------
     inputs : snakemake.io.InputFiles
-        - demand : path to the reference demand CSV (region index, demand column in TWh/year)
-        - installed_capacity : path to the reference installed capacity CSV
-          (region+carrier multi-index, p_nom column in MW)
+        - demand : path to the reference demand CSV which has a region index as ISO2 code and demand column containing annual values in TWh/year)
+        - installed_capacity : path to the reference installed capacity CSV which has 
+          an index as region+carrier multi-index and p_nom column containing installed capacity data in MW
     outputs : snakemake.io.OutputFiles
         - network : path to write the output NetCDF network file
     params : snakemake.io.Params
