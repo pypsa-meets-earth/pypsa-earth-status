@@ -4,10 +4,11 @@
 
 # -*- coding: utf-8 -*-
 """
-This script reads the reference statistics (demand and installed capacity) for
-the region of interest and creates a PyPSA network whose statistics match the
-reference data. The resulting network can be used for validation or as sample
-output for users interested in reference energy system data.
+This script reads the reference statistics (demand and installed capacity)
+according to the specifications in the config file for and creates a PyPSA
+network whose statistics match the reference data. The resulting network
+can be used for validation or as sample output for users interested in
+reference energy system data.
 
 The network contains:
 - One bus per country/region
