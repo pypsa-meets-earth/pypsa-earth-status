@@ -5,8 +5,7 @@
 version: 0.0.1
 
 methodology: network_validation   # technique used in the validation:
-                                  # - network_validation: to validate a single network file specified in    "network_validation" block
-                                  # - export_reference_network: to export a reference PyPSA network built from reference statistics (run rule build_reference_pypsa_network)
+                                  # - network_validation: to validate a single network file specified in "network_validation" block
 
 datasets:
   demand: ["ourworldindata"]  # list of datasets sources to use. A subset of 'ourworldindata'
