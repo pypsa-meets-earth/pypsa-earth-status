@@ -5,6 +5,7 @@ SPDX-License-Identifier: CC-BY-4.0
 -->
 
 # PyPSA-Earth-Status: validating any PyPSA network on Earth
+Track the data quality status of PyPSA-Earth globally. Contributions are wanted both on the coding side and by sharing needs and insights on regional energy system modelling.
 
 ## Development Status: **under development**
 
