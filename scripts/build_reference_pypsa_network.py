@@ -31,7 +31,7 @@ HOURS_PER_YEAR = 8760
 TWH_TO_MWH = 1e6
 
 
-def build_reference_pypsa_network(inputs, outputs, params):
+def build_one_node_pypsa_network(inputs, outputs, params):
     """
     Build a reference PyPSA network from the reference statistics.
 
@@ -143,7 +143,7 @@ if __name__ == "__main__":
 
     configure_logging(snakemake)
 
-    build_reference_pypsa_network(
+    build_one_node_pypsa_network(
         snakemake.input,
         snakemake.output,
         snakemake.params,
