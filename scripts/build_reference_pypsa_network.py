@@ -59,9 +59,6 @@ def build_one_node_pypsa_network(inputs, outputs, params):
     demand_df = read_csv_nafix(inputs["demand"])
     capacity_df = read_csv_nafix(inputs["installed_capacity"])
 
-    # The demand CSV has 'region' as the first column (written as index by
-    # build_reference_statistics.py, read back as a regular column here).
-    # Set it as the index to simplify lookups.
     if "region" in demand_df.columns:
         demand_df = demand_df.set_index("region")
 
