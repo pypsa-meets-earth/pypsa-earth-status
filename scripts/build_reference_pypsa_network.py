@@ -62,7 +62,6 @@ def build_one_node_pypsa_network(inputs, outputs, params):
     if "region" in demand_df.columns:
         demand_df = demand_df.set_index("region")
 
-    # Filter to configured countries only
     demand_df = demand_df[demand_df.index.isin(countries)]
     capacity_df = capacity_df[capacity_df["region"].isin(countries)]
 
