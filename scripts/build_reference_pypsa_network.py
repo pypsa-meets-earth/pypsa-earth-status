@@ -12,8 +12,8 @@ reference energy system data.
 
 The network contains:
 - One bus per country/region
-- Loads matching the reference annual electricity demand
-- Generators matching the reference installed capacity by carrier
+- Loads matching the reference annual electricity demand by setting p_set to the average power (TWh/year converted to MW)
+- Generators matching the reference installed capacity by carrier by setting ``p_nom`` to the installed capacity (MW)
 """
 
 import logging
