@@ -5,7 +5,7 @@
 version: 0.0.1
 
 methodology: network_validation   # technique used in the validation:
-                                  # - network_validation: to validate a single network file specified in    "network_validation" block
+                                  # - network_validation: to validate a single network file specified in "network_validation" block
 
 datasets:
   demand: ["ourworldindata"]  # list of datasets sources to use. A subset of 'ourworldindata'
