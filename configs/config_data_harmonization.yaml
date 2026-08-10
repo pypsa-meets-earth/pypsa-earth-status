@@ -1,0 +1,44 @@
+# SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
+#
+# SPDX-License-Identifier: CC0-1.0
+
+data_harmonization:
+  irena_installed_capacity:
+    technology_mapping:
+      solar:
+      - "Solar photovoltaic"
+      - "Solar thermal energy"
+      onwind:
+      - "Onshore wind energy"
+      offwind-dc:
+      - "Offshore wind energy"
+      ror:
+      - "Renewable hydropower"
+      - "Mixed Hydro Plants"
+      - "Pumped storage"
+      other:
+      - "Other non-renewable energy"
+      - "Marine energy"
+      biomass:
+      - "Liquid biofuels"
+      - "Biogas"
+      - "Solid biofuels"
+      geothermal:
+      - "Geothermal energy"
+      CCGT:
+      - "Natural gas"
+      waste:
+      - "Renewable municipal waste"
+      coal:
+      - "Coal and peat"
+      oil:
+      - "Oil"
+      - "Fossil fuels n.e.s."
+    drop_technologies:
+    - "Total Renewable"
+    - "Total Non-Renewable"
+    - "Nuclear"
+    country_overrides:
+      "Congo (the)": "CG"
+      "Türkiye": "TR"
+    fail_on_unmapped_technologies: true
