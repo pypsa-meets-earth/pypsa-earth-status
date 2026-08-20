@@ -80,47 +80,51 @@ def compare_generation_statistics(
 ):
     """
     Compare annual electricity generation by region and carrier.
+
+    Keep technologies that occur in only one dataset. Missing values remain
+    NaN in the comparison data and are replaced by zero only when plotting.
     """
-    comparison_results = []
+    reference = (
+        reference_df.groupby(
+            ["region", "carrier"],
+            as_index=False,
+        )["generation"]
+        .sum()
+        .rename(
+            columns={
+                "generation": "reference_generation",
+            }
+        )
+    )
 
-    unique_combinations = reference_df[
+    network = (
+        network_df.groupby(
+            ["region", "carrier"],
+            as_index=False,
+        )["generation"]
+        .sum()
+        .rename(
+            columns={
+                "generation": "network_generation",
+            }
+        )
+    )
+
+    comparison_df = pd.merge(
+        reference,
+        network,
+        how="outer",
+        on=["region", "carrier"],
+    )
+
+    comparison_df = comparison_df[
         [
-            "region",
-            "carrier",
-        ]
-    ].drop_duplicates()
-
-    for _, row in unique_combinations.iterrows():
-        region = row["region"]
-        carrier = row["carrier"]
-
-        reference_row = reference_df[
-            (reference_df["region"] == region) & (reference_df["carrier"] == carrier)
-        ]
-
-        network_row = network_df[
-            (network_df["region"] == region) & (network_df["carrier"] == carrier)
-        ]
-
-        if not reference_row.empty and not network_row.empty:
-            comparison_results.append(
-                {
-                    "region": region,
-                    "carrier": carrier,
-                    "network_generation": (network_row["generation"].iloc[0]),
-                    "reference_generation": (reference_row["generation"].iloc[0]),
-                }
-            )
-
-    comparison_df = pd.DataFrame(
-        comparison_results,
-        columns=[
             "region",
             "carrier",
             "network_generation",
             "reference_generation",
-        ],
-    )
+        ]
+    ]
 
     return comparison_df.set_index("region")
 

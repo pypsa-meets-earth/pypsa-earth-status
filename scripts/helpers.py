@@ -33,9 +33,10 @@ IRENA_TECHNOLOGY_MAPPING = {
     "Biogas": "biomass",
     "Renewable municipal waste": "waste",
     "Geothermal energy": "geothermal",
+    "Non-bio renewable fuels": "non-bio renewable fuels",
     "Coal and peat": "coal",
     "Oil": "oil",
-    "Natural gas": "CCGT",
+    "Natural gas": "gas",
     "Fossil fuels n.e.s.": "oil",
     "Nuclear": "nuclear",
     "Other non-renewable energy": "other",
@@ -397,19 +398,27 @@ def create_country_list(input, iso_coding=True):
 
 
 def harmonize_carrier_names(series):
-    return series.str.lower().replace(
-        {
-            "solar": "pv",
-            "wind": "onwind",
-            "offwind": "offwind",
-            "ror": "hydro",
-            "run of river": "hydro",
-            "storage hydro": "hydro",
-            "phs": "hydro",
-            "wind onshore": "onshore",
-            "wind offshore": "offwind",
-            "offwind-dc": "offwind",
-            "offwind-ac": "offwind",
-            "hard coal": "coal",
-        }
+    return (
+        series.fillna("")
+        .astype(str)
+        .str.strip()
+        .str.casefold()
+        .replace(
+            {
+                "solar": "pv",
+                "wind": "onwind",
+                "offwind": "offwind",
+                "ror": "hydro",
+                "run of river": "hydro",
+                "storage hydro": "hydro",
+                "phs": "hydro",
+                "wind onshore": "onshore",
+                "wind offshore": "offwind",
+                "offwind-dc": "offwind",
+                "offwind-ac": "offwind",
+                "hard coal": "coal",
+                "ccgt": "gas",
+                "ocgt": "gas",
+            }
+        )
     )

@@ -531,7 +531,13 @@ def plot_generation_comparison(
             .sort_index()
         )
 
-        region_df.fillna(0).plot(
+        plot_df = region_df.fillna(0).rename(
+            index={
+                "non-bio renewable fuels": "non-bio renewable\nfuels",
+            }
+        )
+
+        plot_df.plot(
             kind="bar",
             stacked=False,
             ax=ax,

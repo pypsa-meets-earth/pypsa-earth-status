@@ -10,7 +10,9 @@ SPDX-License-Identifier: CC-BY-4.0
 
 ### New Features and Major Changes
 
-* [Add electricity generation validation based on IRENA data PR #63](https://github.com/SPSUnipi/pypsa2smspp/pull/63)
+* [Design validation for electricity sector in sector networks PR #70](https://github.com/pypsa-meets-earth/pypsa-earth-status/pull/70)
+*
+* [Add electricity generation validation based on IRENA data PR #63](https://github.com/pypsa-meets-earth/pypsa-earth-status/pull/63)
 
 * [Add optional custom subfolder to resources and results folders PR #62](https://github.com/SPSUnipi/pypsa2smspp/pull/62)
 
