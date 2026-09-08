@@ -180,6 +180,7 @@ results/*
 *.nc
 *.geojson
 *.txt
+data/ember/
 
 # images and logs
 logs/*

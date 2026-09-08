@@ -35,7 +35,7 @@ IRENA_TECHNOLOGY_MAPPING = {
     "Geothermal energy": "geothermal",
     "Coal and peat": "coal",
     "Oil": "oil",
-    "Natural gas": "CCGT",
+    "Natural gas": "gas",
     "Fossil fuels n.e.s.": "oil",
     "Nuclear": "nuclear",
     "Other non-renewable energy": "other",
@@ -400,16 +400,43 @@ def harmonize_carrier_names(series):
     return series.str.lower().replace(
         {
             "solar": "pv",
+            "csp": "pv",
             "wind": "onwind",
             "offwind": "offwind",
             "ror": "hydro",
             "run of river": "hydro",
             "storage hydro": "hydro",
+            "pumped hydro": "hydro",
             "phs": "hydro",
-            "wind onshore": "onshore",
+            "wind onshore": "onwind",
             "wind offshore": "offwind",
             "offwind-dc": "offwind",
             "offwind-ac": "offwind",
             "hard coal": "coal",
+            "lignite": "coal",
+            "brown coal": "coal",
+            # Reference sources report a single gas category, so network-side
+            # CCGT and OCGT are aggregated rather than conflated with each other.
+            "ccgt": "gas",
+            "ocgt": "gas",
+            "multiple": "other",
         }
     )
+
+
+def collapse_wind_carriers(series):
+    """
+    Fold offshore wind into onshore wind.
+    """
+    return series.replace({"offwind": "onwind"})
+
+
+def reference_splits_offshore_wind(df):
+    """
+    Whether a reference dataset reports offshore wind separately from onshore.
+
+    Evaluate this on the full dataset rather than on a per-country slice: a
+    country without offshore wind carries no "offwind" row even under a source
+    that does distinguish the two.
+    """
+    return "offwind" in set(df["carrier"])

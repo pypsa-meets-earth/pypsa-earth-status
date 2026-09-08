@@ -12,6 +12,10 @@ from shutil import copyfile, move
 
 from helpers import create_country_list
 
+# Create a temporary backup of the validation results before Snakemake deletes it
+if exists("results/health_status.csv"):
+    copyfile("results/health_status.csv", "results/health_status.csv.tmp")
+
 
 configfile: "config.yaml"
 
@@ -46,6 +50,58 @@ rule clean:
             shell("snakemake -j 1 visualize_data --delete-all-output")
         except:
             pass
+
+
+rule download_ember_data:
+    input:
+        ember_data=storage.HTTP(
+            "https://storage.googleapis.com/emb-prod-bkt-publicdata/"
+            "public-downloads/yearly_full_release_long_format.csv"
+        ),
+    output:
+        ember_data="data/ember/yearly_full_release_long_format.csv",
+    run:
+        os.makedirs(
+            os.path.dirname(output.ember_data),
+            exist_ok=True,
+        )
+        copyfile(
+            input.ember_data,
+            output.ember_data,
+        )
+
+
+rule build_reference_demand_ember:
+    input:
+        demand_ember="data/ember/yearly_full_release_long_format.csv",
+    output:
+        demand_ember="resources/clean/ember_demand_data.csv",
+    log:
+        "logs/build_reference_demand_ember.log",
+    script:
+        "scripts/build_reference_demand_ember.py"
+
+
+rule build_reference_installed_capacity_ember:
+    input:
+        cap_ember="data/ember/yearly_full_release_long_format.csv",
+    output:
+        cap_ember="resources/clean/ember_capacity_data.csv",
+    log:
+        "logs/build_reference_installed_capacity_ember.log",
+    script:
+        "scripts/build_reference_installed_capacity_ember.py"
+
+
+rule build_reference_generation_ember:
+    input:
+        gen_ember="data/ember/yearly_full_release_long_format.csv",
+    output:
+        gen_ember="resources/clean/ember_generation_data.csv",
+    log:
+        "logs/build_reference_generation_ember.log",
+    script:
+        "scripts/build_reference_generation_ember.py"
 
 
 rule build_reference_demand_ourworldindata:
@@ -126,9 +182,12 @@ rule build_network_geojson:
 
 rule build_reference_statistics:
     input:
-        demand_owid="resources/clean/owid_demand_data.csv",
+        demand_ourworldindata="resources/clean/owid_demand_data.csv",
+        demand_ember="resources/clean/ember_demand_data.csv",
         cap_irena="resources/clean/irena_capacity_data.csv",
-        generation_irena="resources/clean/irena_generation_data.csv",
+        cap_ember="resources/clean/ember_capacity_data.csv",
+        gen_ember="resources/clean/ember_generation_data.csv",
+        gen_irena="resources/clean/irena_generation_data.csv",
     output:
         demand=f"{reference_statistics_dir}/demand.csv",
         installed_capacity=f"{reference_statistics_dir}/installed_capacity.csv",
@@ -195,6 +254,8 @@ rule make_comparison:
         network_comparison_geojson=f"{results_dir}/network_comparison.geojson",
     log:
         f"{logs_dir}/make_comparison.log",
+    params:
+        datasets=config["datasets"],
     script:
         "scripts/make_comparison.py"
 
@@ -249,3 +310,26 @@ rule create_example_DE:
         n.buses["country"] = "DE"
         n.export_to_netcdf(output[0])
         print(f"Created example network at {output[0]}")
+
+
+rule build_health_status:
+    input:
+        demand_ourworldindata="resources/clean/owid_demand_data.csv",
+        demand_ember="resources/clean/ember_demand_data.csv",
+        cap_irena="resources/clean/irena_capacity_data.csv",
+        cap_ember="resources/clean/ember_capacity_data.csv",
+        gen_ember="resources/clean/ember_generation_data.csv",
+        gen_irena="resources/clean/irena_generation_data.csv",
+    output:
+        health_status="results/health_status.csv",
+    log:
+        "logs/build_health_status.log",
+    params:
+        networks=config["network_validation"].get("networks", {}),
+        year=config["network_validation"]["year"],
+        datasets=config.get("datasets", {}),
+        fallback_pypsa_earth_version=config["network_validation"].get(
+            "fallback_pypsa_earth_version", ""
+        ),
+    script:
+        "scripts/build_health_status.py"

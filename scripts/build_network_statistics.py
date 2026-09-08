@@ -1,5 +1,5 @@
 # SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
-
+#
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 # -*- coding: utf-8 -*-
@@ -8,7 +8,6 @@ This script reads a PyPSA network and builds reference statistics to be used for
 """
 
 import os
-import re
 
 import pandas as pd
 import pypsa
@@ -21,8 +20,13 @@ def process_network_statistics(inputs, outputs):
     """
     network = pypsa.Network(inputs["network_path"])
 
-    # Extract demand
-    demand = network.loads_t.p_set.mean().T * 8760 * 1e-6
+    # 1. Extract demand
+    demand = (
+        network.loads_t.p_set.multiply(network.snapshot_weightings.objective, axis=0)
+        .sum()
+        .T
+        * 1e-6
+    )  # Convert MWh to TWh
     demand = demand.reset_index()
     demand.columns = ["bus", "demand"]
     demand = demand.set_index("bus")
@@ -32,39 +36,53 @@ def process_network_statistics(inputs, outputs):
     demand = demand.groupby(["region"]).sum()
     to_csv_nafix(demand, outputs["demand"])
 
-    # Extract installed capacity
+    # 2. Extract installed capacity (from both generators and storage units)
     generator_capacity = network.generators[["carrier", "p_nom", "bus"]].reset_index(
         drop=True
     )
-
     storage_capacity = network.storage_units[["carrier", "p_nom", "bus"]].reset_index(
         drop=True
     )
-
     installed_capacity = pd.concat(
-        [
-            generator_capacity,
-            storage_capacity,
-        ],
-        ignore_index=True,
+        [generator_capacity, storage_capacity], ignore_index=True
     )
-
     installed_capacity["region"] = installed_capacity["bus"].map(
         network.buses["country"]
     )
 
+    # Filter out load shedding units
+    installed_capacity = installed_capacity[
+        ~installed_capacity["carrier"].str.lower().isin(["load", "load shedding"])
+    ]
+
     installed_capacity["carrier"] = harmonize_carrier_names(
         installed_capacity["carrier"]
     )
-
     installed_capacity = installed_capacity.groupby(["region", "carrier"])[
         ["p_nom"]
     ].sum()
+    to_csv_nafix(installed_capacity, outputs["installed_capacity"])
 
-    to_csv_nafix(
-        installed_capacity,
-        outputs["installed_capacity"],
+    # 3. Extract optimal capacity (from both generators and storage units)
+    generator_optimal_capacity = network.generators[
+        ["carrier", "p_nom_opt", "bus"]
+    ].rename(columns={"p_nom_opt": "p_nom"})
+    storage_optimal_capacity = network.storage_units[
+        ["carrier", "p_nom_opt", "bus"]
+    ].rename(columns={"p_nom_opt": "p_nom"})
+    optimal_capacity = pd.concat(
+        [generator_optimal_capacity, storage_optimal_capacity], ignore_index=True
     )
+    optimal_capacity["region"] = optimal_capacity["bus"].map(network.buses["country"])
+
+    # Filter out load shedding units
+    optimal_capacity = optimal_capacity[
+        ~optimal_capacity["carrier"].str.lower().isin(["load", "load shedding"])
+    ]
+
+    optimal_capacity["carrier"] = harmonize_carrier_names(optimal_capacity["carrier"])
+    optimal_capacity = optimal_capacity.groupby(["region", "carrier"])[["p_nom"]].sum()
+    to_csv_nafix(optimal_capacity, outputs["optimal_capacity"])
 
     # Extract optimal capacity from generators and storage units
     generator_optimal_capacity = (
@@ -153,30 +171,22 @@ def process_network_statistics(inputs, outputs):
     ].to_numpy()
 
     generation = pd.concat(
-        [
-            generator_generation,
-            storage_generation,
-        ],
-        ignore_index=True,
+        [generator_generation, storage_generation], ignore_index=True
     )
+
+    # Filter out load shedding units
+    generation = generation[
+        ~generation["carrier"].str.lower().isin(["load", "load shedding"])
+    ]
 
     # Convert weighted MWh to GWh
     generation["generation"] /= 1e3
 
-    generation["region"] = network.buses.loc[
-        generation["bus"],
-        "country",
-    ].to_numpy()
-
+    generation["region"] = generation["bus"].map(network.buses["country"])
     generation["carrier"] = harmonize_carrier_names(generation["carrier"])
+    generation = generation.groupby(["region", "carrier"])[["generation"]].sum()
 
-    generation = generation.reset_index(drop=True).groupby(["region", "carrier"]).sum()
-    generation.drop(columns="bus", inplace=True)
-
-    to_csv_nafix(
-        generation,
-        outputs["electricity_generation"],
-    )
+    to_csv_nafix(generation, outputs["electricity_generation"])
 
 
 if __name__ == "__main__":

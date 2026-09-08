@@ -100,12 +100,12 @@ def plot_carrier_capacity_comparison(
     available_carriers = installed_capacity_df["carrier"].unique()
     if carrier not in available_carriers:
         original_carrier = carrier
-        # Priority: Coal > CCGT
+        # Priority: Coal > gas
         if "coal" in available_carriers:
             carrier = "coal"
-        elif "ccgt" in available_carriers:
-            carrier = "ccgt"
-            print(f"{original_carrier} not found. Switching to ccgt.")
+        elif "gas" in available_carriers:
+            carrier = "gas"
+            print(f"{original_carrier} not found. Switching to gas.")
 
     # Filter for the chosen carrier
     installed_capacity_df = installed_capacity_df[

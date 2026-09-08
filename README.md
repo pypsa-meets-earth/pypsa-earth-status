@@ -116,3 +116,63 @@ If you want to validate your own PyPSA network, you can:
     ```
 
 5. Check the results in the `results/` folder
+
+## Compiling Health Status Reports
+
+If you want to validate multiple solved networks (scenarios) across multiple countries and compare them against different configurable reference sources (e.g., Ember, IRENA, Our World in Data) in a single long-format tidy table:
+
+1. **Configure Scenarios:**
+   Open the file `config.yaml` and add your solved PyPSA network files (`.nc`) under the `networks:` block. You can add them in two formats:
+
+   * **Format A: Explicit Country List (Dictionary format)**
+     Use this for multi-country networks (e.g. SAPP) or to restrict validation to a subset of countries. List the file path and the target country codes:
+     ```yaml
+     SAPP:
+       path: "results/SAPP/networks/elec_s_40flex_ec_lc1.0_1H.nc"
+       countries: ["ZA", "BW", "LS", "MW", "MZ"]
+     ```
+
+   * **Format B: Dynamic Auto-detection (Simple string format)**
+     Use this when you want the validation script to automatically discover and validate all countries present in the network buses (`n.buses.country`):
+     ```yaml
+     NG_2021: "results/NG_2021/networks/elec_s_40flex_ec_lc1.0_1H.nc"
+     ```
+
+   *(Note: Set `fallback_pypsa_earth_version` under the `network_validation` block in `config.yaml` to specify the default version when metadata is absent in the network file).*
+
+2. **Select Reference Sources:**
+   Under the `datasets:` block, specify the list of sources you want to compare against for demand, capacity, and generation:
+   ```yaml
+   datasets:
+     demand: ["ourworldindata", "ember"]
+     installed_capacity: ["irena", "ember"]
+     electricity_generation: ["ember", "irena"]
+   ```
+
+3. **Execute the rule:**
+   Run the following Snakemake command:
+   ```bash
+   snakemake -j 1 results/health_status.csv
+   ```
+
+4. **Review Results:**
+   The tidy long-format comparison is exported to `results/health_status.csv`. Each row compares a single scenario, country, and metric against a single reference source, detailing the relative error deviation and a validation grade.
+
+   Grades are assigned from the absolute relative deviation between the PyPSA value and the reference value:
+
+   | Grade | Deviation from reference |
+   | :--- | :--- |
+   | `A` | below 5% |
+   | `B` | 5% to below 10% |
+   | `C` | 10% to below 20% |
+   | `D` | 20% or above |
+   | *(blank)* | metric is not graded |
+
+   The mean absolute error metrics (`capacity_mae_pct` and `generation_share_mae`) are deliberately left ungraded. They report a deviation, but it summarises the average per-carrier spread rather than a deviation from one reference figure, so their `reference_value` is empty and the grade thresholds above do not apply to them.
+
+   This output supports two distinct applications:
+
+   1. **Validating a custom set of scenarios.** Any collection of networks listed under `networks:` is validated in a single run, so an arbitrary set of countries, regions, or model configurations can be checked together rather than one network at a time.
+   2. **Tracking the accuracy status of the PyPSA-Earth workflow.** Because results persist across runs, the file builds up into an overall picture of how model output compares against reference data over time and across scenarios.
+
+   To serve the second purpose, and unlike the other validation outputs, this file is not written to a per-validation subfolder. It is a global tracker kept at a single stable path so that results accumulate across scenarios and validation configurations: each run replaces only the rows for the scenario-country pairs it just validated and leaves all other rows untouched. Running the rule with no `networks:` configured therefore leaves any existing results unchanged.
