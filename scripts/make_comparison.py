@@ -1,5 +1,5 @@
 # SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
-
+#
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 # -*- coding: utf-8 -*-
@@ -14,22 +14,45 @@ import json
 import logging
 import os
 
+import numpy as np
 import pandas as pd
 from helpers import (
+    collapse_wind_carriers,
     configure_logging,
-    country_name_2_two_digits,
     read_csv_nafix,
+    reference_splits_offshore_wind,
     to_csv_nafix,
 )
 
 
-def compare_capacity_statistics(reference_df, network_df):
+def compute_differences(network_val, reference_val):
+    """
+    Signed, absolute and relative differences between a network value and its
+    reference. The relative difference is a percentage of the reference and is
+    undefined when the reference is zero.
+    """
+    difference = network_val - reference_val
+    return {
+        "difference": difference,
+        "absolute_difference": abs(difference),
+        "relative_difference_pct": (
+            difference / reference_val * 100.0 if reference_val != 0.0 else np.inf
+        ),
+    }
+
+
+def compare_capacity_statistics(reference_df, network_df, source_name):
     comparison_results = []
-    unique_combinations = reference_df[["region", "carrier"]].drop_duplicates()
+
+    # We want to match unique combinations of region and carrier from both dfs
+    unique_combinations = pd.concat(
+        [reference_df[["region", "carrier"]], network_df[["region", "carrier"]]]
+    ).drop_duplicates()
 
     for _, row in unique_combinations.iterrows():
         region = row["region"]
         carrier = row["carrier"]
+
         reference_row = reference_df[
             (reference_df["region"] == region) & (reference_df["carrier"] == carrier)
         ]
@@ -37,58 +60,98 @@ def compare_capacity_statistics(reference_df, network_df):
             (network_df["region"] == region) & (network_df["carrier"] == carrier)
         ]
 
-        if not reference_row.empty and not network_row.empty:
-            comparison_results.append(
-                {
-                    "region": region,
-                    "carrier": carrier,
-                    "network_capacity": network_row["p_nom"].values[0],
-                    "reference_capacity": reference_row["p_nom"].values[0],
-                }
-            )
+        network_val = network_row["p_nom"].values[0] if not network_row.empty else 0.0
+        reference_val = (
+            reference_row["p_nom"].values[0] if not reference_row.empty else 0.0
+        )
 
-    comparison_df = pd.DataFrame(comparison_results)
-    comparison_df = comparison_df.set_index("region")
+        if network_val == 0.0 and reference_val == 0.0:
+            continue
+
+        comparison_results.append(
+            {
+                "region": region,
+                "carrier": carrier,
+                "network_capacity": network_val,
+                "reference_capacity": reference_val,
+                **compute_differences(network_val, reference_val),
+                "reference_source": source_name,
+            }
+        )
+
+    if comparison_results:
+        comparison_df = pd.DataFrame(comparison_results)
+        comparison_df = comparison_df.set_index("region")
+    else:
+        comparison_df = pd.DataFrame(
+            columns=[
+                "region",
+                "carrier",
+                "network_capacity",
+                "reference_capacity",
+                "difference",
+                "absolute_difference",
+                "relative_difference_pct",
+                "reference_source",
+            ]
+        ).set_index("region")
+
     return comparison_df
 
 
-def compare_demand_statistics(reference_df, network_df):
+def compare_demand_statistics(reference_df, network_df, source_name):
     comparison_results = []
-    unique_countries = reference_df["region"].drop_duplicates()
+    unique_countries = pd.concat(
+        [reference_df["region"], network_df["region"]]
+    ).drop_duplicates()
 
     for region in unique_countries:
         reference_row = reference_df[reference_df["region"] == region]
         network_row = network_df[network_df["region"] == region]
 
-        if not reference_row.empty and not network_row.empty:
-            comparison_results.append(
-                {
-                    "region": region,
-                    "network_demand": network_row["demand"].values[0],
-                    "reference_demand": reference_row["demand"].values[0],
-                }
-            )
+        network_val = network_row["demand"].values[0] if not network_row.empty else 0.0
+        reference_val = (
+            reference_row["demand"].values[0] if not reference_row.empty else 0.0
+        )
 
-    comparison_df = pd.DataFrame(comparison_results)
-    comparison_df = comparison_df.set_index("region")
+        if network_val == 0.0 and reference_val == 0.0:
+            continue
+
+        comparison_results.append(
+            {
+                "region": region,
+                "network_demand": network_val,
+                "reference_demand": reference_val,
+                **compute_differences(network_val, reference_val),
+                "reference_source": source_name,
+            }
+        )
+
+    if comparison_results:
+        comparison_df = pd.DataFrame(comparison_results)
+        comparison_df = comparison_df.set_index("region")
+    else:
+        comparison_df = pd.DataFrame(
+            columns=[
+                "region",
+                "network_demand",
+                "reference_demand",
+                "difference",
+                "absolute_difference",
+                "relative_difference_pct",
+                "reference_source",
+            ]
+        ).set_index("region")
+
     return comparison_df
 
 
-def compare_generation_statistics(
-    reference_df,
-    network_df,
-):
-    """
-    Compare annual electricity generation by region and carrier.
-    """
+def compare_generation_statistics(reference_df, network_df, source_name):
     comparison_results = []
 
-    unique_combinations = reference_df[
-        [
-            "region",
-            "carrier",
-        ]
-    ].drop_duplicates()
+    unique_combinations = pd.concat(
+        [reference_df[["region", "carrier"]], network_df[["region", "carrier"]]]
+    ).drop_duplicates()
 
     for _, row in unique_combinations.iterrows():
         region = row["region"]
@@ -97,32 +160,49 @@ def compare_generation_statistics(
         reference_row = reference_df[
             (reference_df["region"] == region) & (reference_df["carrier"] == carrier)
         ]
-
         network_row = network_df[
             (network_df["region"] == region) & (network_df["carrier"] == carrier)
         ]
 
-        if not reference_row.empty and not network_row.empty:
-            comparison_results.append(
-                {
-                    "region": region,
-                    "carrier": carrier,
-                    "network_generation": (network_row["generation"].iloc[0]),
-                    "reference_generation": (reference_row["generation"].iloc[0]),
-                }
-            )
+        network_val = (
+            network_row["generation"].values[0] if not network_row.empty else 0.0
+        )
+        reference_val = (
+            reference_row["generation"].values[0] if not reference_row.empty else 0.0
+        )
 
-    comparison_df = pd.DataFrame(
-        comparison_results,
-        columns=[
-            "region",
-            "carrier",
-            "network_generation",
-            "reference_generation",
-        ],
-    )
+        if network_val == 0.0 and reference_val == 0.0:
+            continue
 
-    return comparison_df.set_index("region")
+        comparison_results.append(
+            {
+                "region": region,
+                "carrier": carrier,
+                "network_generation": network_val,
+                "reference_generation": reference_val,
+                **compute_differences(network_val, reference_val),
+                "reference_source": source_name,
+            }
+        )
+
+    if comparison_results:
+        comparison_df = pd.DataFrame(comparison_results)
+        comparison_df = comparison_df.set_index("region")
+    else:
+        comparison_df = pd.DataFrame(
+            columns=[
+                "region",
+                "carrier",
+                "network_generation",
+                "reference_generation",
+                "difference",
+                "absolute_difference",
+                "relative_difference_pct",
+                "reference_source",
+            ]
+        ).set_index("region")
+
+    return comparison_df
 
 
 def compute_line_ratios_geojson(reference_path, model_path, output_path):
@@ -178,7 +258,21 @@ def compute_line_ratios_geojson(reference_path, model_path, output_path):
         json.dump(geojson_model, f)
 
 
-def make_comparison(inputs, outputs):
+def _collapse_wind_and_regroup(df, value_col):
+    """
+    Fold offshore wind into onshore wind and re-sum so folded rows combine
+    instead of one silently overwriting the other on lookup.
+    """
+    df = df.copy()
+    df["carrier"] = collapse_wind_carriers(df["carrier"])
+    return df.groupby(["region", "carrier"], as_index=False)[value_col].sum()
+
+
+def make_comparison(inputs, outputs, datasets):
+    demand_source = datasets.get("demand", ["ourworldindata"])[0]
+    capacity_source = datasets.get("installed_capacity", ["irena"])[0]
+    generation_source = datasets.get("electricity_generation", ["ember"])[0]
+
     df_reference_installed_capacity = read_csv_nafix(
         inputs["installed_capacity_reference"]
     )
@@ -193,19 +287,32 @@ def make_comparison(inputs, outputs):
     df_network_demand = read_csv_nafix(inputs["demand_network"])
     df_network_generation = read_csv_nafix(inputs["electricity_generation_network"])
 
+    # The network side always keeps onshore/offshore wind distinct. Fold them
+    # together when comparing against a reference source that doesn't split them,
+    # re-aggregating so folded rows are summed rather than silently dropped.
+    if not reference_splits_offshore_wind(df_reference_installed_capacity):
+        df_network_installed_capacity = _collapse_wind_and_regroup(
+            df_network_installed_capacity, "p_nom"
+        )
+        df_network_optimal_capacity = _collapse_wind_and_regroup(
+            df_network_optimal_capacity, "p_nom"
+        )
+    if not reference_splits_offshore_wind(df_reference_generation):
+        df_network_generation = _collapse_wind_and_regroup(
+            df_network_generation, "generation"
+        )
+
     installed_capacity_comparison = compare_capacity_statistics(
-        df_reference_installed_capacity, df_network_installed_capacity
+        df_reference_installed_capacity, df_network_installed_capacity, capacity_source
     )
     optimal_capacity_comparison = compare_capacity_statistics(
-        df_reference_optimal_capacity, df_network_optimal_capacity
+        df_reference_optimal_capacity, df_network_optimal_capacity, capacity_source
     )
     demand_comparison = compare_demand_statistics(
-        df_reference_demand, df_network_demand
+        df_reference_demand, df_network_demand, demand_source
     )
-
     electricity_generation_comparison = compare_generation_statistics(
-        df_reference_generation,
-        df_network_generation,
+        df_reference_generation, df_network_generation, generation_source
     )
 
     to_csv_nafix(
@@ -233,4 +340,4 @@ if __name__ == "__main__":
         snakemake = mock_snakemake("make_comparison")
 
     configure_logging(snakemake)
-    make_comparison(snakemake.input, snakemake.output)
+    make_comparison(snakemake.input, snakemake.output, snakemake.params["datasets"])
