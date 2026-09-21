@@ -14,6 +14,12 @@ SPDX-FileCopyrightText = "The PyPSA-Earth and PyPSA-Eur Authors"
 SPDX-License-Identifier = "CC-BY-4.0"
 
 [[annotations]]
+path = "results/health_status.csv"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "The PyPSA-Earth and PyPSA-Eur Authors"
+SPDX-License-Identifier = "CC-BY-4.0"
+
+[[annotations]]
 path = "data/**"
 precedence = "aggregate"
 SPDX-FileCopyrightText = "The PyPSA-Earth and PyPSA-Eur Authors"

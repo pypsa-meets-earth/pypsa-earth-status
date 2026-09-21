@@ -44,7 +44,7 @@ def clean_capacity_irena(df_irena):
         "Technology",
     ] = "biomass"
     df.loc[df["Technology"].isin(["Geothermal energy"]), "Technology"] = "geothermal"
-    df.loc[df["Technology"].isin(["Natural gas"]), "Technology"] = "CCGT"
+    df.loc[df["Technology"].isin(["Natural gas"]), "Technology"] = "gas"
     df.loc[df["Technology"].isin(["Renewable municipal waste"]), "Technology"] = "waste"
     df.loc[df["Technology"].isin(["Coal and peat"]), "Technology"] = "coal"
     df.loc[df["Technology"].isin(["Oil", "Fossil fuels n.e.s."]), "Technology"] = "oil"

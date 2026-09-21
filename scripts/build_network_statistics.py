@@ -1,5 +1,5 @@
 # SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
-
+#
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 # -*- coding: utf-8 -*-
@@ -8,7 +8,6 @@ This script reads a PyPSA network and builds reference statistics to be used for
 """
 
 import os
-import re
 
 import pandas as pd
 import pypsa
@@ -26,6 +25,7 @@ NON_GENERATION_LINK_CARRIERS = {
     "b2b",
 }
 NON_GENERATION_GENERATOR_CARRIERS = {
+    "load",
     "load shedding",
 }
 NON_GENERATION_STORAGE_UNIT_CARRIERS = {
@@ -195,7 +195,7 @@ def process_network_statistics(inputs, outputs):
         columns=electricity_loads,
     )
 
-    weights = network.snapshot_weightings.generators.reindex(network.snapshots)
+    weights = network.snapshot_weightings.objective.reindex(network.snapshots)
 
     demand = load_p_set.mul(weights, axis=0).sum(axis=0).mul(1e-6)
 

@@ -26,7 +26,8 @@ def build_reference_demand_ourworldindata(inputs, outputs):
     df = df.loc[:, ["iso_code", "year", "electricity_demand"]]
     df = df[df["iso_code"].notna()]  # removes Antarctica
     df["region"] = cc.pandas_convert(df["iso_code"], to="ISO2")
-    df = df[["region", "year", "electricity_demand"]]
+    df = df.rename(columns={"year": "Year", "electricity_demand": "demand"})
+    df = df[["region", "Year", "demand"]]
     df = df.set_index("region")
 
     to_csv_nafix(df, fp_output)
