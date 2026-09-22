@@ -397,36 +397,30 @@ def create_country_list(input, iso_coding=True):
 
 
 def harmonize_carrier_names(series):
-    return (
-        series.fillna("")
-        .astype(str)
-        .str.strip()
-        .str.casefold()
-        .replace(
-            {
-                "solar": "pv",
-                "csp": "pv",
-                "wind": "onwind",
-                "offwind": "offwind",
-                "ror": "hydro",
-                "run of river": "hydro",
-                "storage hydro": "hydro",
-                "pumped hydro": "hydro",
-                "phs": "hydro",
-                "wind onshore": "onwind",
-                "wind offshore": "offwind",
-                "offwind-dc": "offwind",
-                "offwind-ac": "offwind",
-                "hard coal": "coal",
-                "lignite": "coal",
-                "brown coal": "coal",
-                # Reference sources report a single gas category, so network-side
-                # CCGT and OCGT are aggregated rather than conflated with each other.
-                "ccgt": "gas",
-                "ocgt": "gas",
-                "multiple": "other",
-            }
-        )
+    return series.str.lower().replace(
+        {
+            "solar": "pv",
+            "csp": "pv",
+            "wind": "onwind",
+            "offwind": "offwind",
+            "ror": "hydro",
+            "run of river": "hydro",
+            "storage hydro": "hydro",
+            "pumped hydro": "hydro",
+            "phs": "hydro",
+            "wind onshore": "onwind",
+            "wind offshore": "offwind",
+            "offwind-dc": "offwind",
+            "offwind-ac": "offwind",
+            "hard coal": "coal",
+            "lignite": "coal",
+            "brown coal": "coal",
+            # Reference sources report a single gas category, so network-side
+            # CCGT and OCGT are aggregated rather than conflated with each other.
+            "ccgt": "gas",
+            "ocgt": "gas",
+            "multiple": "other",
+        }
     )
 
 

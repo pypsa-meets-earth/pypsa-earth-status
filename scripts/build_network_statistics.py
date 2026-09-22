@@ -72,10 +72,8 @@ def harmonize_electricity_carrier_names(carriers):
     Harmonize electricity-producing technologies while keeping rooftop and
     utility-scale solar as separate categories.
     """
-    original = carriers.fillna("").astype(str)
-    normalized = original.str.strip().str.casefold()
-
-    result = original.copy()
+    normalized = carriers.fillna("").astype(str).str.strip().str.casefold()
+    result = normalized.copy()
 
     is_biomass = normalized.str.contains("biomass", regex=False)
     result.loc[is_biomass] = "biomass"
