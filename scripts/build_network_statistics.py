@@ -18,7 +18,7 @@ ELECTRICITY_BUS_CARRIERS = {
     "low voltage",
     "dc",
 }
-# CO2_BUS_CARRIERS = {"co2", "co2 atmosphere"}
+
 NON_GENERATION_LINK_CARRIERS = {
     "battery discharger",
     "home battery discharger",
