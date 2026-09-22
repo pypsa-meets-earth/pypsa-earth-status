@@ -33,7 +33,6 @@ IRENA_TECHNOLOGY_MAPPING = {
     "Biogas": "biomass",
     "Renewable municipal waste": "waste",
     "Geothermal energy": "geothermal",
-    "Non-bio renewable fuels": "non-bio renewable fuels",
     "Coal and peat": "coal",
     "Oil": "oil",
     "Natural gas": "gas",
