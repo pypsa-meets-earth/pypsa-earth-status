@@ -131,9 +131,7 @@ def get_link_capacity(network, capacity_column):
 
 
 def process_network_statistics(inputs, outputs):
-    """
-    Extracts and processes demand, installed capacity, and optimal capacity from the PyPSA network.
-    """
+    """Extract and process electricity demand, capacity, and generation."""
     network = pypsa.Network(inputs["network_path"])
 
     # Extract electricity demand
@@ -215,7 +213,7 @@ def process_network_statistics(inputs, outputs):
         outputs["installed_capacity"],
     )
 
-    # Extract optimal capacity from generators and storage units
+    # Extract optimal capacity from generators, storage units, and production links
     generator_optimal_capacity = (
         network.generators.loc[
             electricity_generators,
