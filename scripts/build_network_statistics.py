@@ -90,15 +90,6 @@ def harmonize_electricity_carrier_names(carriers):
 
     result.loc[is_chp & normalized.str.contains("gas", regex=False)] = "gas"
 
-    # Project-specific comparison convention; this is not a direct mapping to the
-    # IRENA "Other renewable energy" category.
-    is_hydrogen_generation = normalized.str.contains(
-        r"\bh2\b",
-        regex=True,
-        na=False,
-    )
-    result.loc[is_hydrogen_generation] = "non-bio renewable fuels"
-
     result = harmonize_carrier_names(result)
 
     # Keep waste separate from biomass because reference statistics provide a
