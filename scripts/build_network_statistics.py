@@ -23,6 +23,7 @@ NON_GENERATION_LINK_CARRIERS = {
     "battery discharger",
     "home battery discharger",
     "b2b",
+    "v2g",
 }
 NON_GENERATION_GENERATOR_CARRIERS = {
     "load",
