@@ -10,6 +10,8 @@ SPDX-License-Identifier: CC-BY-4.0
 
 ### New Features and Major Changes
 
+* [Support electricity validation for sector-coupled networks PR #70](https://github.com/pypsa-meets-earth/pypsa-earth-status/pull/70)
+
 * [Add multi-scenario health status validation reports with ember dataset source PR #61](https://github.com/pypsa-meets-earth/pypsa-earth-status/pull/61)
 
 * [Add electricity generation validation based on IRENA data PR #63](https://github.com/pypsa-meets-earth/pypsa-earth-status/pull/63)
