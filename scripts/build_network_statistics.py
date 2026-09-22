@@ -28,9 +28,6 @@ NON_GENERATION_GENERATOR_CARRIERS = {
     "load",
     "load shedding",
 }
-NON_GENERATION_STORAGE_UNIT_CARRIERS = {
-    "phs",
-}
 
 
 def get_electricity_buses(network):
@@ -157,24 +154,8 @@ def process_network_statistics(inputs, outputs):
         & ~generator_carriers.isin(NON_GENERATION_GENERATOR_CARRIERS)
     ]
 
-    storage_unit_carriers = (
-        network.storage_units["carrier"]
-        .fillna("")
-        .astype(str)
-        .str.strip()
-        .str.casefold()
-    )
-
     electricity_storage_units = network.storage_units.index[
         network.storage_units["bus"].isin(electricity_buses)
-    ]
-
-    # Pumped storage is excluded from generation because it is not primary
-    # electricity generation.
-    generation_storage_units = electricity_storage_units[
-        ~storage_unit_carriers.loc[electricity_storage_units].isin(
-            NON_GENERATION_STORAGE_UNIT_CARRIERS
-        )
     ]
 
     electricity_loads = network.loads.index[
@@ -316,7 +297,7 @@ def process_network_statistics(inputs, outputs):
     storage_generation = (
         network.storage_units_t.p.reindex(
             index=network.snapshots,
-            columns=generation_storage_units,
+            columns=electricity_storage_units,
             fill_value=0.0,
         )
         .clip(lower=0.0)
