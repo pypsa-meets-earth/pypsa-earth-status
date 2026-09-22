@@ -68,10 +68,7 @@ def get_electricity_production_links(network):
 
 
 def harmonize_electricity_carrier_names(carriers):
-    """
-    Harmonize electricity-producing technologies while keeping rooftop and
-    utility-scale solar as separate categories.
-    """
+    """Harmonize electricity-producing technologies for reference comparison."""
     normalized = carriers.fillna("").astype(str).str.strip().str.casefold()
     result = normalized.copy()
 
@@ -86,19 +83,18 @@ def harmonize_electricity_carrier_names(carriers):
 
     result.loc[is_chp & normalized.str.contains("gas", regex=False)] = "gas"
 
+    # Reference datasets do not distinguish rooftop from utility-scale PV.
+    is_rooftop_solar = normalized.str.contains(
+        "solar", regex=False
+    ) & normalized.str.contains("rooftop", regex=False)
+    result.loc[is_rooftop_solar] = "solar"
+
     result = harmonize_carrier_names(result)
 
     # Keep waste separate from biomass because reference statistics provide a
     # dedicated waste category.
     is_waste = normalized.str.contains("waste", regex=False, na=False)
     result.loc[is_waste] = "waste"
-
-    # Apply this after general harmonization to prevent rooftop PV from being
-    # merged with utility-scale PV.
-    is_rooftop_solar = normalized.str.contains(
-        "solar", regex=False
-    ) & normalized.str.contains("rooftop", regex=False)
-    result.loc[is_rooftop_solar] = "solar rooftop"
 
     return result
 
