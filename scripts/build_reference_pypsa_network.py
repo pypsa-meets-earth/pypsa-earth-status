@@ -10,7 +10,7 @@ and creates a PyPSA network whose statistics match the reference data.
 The resulting network can be used for validation or as sample output for
 users interested in reference energy system data.
 
-The network contains:\
+The network contains:
 - One bus per country/region
 - Loads matching the reference annual electricity demand by setting p_set
   to the average power (TWh/year converted to MW)
