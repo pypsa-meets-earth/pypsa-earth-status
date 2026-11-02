@@ -2,8 +2,8 @@
 #
 # SPDX-License-Identifier: CC0-1.0
 
-data_harmonization:
-  irena_installed_capacity:
+installed_capacity:
+  irena:
     technology_mapping:
       solar:
       - "Solar photovoltaic"
@@ -37,7 +37,6 @@ data_harmonization:
     drop_technologies:
     - "Total Renewable"
     - "Total Non-Renewable"
-    - "Nuclear"
     country_overrides:
       "Congo (the)": "CG"
       "Türkiye": "TR"
