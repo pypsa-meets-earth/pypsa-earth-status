@@ -77,25 +77,6 @@ def read_osm_config(*args):
     return tuple(osm_config[arg] for arg in args)
 
 
-def get_harmonization_config(config, section=None):
-    """
-    Read source-specific data harmonization settings from the Snakemake config.
-    """
-    if "data_harmonization" not in config:
-        raise KeyError(
-            "Data harmonization config section 'data_harmonization' not found in config"
-        )
-    config_harmonization = config["data_harmonization"]
-
-    if section is None:
-        return config_harmonization
-
-    if section not in config_harmonization:
-        raise KeyError(f"Data harmonization config section {section!r} not found.")
-
-    return config_harmonization[section]
-
-
 def apply_country_overrides(series, harmonization_config):
     """
     Apply source-specific country label overrides before country conversion.
