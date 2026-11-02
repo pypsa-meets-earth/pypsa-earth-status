@@ -9,7 +9,7 @@ sys.path.append("./scripts")
 from os.path import normpath, exists, isdir
 from shutil import copyfile, move
 
-from helpers import create_country_list, get_harmonization_config
+from helpers import create_country_list
 
 
 configfile: "configs/config_data_harmonization.yaml"
@@ -43,9 +43,7 @@ rule build_reference_installed_capacity_irena:
     log:
         "logs/build_reference_installed_capacity_irena.log",
     params:
-        harmonization_config=get_harmonization_config(
-            config, "irena_installed_capacity"
-        ),
+        cfg_installed_capacity=config["installed_capacity"]["irena"],
     script:
         "scripts/build_reference_installed_capacity_irena.py"
 

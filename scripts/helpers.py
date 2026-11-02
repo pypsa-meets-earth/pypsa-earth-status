@@ -77,97 +77,28 @@ def read_osm_config(*args):
     return tuple(osm_config[arg] for arg in args)
 
 
-def apply_country_overrides(series, harmonization_config):
-    """
-    Apply source-specific country label overrides before country conversion.
-    """
-    country_overrides = harmonization_config.get("country_overrides", {})
-    if not country_overrides:
-        return series
-    return series.replace(country_overrides)
+def drop_rows(df, column, values):
+    """Return a copy excluding rows whose column matches any listed value."""
+    return df.loc[~df[column].isin(values)].copy()
 
 
-def _as_list(value):
-    """
-    Normalize scalar or empty config values to a list.
-    """
-    if isinstance(value, str):
-        return [value]
-    if value is None:
-        return []
-    return list(value)
+def map_labels(series, mapping, fail_on_unmapped=True):
+    """Map {target: [source labels]}; warn and return NA for unknowns if non-strict."""
+    lookup = {}
+    for target, sources in mapping.items():
+        for source in sources:
+            if source in lookup and lookup[source] != target:
+                raise ValueError(f"Label {source!r} is assigned to multiple targets")
+            lookup[source] = target
 
+    unmapped = sorted(set(series.dropna()) - lookup.keys(), key=str)
+    if unmapped:
+        message = f"Unmapped labels in {series.name!r}: {unmapped}"
+        if fail_on_unmapped:
+            raise ValueError(message)
+        logger.warning("%s; returning NA for these labels.", message)
 
-def get_harmonization_sources(grouped_mapping):
-    """
-    Return all source labels selected by a {target: [source labels]} mapping.
-    """
-    source_values = set()
-
-    for source_labels in (grouped_mapping or {}).values():
-        source_values.update(_as_list(source_labels))
-
-    return source_values
-
-
-def find_unmapped_values(series, selected_values=None, dropped_values=None):
-    """
-    Return source values that are neither selected for mapping nor explicitly dropped.
-    """
-    selected_values = set(selected_values or [])
-    dropped_values = set(dropped_values or [])
-    source_values = set(series.dropna().unique())
-
-    return sorted(
-        source_values - selected_values - dropped_values,
-        key=str,
-    )
-
-
-def harmonize_and_aggregate(
-    df,
-    column,
-    harmonization_config,
-    aggregate_by=None,
-    aggregate_columns=None,
-):
-    """
-    Apply source-to-target harmonization and optionally aggregate mapped rows.
-    """
-    mapped_frames = []
-
-    for target, source_labels in harmonization_config["technology_mapping"].items():
-        source_labels = _as_list(source_labels)
-        if not source_labels:
-            continue
-
-        mapped = df.loc[df[column].isin(source_labels)].copy()
-        if mapped.empty:
-            continue
-
-        mapped[column] = target
-        mapped_frames.append(mapped)
-
-    if not mapped_frames:
-        return df.iloc[0:0].copy()
-
-    df = pd.concat(mapped_frames).sort_index(kind="stable")
-
-    if aggregate_by is None:
-        return df
-
-    aggregate_by = _as_list(aggregate_by)
-    aggregate_columns = _as_list(aggregate_columns)
-    if not aggregate_columns:
-        raise ValueError("aggregate_columns must be provided when aggregate_by is set")
-
-    return df.groupby(
-        aggregate_by,
-        as_index=False,
-        sort=False,
-    )[
-        aggregate_columns
-    ].sum(min_count=1)
+    return series.map(lookup)
 
 
 def configure_logging(snakemake, skip_handlers=False):
