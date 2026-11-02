@@ -34,6 +34,8 @@ installed_capacity:
       oil:
       - "Oil"
       - "Fossil fuels n.e.s."
+      nuclear:
+      - "Nuclear energy"
     drop_technologies:
     - "Total Renewable"
     - "Total Non-Renewable"
