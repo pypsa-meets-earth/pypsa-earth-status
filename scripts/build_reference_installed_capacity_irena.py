@@ -5,6 +5,18 @@
 # -*- coding: utf-8 -*-
 """
 Build installed capacity reference data from IRENA.
+
+Capacity is aggregated by country, technology, and year, treating ``-`` as missing and
+preserving groups with no reported values as missing.
+The output is a CSV file with columns
+``region`` (ISO2), ``Technology``, ``Year``, and ``p_nom`` (MW).
+
+The IRENA installed capacity data is parsed in agreement with the configuration in
+``configs/config_data_harmonization.yaml``.
+Use ``installed_capacity.irena`` in ``configs/config_data_harmonization.yaml`` 
+to drop technologies, map source labels to target technologies, and override
+country labels before ISO2 conversion. Unmapped technologies raise an error when
+``fail_on_unmapped_technologies`` is true; otherwise, warn and drop their rows.
 """
 
 import os
@@ -53,7 +65,9 @@ def clean_capacity_irena(df_irena, cfg_installed_capacity):
     df[TECHNOLOGY_COLUMN] = map_labels(
         df[TECHNOLOGY_COLUMN],
         cfg_installed_capacity["technology_mapping"],
-        fail_on_unmapped=cfg_installed_capacity.get("fail_on_unmapped_technologies", True),
+        fail_on_unmapped=cfg_installed_capacity.get(
+            "fail_on_unmapped_technologies", True
+        ),
     )
     df = df.dropna(subset=[TECHNOLOGY_COLUMN])
     df[COUNTRY_COLUMN] = df[COUNTRY_COLUMN].replace(
