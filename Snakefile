@@ -58,7 +58,7 @@ rule download_ember_data:
             "https://files.ember-energy.org/public-downloads/generation/outputs/release_generation_yearly_global.csv"
         ),
     output:
-        ember_data="release_generation_yearly_global.csv",
+        ember_data="data/ember/release_generation_yearly_global.csv",
     run:
         os.makedirs(
             os.path.dirname(output.ember_data),
