@@ -20,19 +20,14 @@ def clean_demand_ember(df_ember):
     """
     Clean demand data from Ember.
     """
-    df = df_ember.copy()
+    # Demand is a source row in the yearly release, measured in TWh.
+    df = df_ember.loc[
+        (df_ember["Area type"] == "Country or economy")
+        & (df_ember["Electricity source"] == "Demand")
+    ].copy()
+    df["demand"] = pd.to_numeric(df["Generation (TWh)"], errors="coerce")
 
-    # Filter to demand (in TWh)
-    df = df[
-        (df["Category"] == "Electricity demand")
-        & (df["Variable"] == "Demand")
-        & (df["Unit"] == "TWh")
-    ]
-
-    # Rename Value to demand
-    df["demand"] = pd.to_numeric(df["Value"], errors="coerce")
-
-    return df
+    return df.dropna(subset=["demand"])
 
 
 def build_reference_demand_ember(inputs, outputs):
@@ -43,8 +38,8 @@ def build_reference_demand_ember(inputs, outputs):
     fp_output = outputs["demand_ember"]
 
     df_ember = read_csv_nafix(fp_input)
-    df_ember["region"] = cc.pandas_convert(df_ember["ISO 3 code"], to="ISO2")
     df_ember = clean_demand_ember(df_ember)
+    df_ember["region"] = cc.pandas_convert(df_ember["ISO 3 code"], to="ISO2")
     df_ember = df_ember[["region", "Year", "demand"]]
     df_ember = df_ember.set_index("region")
 

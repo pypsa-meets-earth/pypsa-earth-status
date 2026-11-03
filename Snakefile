@@ -55,11 +55,10 @@ rule clean:
 rule download_ember_data:
     input:
         ember_data=storage.HTTP(
-            "https://storage.googleapis.com/emb-prod-bkt-publicdata/"
-            "public-downloads/yearly_full_release_long_format.csv"
+            "https://files.ember-energy.org/public-downloads/generation/outputs/release_generation_yearly_global.csv"
         ),
     output:
-        ember_data="data/ember/yearly_full_release_long_format.csv",
+        ember_data="release_generation_yearly_global.csv",
     run:
         os.makedirs(
             os.path.dirname(output.ember_data),

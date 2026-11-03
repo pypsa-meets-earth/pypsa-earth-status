@@ -61,6 +61,7 @@ Currently, the following datasets are supported:
 - Cross-border line capacities from [Global Transmission Database](https://zenodo.org/records/15527469)
 - Comparison of network data with reference statistics
 - Demand data from Our World in Data
+- Generation data from Ember
 
 The following repositories provide more reference data:
 
