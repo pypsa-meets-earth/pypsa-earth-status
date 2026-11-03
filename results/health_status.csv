@@ -1,0 +1,89 @@
+scenario_key,country_code,country_name,pillar,metric,pypsa_value,reference_value,reference_source,unit,deviation_pct,grade,pypsa_earth_version,year
+AU_2021,AU,Australia,demand,total_demand,267.3624060313471,267.45,ember,TWh,-0.0327515306236186,A,0.4.0,2021
+AU_2021,AU,Australia,demand,total_demand,267.3624060313471,267.45,ourworldindata,TWh,-0.0327515306236186,A,0.4.0,2021
+AU_2021,AU,Australia,generation,generation_share_mae,2.0580626487041296,,ember,%,2.0580626487041296,,0.4.0,2021
+AU_2021,AU,Australia,generation,total_generation,228.8949494490346,267.45000000000005,ember,TWh,-14.415797551305076,C,0.4.0,2021
+AU_2021,AU,Australia,installed_capacity,capacity_mae_pct,1.985651038268282,,ember,%,1.985651038268282,,0.4.0,2021
+AU_2021,AU,Australia,installed_capacity,capacity_mae_pct,1.9485807645812967,,irena,%,1.9485807645812967,,0.4.0,2021
+AU_2021,AU,Australia,installed_capacity,total_capacity,89240.9264989277,95400.0,ember,MW,-6.456051887916457,B,0.4.0,2021
+AU_2021,AU,Australia,installed_capacity,total_capacity,89240.9264989277,96697.1,irena,MW,-7.710855342168799,B,0.4.0,2021
+BR_2021,BR,Brazil,demand,total_demand,685.566933151822,679.5,ember,TWh,0.892852560974542,A,0.4.0,2021
+BR_2021,BR,Brazil,demand,total_demand,685.566933151822,679.21,ourworldindata,TWh,0.9359304415161698,A,0.4.0,2021
+BR_2021,BR,Brazil,generation,generation_share_mae,8.635473063280644,,ember,%,8.635473063280644,,0.4.0,2021
+BR_2021,BR,Brazil,generation,total_generation,603.8979909971929,656.4,ember,TWh,-7.99847791023874,B,0.4.0,2021
+BR_2021,BR,Brazil,installed_capacity,capacity_mae_pct,1.1571037434299576,,ember,%,1.1571037434299576,,0.4.0,2021
+BR_2021,BR,Brazil,installed_capacity,capacity_mae_pct,1.1636786315890624,,irena,%,1.1636786315890624,,0.4.0,2021
+BR_2021,BR,Brazil,installed_capacity,total_capacity,193311.9292922465,192940.0,ember,MW,0.1927694061607212,A,0.4.0,2021
+BR_2021,BR,Brazil,installed_capacity,total_capacity,193311.9292922465,193688.17999999996,irena,MW,-0.1942558950956472,A,0.4.0,2021
+CN_2021,CN,China,demand,total_demand,8515.636799858248,8520.02,ember,TWh,-0.0514458902884293,A,0.4.0,2021
+CN_2021,CN,China,demand,total_demand,8515.636799858248,8520.02,ourworldindata,TWh,-0.0514458902884293,A,0.4.0,2021
+CN_2021,CN,China,generation,generation_share_mae,10.0,,ember,%,10.0,,0.4.0,2021
+CN_2021,CN,China,generation,total_generation,0.0,8534.26,ember,TWh,-100.0,D,0.4.0,2021
+CN_2021,CN,China,installed_capacity,capacity_mae_pct,2.323322217844112,,ember,%,2.323322217844112,,0.4.0,2021
+CN_2021,CN,China,installed_capacity,capacity_mae_pct,2.0375419729910456,,irena,%,2.0375419729910456,,0.4.0,2021
+CN_2021,CN,China,installed_capacity,total_capacity,2517373.8438692433,2252030.0,ember,MW,11.782429357923442,C,0.4.0,2021
+CN_2021,CN,China,installed_capacity,total_capacity,2517373.8438692433,2367221.73,irena,MW,6.3429678752249075,B,0.4.0,2021
+CO_2021,CO,Colombia,demand,total_demand,81.36999999999999,84.48,ember,TWh,-3.681344696969713,A,0.4.0,2021
+CO_2021,CO,Colombia,demand,total_demand,81.36999999999999,84.54,ourworldindata,TWh,-3.749704281996707,A,0.4.0,2021
+CO_2021,CO,Colombia,generation,generation_share_mae,2.492798946706484,,ember,%,2.492798946706484,,0.4.0,2021
+CO_2021,CO,Colombia,generation,total_generation,81.36999930847145,84.36000000000001,ember,TWh,-3.5443346272268417,A,0.4.0,2021
+CO_2021,CO,Colombia,installed_capacity,capacity_mae_pct,1.6521877475202291,,ember,%,1.6521877475202291,,0.4.0,2021
+CO_2021,CO,Colombia,installed_capacity,capacity_mae_pct,2.1199617418335506,,irena,%,2.1199617418335506,,0.4.0,2021
+CO_2021,CO,Colombia,installed_capacity,total_capacity,21592.6272339318,19080.0,ember,MW,13.168905838216974,C,0.4.0,2021
+CO_2021,CO,Colombia,installed_capacity,total_capacity,21592.6272339318,18416.39,irena,MW,17.24679610896489,C,0.4.0,2021
+DE_2021,DE,Germany,demand,total_demand,560.73,560.25,ember,TWh,0.0856760374832696,A,0.4.0,2021
+DE_2021,DE,Germany,demand,total_demand,560.73,560.73,ourworldindata,TWh,0.0,A,0.4.0,2021
+DE_2021,DE,Germany,generation,generation_share_mae,4.789493569527777,,ember,%,4.789493569527777,,0.4.0,2021
+DE_2021,DE,Germany,generation,total_generation,559.6566564070531,578.83,ember,TWh,-3.312430867948609,A,0.4.0,2021
+DE_2021,DE,Germany,installed_capacity,capacity_mae_pct,1.5544043239683116,,ember,%,1.5544043239683116,,0.4.0,2021
+DE_2021,DE,Germany,installed_capacity,capacity_mae_pct,7.4642357448387875,,irena,%,7.4642357448387875,,0.4.0,2021
+DE_2021,DE,Germany,installed_capacity,total_capacity,215176.13425208075,218990.0,ember,MW,-1.7415707328733037,A,0.4.0,2021
+DE_2021,DE,Germany,installed_capacity,total_capacity,215176.13425208075,241607.5,irena,MW,-10.939795224866469,C,0.4.0,2021
+IN_2021,IN,India,demand,total_demand,1712.8799999999994,1678.69,ember,TWh,2.03670719430028,A,0.4.0,2021
+IN_2021,IN,India,demand,total_demand,1712.8799999999994,1714.73,ourworldindata,TWh,-0.107888705510523,A,0.4.0,2021
+IN_2021,IN,India,generation,generation_share_mae,1.7851829776179744,,ember,%,1.7851829776179744,,0.4.0,2021
+IN_2021,IN,India,generation,total_generation,1712.879999996711,1678.7199999999998,ember,TWh,2.034883720734317,A,0.4.0,2021
+IN_2021,IN,India,installed_capacity,capacity_mae_pct,2.7261259583529593,,ember,%,2.7261259583529593,,0.4.0,2021
+IN_2021,IN,India,installed_capacity,capacity_mae_pct,1.9268081732028053,,irena,%,1.9268081732028053,,0.4.0,2021
+IN_2021,IN,India,installed_capacity,total_capacity,509812.81657922297,435090.0,ember,MW,17.174105720476906,C,0.4.0,2021
+IN_2021,IN,India,installed_capacity,total_capacity,509812.81657922297,464572.32,irena,MW,9.738095584175776,B,0.4.0,2021
+IT_2021,IT,Italy,demand,total_demand,328.2800000000001,328.28,ember,TWh,3.4631058158162565e-14,A,0.4.0,2021
+IT_2021,IT,Italy,demand,total_demand,328.2800000000001,328.28,ourworldindata,TWh,3.4631058158162565e-14,A,0.4.0,2021
+IT_2021,IT,Italy,generation,generation_share_mae,3.897504961260203,,ember,%,3.897504961260203,,0.4.0,2021
+IT_2021,IT,Italy,generation,total_generation,327.9515967872899,285.49,ember,TWh,14.873234364527606,C,0.4.0,2021
+IT_2021,IT,Italy,installed_capacity,capacity_mae_pct,1.741391534289966,,ember,%,1.741391534289966,,0.4.0,2021
+IT_2021,IT,Italy,installed_capacity,capacity_mae_pct,10.165176783606194,,irena,%,10.165176783606194,,0.4.0,2021
+IT_2021,IT,Italy,installed_capacity,total_capacity,113403.50494553224,121060.0,ember,MW,-6.324545724820549,B,0.4.0,2021
+IT_2021,IT,Italy,installed_capacity,total_capacity,113403.50494553224,116748.3,irena,MW,-2.864962534330474,A,0.4.0,2021
+MX_2021,MX,Mexico,demand,total_demand,339.1541330446688,327.63,ember,TWh,3.517423021295002,A,0.4.0,2021
+MX_2021,MX,Mexico,demand,total_demand,339.1541330446688,329.04,ourworldindata,TWh,3.0738308548105975,A,0.4.0,2021
+MX_2021,MX,Mexico,generation,generation_share_mae,4.480838284863266,,ember,%,4.480838284863266,,0.4.0,2021
+MX_2021,MX,Mexico,generation,total_generation,284.07385509152857,328.59,ember,TWh,-13.54762619327168,C,0.4.0,2021
+MX_2021,MX,Mexico,installed_capacity,capacity_mae_pct,3.316141319024336,,ember,%,3.316141319024336,,0.4.0,2021
+MX_2021,MX,Mexico,installed_capacity,capacity_mae_pct,4.123417236983946,,irena,%,4.123417236983946,,0.4.0,2021
+MX_2021,MX,Mexico,installed_capacity,total_capacity,97754.57612810972,106600.0,ember,MW,-8.297770986763862,B,0.4.0,2021
+MX_2021,MX,Mexico,installed_capacity,total_capacity,97754.57612810972,101518.92,irena,MW,-3.708021984365354,A,0.4.0,2021
+NG_2021,NG,Nigeria,demand,total_demand,31.469999999999995,36.14,ember,TWh,-12.921970116214734,C,0.4.0,2021
+NG_2021,NG,Nigeria,demand,total_demand,31.469999999999995,36.06,ourworldindata,TWh,-12.728785357737124,C,0.4.0,2021
+NG_2021,NG,Nigeria,generation,generation_share_mae,3.2441856006625835,,ember,%,3.2441856006625835,,0.4.0,2021
+NG_2021,NG,Nigeria,generation,total_generation,31.47000000002071,39.2,ember,TWh,-19.719387755049212,C,0.4.0,2021
+NG_2021,NG,Nigeria,installed_capacity,capacity_mae_pct,2.6072850947890687,,ember,%,2.6072850947890687,,0.4.0,2021
+NG_2021,NG,Nigeria,installed_capacity,capacity_mae_pct,3.1364446179053678,,irena,%,3.1364446179053678,,0.4.0,2021
+NG_2021,NG,Nigeria,installed_capacity,total_capacity,17212.287196087404,13800.0,ember,MW,24.726718812227563,D,0.4.0,2021
+NG_2021,NG,Nigeria,installed_capacity,total_capacity,17212.287196087404,13254.859999999999,irena,MW,29.856423953835844,D,0.4.0,2021
+US_2021,US,United States,demand,total_demand,4191.630740963554,4192.93,ember,TWh,-0.0309869002450918,A,0.4.0,2021
+US_2021,US,United States,demand,total_demand,4191.630740963554,4192.93,ourworldindata,TWh,-0.0309869002450918,A,0.4.0,2021
+US_2021,US,United States,generation,generation_share_mae,5.544264843127011,,ember,%,5.544264843127011,,0.4.0,2021
+US_2021,US,United States,generation,total_generation,4182.389504548206,4153.62,ember,TWh,0.6926368937988066,A,0.4.0,2021
+US_2021,US,United States,installed_capacity,capacity_mae_pct,2.55607535787575,,ember,%,2.55607535787575,,0.4.0,2021
+US_2021,US,United States,installed_capacity,capacity_mae_pct,2.9408817385629216,,irena,%,2.9408817385629216,,0.4.0,2021
+US_2021,US,United States,installed_capacity,total_capacity,1428303.3693737756,1205020.0,ember,MW,18.529432654543125,C,0.4.0,2021
+US_2021,US,United States,installed_capacity,total_capacity,1428303.3693737756,1174352.57,irena,MW,21.624749318152,D,0.4.0,2021
+ZA_2021,ZA,South Africa,demand,total_demand,218.8430712205561,241.89,ember,TWh,-9.527855132268336,B,0.4.0,2021
+ZA_2021,ZA,South Africa,demand,total_demand,218.8430712205561,240.74,ourworldindata,TWh,-9.095675325846928,B,0.4.0,2021
+ZA_2021,ZA,South Africa,generation,generation_share_mae,1.5335197661154552,,ember,%,1.5335197661154552,,0.4.0,2021
+ZA_2021,ZA,South Africa,generation,total_generation,218.84307122022048,245.46,ember,TWh,-10.843692976362544,C,0.4.0,2021
+ZA_2021,ZA,South Africa,installed_capacity,capacity_mae_pct,1.4656932678280534,,ember,%,1.4656932678280534,,0.4.0,2021
+ZA_2021,ZA,South Africa,installed_capacity,capacity_mae_pct,1.3763360139728331,,irena,%,1.3763360139728331,,0.4.0,2021
+ZA_2021,ZA,South Africa,installed_capacity,total_capacity,65637.54658870053,59620.0,ember,MW,10.093167709997529,C,0.4.0,2021
+ZA_2021,ZA,South Africa,installed_capacity,total_capacity,65637.54658870053,61951.649999999994,irena,MW,5.9496342530029995,B,0.4.0,2021

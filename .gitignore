@@ -180,6 +180,7 @@ results/*
 *.nc
 *.geojson
 *.txt
+data/ember/
 
 # images and logs
 logs/*
@@ -189,3 +190,6 @@ logs/*
 
 # documentation
 doc/_build/
+
+# Retrieved IRENA electricity generation dataset
+data/electricity_generation/C-ELECGEN_20260713-113435.csv

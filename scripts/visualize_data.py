@@ -100,12 +100,12 @@ def plot_carrier_capacity_comparison(
     available_carriers = installed_capacity_df["carrier"].unique()
     if carrier not in available_carriers:
         original_carrier = carrier
-        # Priority: Coal > CCGT
+        # Priority: Coal > gas
         if "coal" in available_carriers:
             carrier = "coal"
-        elif "ccgt" in available_carriers:
-            carrier = "ccgt"
-            print(f"{original_carrier} not found. Switching to ccgt.")
+        elif "gas" in available_carriers:
+            carrier = "gas"
+            print(f"{original_carrier} not found. Switching to gas.")
 
     # Filter for the chosen carrier
     installed_capacity_df = installed_capacity_df[
@@ -476,6 +476,94 @@ def get_voltage_color(
     return "#000000"
 
 
+def plot_generation_comparison(
+    generation_df,
+    output_path,
+):
+    """
+    Plot reference and modeled annual electricity generation by carrier.
+    """
+    if generation_df.empty:
+        fig, ax = plt.subplots(figsize=(10, 6))
+        ax.text(
+            0.5,
+            0.5,
+            "No Electricity Generation Data Available",
+            ha="center",
+            va="center",
+            fontsize=12,
+        )
+        ax.set_axis_off()
+        fig.savefig(
+            output_path,
+            bbox_inches="tight",
+        )
+        plt.close(fig)
+        return
+
+    regions = sorted(generation_df["region"].unique())
+
+    fig, axes = plt.subplots(
+        nrows=len(regions),
+        ncols=1,
+        figsize=(
+            12,
+            max(6, 5 * len(regions)),
+        ),
+        squeeze=False,
+    )
+
+    for ax, region in zip(
+        axes.flat,
+        regions,
+    ):
+        region_df = generation_df[generation_df["region"] == region].copy()
+
+        region_df = (
+            region_df[
+                [
+                    "carrier",
+                    "reference_generation",
+                    "network_generation",
+                ]
+            ]
+            .set_index("carrier")
+            .sort_index()
+        )
+
+        region_df.fillna(0).plot(
+            kind="bar",
+            stacked=False,
+            ax=ax,
+            color=colors[:2],
+            zorder=3,
+        )
+
+        ax.set_title(f"Electricity Generation Comparison — {region}")
+        ax.set_xlabel("Carrier")
+        ax.set_ylabel("Generation (GWh)")
+        ax.tick_params(
+            axis="x",
+            rotation=45,
+        )
+
+        ax.spines["top"].set_visible(False)
+        ax.spines["right"].set_visible(False)
+        ax.spines["left"].set_visible(False)
+        ax.grid(
+            True,
+            axis="y",
+            zorder=0,
+        )
+
+    fig.tight_layout()
+    fig.savefig(
+        output_path,
+        bbox_inches="tight",
+    )
+    plt.close(fig)
+
+
 def plot_grid_network(
     input: dict[str, str],
     output: str,
@@ -611,8 +699,15 @@ if __name__ == "__main__":
     optimal_capacity_comparison = read_csv_nafix(
         snakemake.input["optimal_capacity_comparison"]
     )
+    electricity_generation_comparison = read_csv_nafix(
+        snakemake.input["electricity_generation_comparison"]
+    )
 
     plot_demand_comparison(demand_comparison, snakemake.output["plot_demand"])
+    plot_generation_comparison(
+        electricity_generation_comparison,
+        snakemake.output["plot_electricity_generation"],
+    )
 
     # Compares capacities per region one carrier at a time
     # Select carrier value: ['solar' 'onwind' 'offwind-dc' 'coal' 'CCGT' 'ror' 'biomass' 'oil' 'geothermal']

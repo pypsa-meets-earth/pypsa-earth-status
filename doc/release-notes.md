@@ -10,6 +10,16 @@ SPDX-License-Identifier: CC-BY-4.0
 
 ### New Features and Major Changes
 
+* [Support electricity validation for sector-coupled networks PR #70](https://github.com/pypsa-meets-earth/pypsa-earth-status/pull/70)
+
+* [Add multi-scenario health status validation reports with ember dataset source PR #61](https://github.com/pypsa-meets-earth/pypsa-earth-status/pull/61)
+
+* [Add electricity generation validation based on IRENA data PR #63](https://github.com/pypsa-meets-earth/pypsa-earth-status/pull/63)
+
+* [Add optional custom subfolder to resources and results folders PR #62](https://github.com/pypsa-meets-earth/pypsa-earth-status/pull/62)
+
+* [Link year and country parameters to build_reference_statistics rule PR #58](https://github.com/pypsa-meets-earth/pypsa-earth-status/pull/58)
+
 * [Decompose clean_data into carrier-source-specific rules PR #47](https://github.com/SPSUnipi/pypsa2smspp/pull/47)
 
 * [Drop pypsa-earth submodule PR #46](https://github.com/pypsa-meets-earth/pypsa-earth-status/pull/46)
@@ -21,6 +31,12 @@ SPDX-License-Identifier: CC-BY-4.0
 * [Add functionality to plot OSM electrical grid network plus circuit values and csv export of osm grid line voltages and their lengths PR #38](https://github.com/pypsa-meets-earth/pypsa-earth-status/pull/38)
 
 ### Minor Changes and bug-fixing
+
+* [Adjust a high-level project description PR #71](https://github.com/pypsa-meets-earth/pypsa-earth-status/pull/71)
+
+* [Make validation outputs configuration-specific to avoid stale results when switching validation settings PR #62](https://github.com/pypsa-meets-earth/pypsa-earth-status/pull/62)
+
+* [Link year and country parameters to `build_reference_statistics` rule PR #58](https://github.com/pypsa-meets-earth/pypsa-earth-status/pull/58)
 
 * [Add Read the Docs badge to README.md PR #35](https://github.com/pypsa-meets-earth/pypsa-earth-status/pull/35)
 
@@ -34,6 +50,7 @@ SPDX-License-Identifier: CC-BY-4.0
 * [Include generation of geojson for network validation PR #3](https://github.com/pypsa-meets-earth/pypsa-earth-status/pull/3)
 * [Finalize workflow, visualization, add CI and documentation PR #6](https://github.com/pypsa-meets-earth/pypsa-earth-status/pull/6)
 * [Add documentation with MkDocs style PR #20](https://github.com/pypsa-meets-earth/pypsa-earth-status/pull/20)
+* [Add electricity generation validation based on IRENA data PR #63](https://github.com/pypsa-meets-earth/pypsa-earth-status/pull/63)
 
 ### Minor Changes and bug-fixing
 

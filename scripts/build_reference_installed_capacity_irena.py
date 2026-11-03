@@ -13,7 +13,7 @@ The output is a CSV file with columns
 
 The IRENA installed capacity data is parsed in agreement with the configuration in
 ``configs/config_data_harmonization.yaml``.
-Use ``installed_capacity.irena`` in ``configs/config_data_harmonization.yaml`` 
+Use ``installed_capacity.irena`` in ``configs/config_data_harmonization.yaml``
 to drop technologies, map source labels to target technologies, and override
 country labels before ISO2 conversion. Unmapped technologies raise an error when
 ``fail_on_unmapped_technologies`` is true; otherwise, warn and drop their rows.

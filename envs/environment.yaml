@@ -21,3 +21,4 @@ dependencies:
 - pyyaml
 - shapely
 - snakemake-minimal
+- snakemake-storage-plugin-http
