@@ -72,7 +72,7 @@ rule download_ember_data:
 
 rule build_reference_demand_ember:
     input:
-        demand_ember="data/ember/yearly_full_release_long_format.csv",
+        demand_ember="data/ember/release_generation_yearly_global.csv",
     output:
         demand_ember="resources/clean/ember_demand_data.csv",
     log:
