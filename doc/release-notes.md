@@ -42,6 +42,8 @@ SPDX-License-Identifier: CC-BY-4.0
 
 * [Handle empty networks and make validation plots robust to missing data PR #34](https://github.com/pypsa-meets-earth/pypsa-earth-status/pull/34)
 
+* [Bugfix Ember datasource to new API PR #84](https://github.com/pypsa-meets-earth/pypsa-earth-status/pull/84)
+
 ## Version v0.0.1 - Initial Release
 
 ### New Features and Major Changes
