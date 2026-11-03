@@ -17,6 +17,7 @@ if exists("results/health_status.csv"):
     copyfile("results/health_status.csv", "results/health_status.csv.tmp")
 
 
+configfile: "configs/config_data_harmonization.yaml"
 configfile: "config.yaml"
 
 
@@ -122,6 +123,8 @@ rule build_reference_installed_capacity_irena:
         cap_irena="resources/clean/irena_capacity_data.csv",
     log:
         "logs/build_reference_installed_capacity_irena.log",
+    params:
+        cfg_installed_capacity=config["installed_capacity"]["irena"],
     script:
         "scripts/build_reference_installed_capacity_irena.py"
 
