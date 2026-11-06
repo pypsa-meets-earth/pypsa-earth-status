@@ -22,12 +22,6 @@ For an isolated CO₂ validation, without running the other reference-data workf
 snakemake -j 1 validate_co2_comparison
 ```
 
-The model-only diagnostic plots can also be generated separately:
-
-```bash
-snakemake -j 1 validate_co2_sectors
-```
-
 The workflow uses the configured network and countries in `network_validation`. The EDGAR reference year is inferred from the network planning horizon when available. For future horizons, the latest year available in the downloaded EDGAR workbook is selected. An optional `sector_emissions.comparison_year` provides a fallback when the planning horizon cannot be determined.
 
 The EDGAR sector mapping is maintained internally in `config/co2_sector_mapping.yaml`; users do not need to supply a mapping file.
@@ -52,8 +46,6 @@ Files are written under `results/<validation_name>/`.
 | `tables/co2_emissions_comparison.csv` | Model–EDGAR sector comparison and comparable total, including absolute and relative differences. |
 | `tables/co2_emissions_validation_summary.csv` | Classification status, emissions coverage, and quantities not included in the comparison. |
 | `figures/co2_emissions_by_carrier.png` | Model emissions by carrier. |
-| `figures/co2_emissions_by_sector.png` | Model-only emissions by sector. |
-| `figures/co2_emissions_by_subsector.png` | Model-only emissions by subsector. |
 | `figures/co2_emissions_comparison.png` | Model versus EDGAR, or an explanation if no comparison is available. |
 
 ## Interpreting coverage and status
@@ -79,6 +71,6 @@ The `total` comparison is a **like-for-like subtotal for the mapped sectors**. D
 
 - The metric is annual **direct CO₂ emissions**, not a full lifecycle greenhouse-gas inventory.
 - The comparison is only as complete as the asset sector metadata and the explicitly supported EDGAR sector mapping.
-- Sector-specific diagnostic charts may show a message rather than a bar chart when no usable sector metadata are available.
+- The model-versus-EDGAR comparison figure reports unavailable comparisons when no comparable sector metadata are present.
 - A successful Snakemake run does not imply that every country and sector was comparable; inspect `status` and coverage in the validation summary.
 - The standard `visualize_data` workflow also depends on other reference data, including Ember. Failures in those independent workflows can prevent `visualize_data` from completing even when CO₂ validation succeeds.

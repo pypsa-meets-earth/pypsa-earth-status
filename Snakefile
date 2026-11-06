@@ -282,8 +282,6 @@ rule visualize_data:
         co2_comparison=f"{results_dir}/tables/co2_emissions_comparison.csv",
         co2_validation_summary=f"{results_dir}/tables/co2_emissions_validation_summary.csv",
         co2_carrier_plot=f"{results_dir}/figures/co2_emissions_by_carrier.png",
-        co2_sector_plot=f"{results_dir}/figures/co2_emissions_by_sector.png",
-        co2_subsector_plot=f"{results_dir}/figures/co2_emissions_by_subsector.png",
         co2_comparison_plot=f"{results_dir}/figures/co2_emissions_comparison.png",
     output:
         plot_demand=f"{results_dir}/figures/demand_comparison.png",
@@ -339,42 +337,6 @@ rule plot_network_co2_emissions:
         --output {output.figure:q} \\
         --groupby carrier
         """
-
-
-rule plot_model_co2_by_sector:
-    input:
-        detail=f"{results_dir}/tables/co2_emissions_by_asset.csv",
-        script="scripts/plot_model_co2_sectors.py",
-    output:
-        figure=f"{results_dir}/figures/co2_emissions_by_sector.png",
-    shell:
-        """
-        python {input.script:q} \
-            --input {input.detail:q} \
-            --output {output.figure:q} \
-            --groupby sector
-        """
-
-
-rule plot_model_co2_by_subsector:
-    input:
-        detail=f"{results_dir}/tables/co2_emissions_by_asset.csv",
-        script="scripts/plot_model_co2_sectors.py",
-    output:
-        figure=f"{results_dir}/figures/co2_emissions_by_subsector.png",
-    shell:
-        """
-        python {input.script:q} \
-            --input {input.detail:q} \
-            --output {output.figure:q} \
-            --groupby subsector
-        """
-
-
-rule validate_co2_sectors:
-    input:
-        f"{results_dir}/figures/co2_emissions_by_sector.png",
-        f"{results_dir}/figures/co2_emissions_by_subsector.png",
 
 
 rule validate_co2:
