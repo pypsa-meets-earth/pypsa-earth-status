@@ -10,7 +10,7 @@ SPDX-License-Identifier: CC-BY-4.0
 
 ### New Features and Major Changes
 
-* Add EDGAR-based CO2 emissions validation for electricity-only and sector-coupled networks, including sector-level comparisons, classification diagnostics, coverage indicators, and integration into `visualize_data`.
+* [Add EDGAR-based CO2 emissions validation for electricity-only and sector-coupled networks PR #86](https://github.com/pypsa-meets-earth/pypsa-earth-status/pull/86)
 
 
 * [Support electricity validation for sector-coupled networks PR #70](https://github.com/pypsa-meets-earth/pypsa-earth-status/pull/70)
