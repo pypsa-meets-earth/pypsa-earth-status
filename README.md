@@ -57,11 +57,11 @@ Additionally, we are working to add validation of the energy mix modelled for a 
 
 Currently, the following datasets are supported:
 
-- Installed capacities from IRENA and IEA
+- Installed capacities from IRENA, IEA and Ember
 - Cross-border line capacities from [Global Transmission Database](https://zenodo.org/records/15527469)
 - Comparison of network data with reference statistics
-- Demand data from Our World in Data
-- Generation and Demand data from Ember
+- Demand data from Our World in Data and Ember
+- Generation from Ember
 
 The following repositories provide more reference data:
 
