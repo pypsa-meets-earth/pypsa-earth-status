@@ -92,13 +92,33 @@ def plot_co2_emissions(table, output_path, groupby="carrier"):
         padding = max(xmax - xmin, 1.0) * 0.12
         ax.set_xlim(xmin - padding, xmax + padding)
 
-    year = ""
-    if "model_year" in table.columns:
-        years = table["model_year"].dropna().unique()
-        if len(years) == 1:
-            year = f" ({int(years[0])})"
+    title = f"CO₂ Emissions by {groupby.capitalize()}"
 
-    ax.set_title(f"Annual CO2 emissions by {groupby}{year}")
+    regions_label = ", ".join(regions) if regions else "Unknown region"
+
+    years = (
+        table["model_year"].dropna().unique() if "model_year" in table.columns else []
+    )
+    year_label = str(int(years[0])) if len(years) == 1 else "Multiple years"
+
+    ax.set_title(
+        title,
+        fontsize=15,
+        fontweight="bold",
+        loc="left",
+        pad=32,
+    )
+
+    ax.text(
+        0,
+        1.015,
+        f"{regions_label} | {year_label} | Model emissions",
+        transform=ax.transAxes,
+        fontsize=10,
+        color="dimgray",
+        ha="left",
+        va="bottom",
+    )
 
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
