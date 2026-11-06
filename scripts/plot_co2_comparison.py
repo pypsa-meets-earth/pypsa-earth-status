@@ -82,7 +82,7 @@ def plot_comparison(table, output):
     positions = np.arange(len(data))
     height = 0.35
 
-    fig, ax = plt.subplots(figsize=(10, max(4, len(data) * 0.8 + 2)))
+    fig, ax = plt.subplots(figsize=(10, max(4.5, len(data) * 0.65 + 1.5)))
 
     model_bars = ax.barh(
         positions - height / 2,
@@ -124,7 +124,7 @@ def plot_comparison(table, output):
         fontsize=16,
         fontweight="bold",
         x=0.5,
-        y=0.98,
+        y=0.96,
     )
 
     ax.set_title(
@@ -156,7 +156,7 @@ def plot_comparison(table, output):
         handles=[model_bars, reference_bars],
         labels=[model_label, reference_label],
         loc="lower center",
-        bbox_to_anchor=(0.5, 0.025),
+        bbox_to_anchor=(0.5, 0.035),
         ncol=2,
         frameon=False,
         fontsize=11,
@@ -171,7 +171,7 @@ def plot_comparison(table, output):
     )
     ax.set_xlim(0, xmax * 1.18)
 
-    fig.tight_layout(rect=[0, 0.18, 1, 0.88])
+    fig.tight_layout(rect=[0, 0.15, 1, 0.88])
 
     output = Path(output)
     output.parent.mkdir(parents=True, exist_ok=True)
