@@ -92,7 +92,7 @@ def plot_co2_emissions(table, output_path, groupby="carrier"):
         padding = max(xmax - xmin, 1.0) * 0.12
         ax.set_xlim(xmin - padding, xmax + padding)
 
-    title = f"CO₂ Emissions by {groupby.capitalize()}"
+    title = f"CO₂ emissions by {groupby}"
 
     regions_label = ", ".join(regions) if regions else "Unknown region"
 
@@ -101,29 +101,25 @@ def plot_co2_emissions(table, output_path, groupby="carrier"):
     )
     year_label = str(int(years[0])) if len(years) == 1 else "Multiple years"
 
-    ax.set_title(
+    fig.suptitle(
         title,
-        fontsize=15,
+        fontsize=16,
         fontweight="bold",
-        loc="left",
-        pad=32,
+        y=0.98,
     )
 
-    ax.text(
-        0,
-        1.015,
-        f"{regions_label} | {year_label} | Model emissions",
-        transform=ax.transAxes,
-        fontsize=10,
-        color="dimgray",
-        ha="left",
-        va="bottom",
+    ax.set_title(
+        f"{regions_label} ({year_label})",
+        fontsize=12,
+        fontweight="normal",
+        loc="center",
+        pad=14,
     )
 
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
 
-    fig.tight_layout()
+    fig.tight_layout(rect=[0, 0, 1, 0.92])
 
     output_path = Path(output_path)
     output_path.parent.mkdir(parents=True, exist_ok=True)
