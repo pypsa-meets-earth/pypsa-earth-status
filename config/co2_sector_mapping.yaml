@@ -1,0 +1,40 @@
+# SPDX-FileCopyrightText: PyPSA-Earth and PyPSA-Eur Authors
+# SPDX-License-Identifier: CC0-1.0
+
+electricity_only:
+- sector: power_and_heat_generation
+  model_sectors: [power_and_heat_generation]
+  reference_sector: Power Industry
+  components: [Generator]
+  include_carriers: [coal, lignite, CCGT, OCGT, oil, gas]
+
+sector_coupled:
+- sector: power_and_heat_generation
+  model_sectors: [power_and_heat_generation]
+  reference_sector: Power Industry
+  components: [Link, Load]
+
+- sector: transport
+  model_sectors: [transport]
+  reference_sector: Transport
+  components: [Link, Load]
+
+- sector: industry
+  model_sectors: [industry]
+  reference_sector: Industrial Combustion
+  components: [Link, Load]
+
+- sector: buildings
+  model_sectors: [residential, services]
+  reference_sector: Buildings
+  components: [Link, Load]
+
+- sector: industry_process_emissions
+  model_sectors: [industry_process_emissions]
+  reference_sector: Processes
+  components: [Link, Load]
+
+- sector: agriculture
+  model_sectors: [agriculture]
+  reference_sector: Agriculture
+  components: [Link, Load]

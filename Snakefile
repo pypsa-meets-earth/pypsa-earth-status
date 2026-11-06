@@ -276,6 +276,13 @@ rule visualize_data:
             config["plot_osm_grid_network"]["grid_path"],
             "all_clean_substations.geojson",
         ),
+        co2_by_asset=f"{results_dir}/tables/co2_emissions_by_asset.csv",
+        co2_by_carrier=f"{results_dir}/tables/co2_emissions_by_carrier.csv",
+        co2_reference=f"{results_dir}/tables/co2_emissions_reference.csv",
+        co2_comparison=f"{results_dir}/tables/co2_emissions_comparison.csv",
+        co2_validation_summary=f"{results_dir}/tables/co2_emissions_validation_summary.csv",
+        co2_carrier_plot=f"{results_dir}/figures/co2_emissions_by_carrier.png",
+        co2_comparison_plot=f"{results_dir}/figures/co2_emissions_comparison.png",
     output:
         plot_demand=f"{results_dir}/figures/demand_comparison.png",
         plot_installed_capacity=(
@@ -296,6 +303,129 @@ rule visualize_data:
         plot_circuits=config["plot_osm_grid_network"]["plot_circuits"],
     script:
         "scripts/visualize_data.py"
+
+
+rule build_network_co2_statistics:
+    input:
+        network=network_path,
+        script="scripts/build_network_co2_statistics.py",
+    output:
+        summary=f"{results_dir}/tables/co2_emissions_by_carrier.csv",
+        detail=f"{results_dir}/tables/co2_emissions_by_asset.csv",
+    params:
+        year=years[0],
+    shell:
+        """
+        python {input.script:q} \\
+        --network {input.network:q} \\
+        --year {params.year} \\
+        --output {output.summary:q} \\
+        --detail-output {output.detail:q}
+        """
+
+
+rule plot_network_co2_emissions:
+    input:
+        statistics=f"{results_dir}/tables/co2_emissions_by_carrier.csv",
+        script="scripts/plot_co2_emissions.py",
+    output:
+        figure=f"{results_dir}/figures/co2_emissions_by_carrier.png",
+    shell:
+        """
+        python {input.script:q} \\
+        --input {input.statistics:q} \\
+        --output {output.figure:q} \\
+        --groupby carrier
+        """
+
+
+rule validate_co2:
+    input:
+        f"{results_dir}/tables/co2_emissions_by_asset.csv",
+        f"{results_dir}/figures/co2_emissions_by_carrier.png",
+
+
+rule retrieve_co2_edgar:
+    output:
+        "resources/clean/edgar_2025_fossilCO2.xlsx",
+    params:
+        url=(
+            "https://edgar.jrc.ec.europa.eu/booklet/"
+            "EDGAR_2025_GHG_booklet_2025_fossilCO2only.xlsx"
+        ),
+    shell:
+        """
+        curl -fL --retry 3 \
+            --output {output:q} \
+            {params.url:q}
+        """
+
+
+rule build_reference_co2_edgar:
+    input:
+        workbook="resources/clean/edgar_2025_fossilCO2.xlsx",
+        network=network_path,
+        script="scripts/build_reference_co2_edgar.py",
+    output:
+        reference=f"{results_dir}/tables/co2_emissions_reference.csv",
+    params:
+        countries=config["network_validation"]["countries"],
+        comparison_year=config.get("sector_emissions", {}).get("comparison_year", 0),
+    shell:
+        """
+        python {input.script:q} \\
+        --input {input.workbook:q} \\
+        --network {input.network:q} \\
+        --comparison-year {params.comparison_year} \\
+        --countries {params.countries} \\
+        --output {output.reference:q}
+        """
+
+
+rule compare_co2_emissions:
+    input:
+        model=f"{results_dir}/tables/co2_emissions_by_asset.csv",
+        reference=f"{results_dir}/tables/co2_emissions_reference.csv",
+        mapping="config/co2_sector_mapping.yaml",
+        network=network_path,
+        script="scripts/compare_co2_emissions.py",
+    output:
+        comparison=f"{results_dir}/tables/co2_emissions_comparison.csv",
+        summary=f"{results_dir}/tables/co2_emissions_validation_summary.csv",
+    shell:
+        """
+        python {input.script:q} \
+            --model {input.model:q} \
+            --reference {input.reference:q} \
+            --mapping {input.mapping:q} \
+            --network {input.network:q} \
+            --output {output.comparison:q} \
+            --summary-output {output.summary:q}
+        """
+
+
+rule plot_co2_comparison:
+    input:
+        comparison=f"{results_dir}/tables/co2_emissions_comparison.csv",
+        script="scripts/plot_co2_comparison.py",
+    output:
+        figure=f"{results_dir}/figures/co2_emissions_comparison.png",
+    shell:
+        """
+        python {input.script:q} \
+            --input {input.comparison:q} \
+            --output {output.figure:q}
+        """
+
+
+rule validate_co2_comparison:
+    input:
+        f"{results_dir}/tables/co2_emissions_by_asset.csv",
+        f"{results_dir}/figures/co2_emissions_by_carrier.png",
+        f"{results_dir}/tables/co2_emissions_reference.csv",
+        f"{results_dir}/tables/co2_emissions_comparison.csv",
+        f"{results_dir}/tables/co2_emissions_validation_summary.csv",
+        f"{results_dir}/figures/co2_emissions_comparison.png",
 
 
 rule create_example_DE:
