@@ -10,10 +10,10 @@ mkdocstrings-python
 mkdocs-table-reader-plugin
 mkdocs-redirects
 
-snakemake<8
+snakemake>=9,<10
 pulp<2.8
 
-pypsa >=0.25, <=0.30
+pypsa>=1.2.4,<2
 vresutils>=0.3.1
 powerplantmatching>=0.5.19
 atlite>=0.4.1
