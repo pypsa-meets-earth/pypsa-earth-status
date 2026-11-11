@@ -73,11 +73,10 @@ rule clean:
 rule download_ember_data:
     input:
         ember_data=storage.HTTP(
-            "https://storage.googleapis.com/emb-prod-bkt-publicdata/"
-            "public-downloads/yearly_full_release_long_format.csv"
+            "https://files.ember-energy.org/public-downloads/generation/outputs/release_generation_yearly_global.csv"
         ),
     output:
-        ember_data="data/ember/yearly_full_release_long_format.csv",
+        ember_data="data/ember/release_generation_yearly_global.csv",
     run:
         os.makedirs(
             os.path.dirname(output.ember_data),
@@ -91,7 +90,7 @@ rule download_ember_data:
 
 rule build_reference_demand_ember:
     input:
-        demand_ember="data/ember/yearly_full_release_long_format.csv",
+        demand_ember="data/ember/release_generation_yearly_global.csv",
     output:
         demand_ember="resources/clean/ember_demand_data.csv",
     log:
@@ -102,7 +101,7 @@ rule build_reference_demand_ember:
 
 rule build_reference_installed_capacity_ember:
     input:
-        cap_ember="data/ember/yearly_full_release_long_format.csv",
+        cap_ember="data/ember/release_generation_yearly_global.csv",
     output:
         cap_ember="resources/clean/ember_capacity_data.csv",
     log:
@@ -113,7 +112,7 @@ rule build_reference_installed_capacity_ember:
 
 rule build_reference_generation_ember:
     input:
-        gen_ember="data/ember/yearly_full_release_long_format.csv",
+        gen_ember="data/ember/release_generation_yearly_global.csv",
     output:
         gen_ember="resources/clean/ember_generation_data.csv",
     log:
