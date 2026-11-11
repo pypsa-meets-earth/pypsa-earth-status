@@ -1,0 +1,47 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "bus_id": "osm_0",
+        "country": "DE"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          9.52257596986,
+          52.3604090558
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "bus_id": "osm_1",
+        "country": "DE"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          9.11321007473,
+          52.5438533224
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "bus_id": "osm_2",
+        "country": "DE"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          9.82158380229,
+          52.4248552546
+        ]
+      }
+    }
+  ]
+}
