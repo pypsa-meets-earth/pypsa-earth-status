@@ -17,8 +17,8 @@ dependencies:
 - pandas <3.1  # country_converter 1.3.2 breaks with pandas 3.1, see IndEcol/country_converter#180
 - pulp <2.8
 - pyproj
-- pypsa >=0.25,<=0.30
+- pypsa >=1.2.4,<2
 - pyyaml
 - shapely
-- snakemake-minimal
+- snakemake-minimal >=9,<10
 - snakemake-storage-plugin-http
