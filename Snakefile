@@ -315,11 +315,7 @@ rule build_network_co2_statistics:
         year=years[0],
     shell:
         """
-        python {input.script:q} \\
-        --network {input.network:q} \\
-        --year {params.year} \\
-        --output {output.summary:q} \\
-        --detail-output {output.detail:q}
+        python {input.script:q} --network {input.network:q} --year {params.year} --output {output.summary:q} --detail-output {output.detail:q}
         """
 
 
@@ -331,10 +327,7 @@ rule plot_network_co2_emissions:
         figure=f"{results_dir}/figures/co2_emissions_by_carrier.png",
     shell:
         """
-        python {input.script:q} \\
-        --input {input.statistics:q} \\
-        --output {output.figure:q} \\
-        --groupby carrier
+        python {input.script:q} --input {input.statistics:q} --output {output.figure:q} --groupby carrier
         """
 
 
@@ -354,9 +347,7 @@ rule retrieve_co2_edgar:
         ),
     shell:
         """
-        curl -fL --retry 3 \
-            --output {output:q} \
-            {params.url:q}
+        curl -fL --retry 3 --output {output:q} {params.url:q}
         """
 
 
@@ -372,12 +363,7 @@ rule build_reference_co2_edgar:
         comparison_year=config.get("sector_emissions", {}).get("comparison_year", 0),
     shell:
         """
-        python {input.script:q} \\
-        --input {input.workbook:q} \\
-        --network {input.network:q} \\
-        --comparison-year {params.comparison_year} \\
-        --countries {params.countries} \\
-        --output {output.reference:q}
+        python {input.script:q} --input {input.workbook:q} --network {input.network:q} --comparison-year {params.comparison_year} --countries {params.countries} --output {output.reference:q}
         """
 
 
@@ -393,13 +379,7 @@ rule compare_co2_emissions:
         summary=f"{results_dir}/tables/co2_emissions_validation_summary.csv",
     shell:
         """
-        python {input.script:q} \
-            --model {input.model:q} \
-            --reference {input.reference:q} \
-            --mapping {input.mapping:q} \
-            --network {input.network:q} \
-            --output {output.comparison:q} \
-            --summary-output {output.summary:q}
+        python {input.script:q} --model {input.model:q} --reference {input.reference:q} --mapping {input.mapping:q} --network {input.network:q} --output {output.comparison:q} --summary-output {output.summary:q}
         """
 
 
@@ -411,9 +391,7 @@ rule plot_co2_comparison:
         figure=f"{results_dir}/figures/co2_emissions_comparison.png",
     shell:
         """
-        python {input.script:q} \
-            --input {input.comparison:q} \
-            --output {output.figure:q}
+        python {input.script:q} --input {input.comparison:q} --output {output.figure:q}
         """
 
 

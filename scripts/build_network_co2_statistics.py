@@ -156,10 +156,21 @@ def generator_emissions(n, model_year, weights):
         return pd.DataFrame(columns=DETAIL_COLUMNS)
 
     if "co2_emissions" not in n.carriers.columns:
-        raise ValueError("Network carriers lack CO2 emission factors.")
+        logger.warning(
+            "Network carriers have no CO2 emission factors; "
+            "generator CO2 emissions are unavailable."
+        )
+        return pd.DataFrame(columns=DETAIL_COLUMNS)
 
     generators = n.generators.copy()
     factors = generators.carrier.map(n.carriers.co2_emissions)
+
+    if factors.notna().sum() == 0:
+        logger.warning(
+            "No generator CO2 emission factors are available; "
+            "generator CO2 emissions are unavailable."
+        )
+        return pd.DataFrame(columns=DETAIL_COLUMNS)
 
     if factors.isna().any():
         missing = sorted(generators.loc[factors.isna(), "carrier"].unique())
