@@ -411,6 +411,7 @@ rule visualize_data:
             config["plot_osm_grid_network"]["grid_path"],
             "all_clean_substations.geojson",
         ),
+        transmission_validation=rules.validate_transmission_network.input,
     output:
         plot_demand=f"{results_dir}/figures/demand_comparison.png",
         plot_installed_capacity=(
