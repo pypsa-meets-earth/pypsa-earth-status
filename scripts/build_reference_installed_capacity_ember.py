@@ -20,10 +20,8 @@ def clean_capacity_ember(df_ember):
     """
     Clean capacity data from Ember.
     """
-    df = df_ember.copy()
-
-    # Filter to capacity by specific fuel subcategory
-    df = df[(df["Category"] == "Capacity") & (df["Subcategory"] == "Fuel")]
+    # Exclude regional totals before converting country codes.
+    df = df_ember.loc[df_ember["Area type"] == "Country or economy"].copy()
 
     # Map variables to PyPSA carriers
     mapping = {
@@ -32,18 +30,18 @@ def clean_capacity_ember(df_ember):
         "Gas": "gas",
         "Hydro": "hydro",
         "Nuclear": "nuclear",
-        "Other Fossil": "oil",
-        "Other Renewables": "geothermal",
+        "Other fossil": "oil",
+        "Other renewables": "geothermal",
         "Solar": "solar",
         "Wind": "onwind",
     }
-    df["Technology"] = df["Variable"].map(mapping)
+    df["Technology"] = df["Electricity source"].map(mapping)
 
     # Convert GW to MW (Ember capacity values are in GW)
-    df["p_nom"] = pd.to_numeric(df["Value"], errors="coerce") * 1000.0
+    df["p_nom"] = pd.to_numeric(df["Capacity (GW)"], errors="coerce") * 1000.0
 
-    # Drop unmapped technologies
-    df = df.dropna(subset=["Technology"])
+    # Exclude aggregate sources and missing capacity observations.
+    df = df.dropna(subset=["Technology", "p_nom"])
 
     return df
 
@@ -56,8 +54,8 @@ def build_reference_installed_capacity_ember(inputs, outputs):
     fp_output = outputs["cap_ember"]
 
     df_ember = read_csv_nafix(fp_input)
-    df_ember["region"] = cc.pandas_convert(df_ember["ISO 3 code"], to="ISO2")
     df_ember = clean_capacity_ember(df_ember)
+    df_ember["region"] = cc.pandas_convert(df_ember["ISO 3 code"], to="ISO2")
     df_ember = df_ember[["region", "Technology", "Year", "p_nom"]]
     df_ember = df_ember.set_index("region")
 
