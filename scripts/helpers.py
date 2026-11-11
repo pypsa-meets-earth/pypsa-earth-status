@@ -106,6 +106,30 @@ def read_osm_config(*args):
     return tuple(osm_config[arg] for arg in args)
 
 
+def drop_rows(df, column, values):
+    """Return a copy excluding rows whose column matches any listed value."""
+    return df.loc[~df[column].isin(values)].copy()
+
+
+def map_labels(series, mapping, fail_on_unmapped=True):
+    """Map {target: [source labels]}; warn and return NA for unknowns if non-strict."""
+    lookup = {}
+    for target, sources in mapping.items():
+        for source in sources:
+            if source in lookup and lookup[source] != target:
+                raise ValueError(f"Label {source!r} is assigned to multiple targets")
+            lookup[source] = target
+
+    unmapped = sorted(set(series.dropna()) - lookup.keys(), key=str)
+    if unmapped:
+        message = f"Unmapped labels in {series.name!r}: {unmapped}"
+        if fail_on_unmapped:
+            raise ValueError(message)
+        logger.warning("%s; returning NA for these labels.", message)
+
+    return series.map(lookup)
+
+
 def configure_logging(snakemake, skip_handlers=False):
     """
     Configure logging for scripts executed by Snakemake or manually.
