@@ -62,5 +62,8 @@ jobs:
         mkdir -p data/electricity_transmission
         ls -la data/electricity_transmission/
 
+    - name: Run unit tests
+      run: python -m pytest tests -q
+
     - name: Run Test
       run: snakemake -j 1 visualize_data --forceall

@@ -1,0 +1,63 @@
+# SPDX-FileCopyrightText: PyPSA-Earth and PyPSA-Eur Authors
+# SPDX-License-Identifier: CC0-1.0
+
+# Values of the 'sector' metadata of loads and links -> UNSD sector.
+sectors:
+  residential: [residential]
+  services: [services]
+  industry: [industry]
+  transport: [transport]
+  agriculture: [agriculture]
+  aviation: []     # no UNSD reference is built for aviation
+  navigation: []   # no UNSD reference is built for navigation
+
+# Fallback used only when a component has no usable 'sector' metadata.
+# Carriers not listed here stay 'unclassified'.
+carrier_sectors:
+  residential: [residential electricity, residential gas, residential oil, residential biomass]
+  services: [services electricity, services gas, services oil, services biomass]
+  agriculture: [agriculture electricity, agriculture oil]
+  industry: [industry electricity]
+  transport: [land transport oil, rail transport oil, rail transport electricity]
+  aviation: [kerosene for aviation]
+  navigation: [shipping oil, H2 for shipping]
+
+# Fallback applied only to sector-coupled networks, i.e. networks that contain at
+# least one load carrier of 'carrier_sectors'. PyPSA-Earth rescales the remaining
+# 'AC' loads to the UNSD residential electricity (prepare_sector_network.py,
+# "Revise residential electricity demand"). In an electricity-only network the
+# 'AC' loads are the total demand and must stay 'unclassified'.
+sector_coupled_carrier_sectors:
+  residential: [AC]
+
+# Fuel category -> carriers of the bus that supplies the end-use device.
+fuels:
+  electricity: [AC, low voltage]
+  gas: [gas, gas for industry, biogas]
+  oil: [oil]
+  coal: [coal, lignite]
+  biomass: [biomass, solid biomass for industry]
+  hydrogen: [H2]
+
+# End-use buses. Loads on them are skipped (their supply is counted at the link
+# inputs), and links that take energy from them are not final consumption.
+end_use_bus_carriers:
+- residential rural heat
+- residential urban decentral heat
+- services rural heat
+- services urban decentral heat
+- urban central heat
+- residential rural water tanks
+- residential urban decentral water tanks
+- services rural water tanks
+- services urban decentral water tanks
+- urban central water tanks
+- Li ion
+
+# Buses that never represent domestic final energy consumption.
+excluded_bus_carriers:
+- co2
+- co2 atmosphere
+- co2 stored
+- process emissions
+- H2 export
