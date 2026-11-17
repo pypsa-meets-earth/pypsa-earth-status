@@ -4,6 +4,7 @@
 
 import os
 import sys
+from pathlib import Path
 
 sys.path.append("./scripts")
 
@@ -608,9 +609,34 @@ rule plot_fuel_consumption_comparison:
         """
 
 
+def existing_fuel_reference_inputs(wildcards):
+    """Track available UNSD inputs while allowing missing reference data."""
+    earth_path = Path(fuel_validation_config.get("pypsa_earth_path", "../pypsa-earth"))
+    unsd_path = Path(
+        fuel_validation_config.get("unsd_path", "../pypsa-earth/data/demand/unsd/data")
+    )
+    transactions_path = Path(
+        fuel_validation_config.get(
+            "transactions_path", "../pypsa-earth/data/unsd_transactions.csv"
+        )
+    )
+
+    sources = [
+        earth_path / "scripts/_helpers.py",
+        transactions_path,
+    ]
+
+    if unsd_path.is_dir():
+        sources.append(unsd_path)
+        sources.extend(sorted(unsd_path.glob("*.txt")))
+
+    return [str(source) for source in sources if source.exists()]
+
+
 rule build_reference_fuel_unsd:
     input:
         script="scripts/build_reference_fuel_unsd.py",
+        sources=existing_fuel_reference_inputs,
     output:
         reference=f"{results_dir}/tables/fuel_consumption_reference.csv",
     params:
