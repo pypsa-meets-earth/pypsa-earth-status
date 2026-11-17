@@ -10,6 +10,8 @@ SPDX-License-Identifier: CC-BY-4.0
 
 ### New Features and Major Changes
 
+* [Add Chilean reference datasets to the data inventory PR #81](https://github.com/pypsa-meets-earth/pypsa-earth-status/pull/81)
+
 * [Support electricity validation for sector-coupled networks PR #70](https://github.com/pypsa-meets-earth/pypsa-earth-status/pull/70)
 
 * [Add multi-scenario health status validation reports with ember dataset source PR #61](https://github.com/pypsa-meets-earth/pypsa-earth-status/pull/61)
@@ -41,6 +43,8 @@ SPDX-License-Identifier: CC-BY-4.0
 * [Add Read the Docs badge to README.md PR #35](https://github.com/pypsa-meets-earth/pypsa-earth-status/pull/35)
 
 * [Handle empty networks and make validation plots robust to missing data PR #34](https://github.com/pypsa-meets-earth/pypsa-earth-status/pull/34)
+
+* [Bugfix Ember datasource to new API PR #84](https://github.com/pypsa-meets-earth/pypsa-earth-status/pull/84)
 
 ## Version v0.0.1 - Initial Release
 
