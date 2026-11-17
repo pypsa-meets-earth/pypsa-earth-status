@@ -1,3 +1,11 @@
 country_code,dataset_name,description,url,lisense,language,implemented,file_name,code_link
-TR,Collection of TSO reports,"PDF provided by TSO of Türkiye from 2021 to 2024,https://www.teias.gov.tr/faaliyet-raporlari,,Turkish,,,
+TR,Collection of TSO reports,"PDF provided by TSO of Türkiye from 2021 to 2024",https://www.teias.gov.tr/faaliyet-raporlari,,Turkish,,,
 TR,Transmission map,380 kv line map of Türkiye from TSO website,https://www.teias.gov.tr/enterkonneksiyonlar,,Turkish,,,
+CL,CEN hourly generation per unit,"Hourly gross generation of every power plant in the Chilean national system (SEN), one Excel file per year; published by the system operator (Coordinador Eléctrico Nacional)",https://www.coordinador.cl/wp-content/uploads/2026/05/CEN-hist_gen_de_energia_por_central_2025.xlsx,Not stated (CEN terms of use),Spanish,,CEN-hist_gen_de_energia_por_central_2025.xlsx,https://github.com/sanjaygrr/pypsa-chile/blob/main/src/pypsa_chile/parse.py
+CL,CEN installed capacity by region and technology,History of installed capacity in the SEN by region and technology,https://www.coordinador.cl/wp-content/uploads/2026/05/CEN-hist_cap_inst_por_region_y_tecno.xlsx,Not stated (CEN terms of use),Spanish,,CEN-hist_cap_inst_por_region_y_tecno.xlsx,https://github.com/sanjaygrr/pypsa-chile/blob/main/src/pypsa_chile/parse.py
+CL,CEN energy sales history,"Annual energy sales history, with the former SIC and SING systems reported separately up to 2016",https://www.coordinador.cl/wp-content/uploads/2026/05/CEN-hist_ventas_de_energia.xlsx,Not stated (CEN terms of use),Spanish,,CEN-hist_ventas_de_energia.xlsx,
+CL,CEN public API (SIP),"Hourly demand, generation and marginal costs; needs a free user key",https://portal.api.coordinador.cl,Not stated (CEN terms of use),Spanish,,,
+CL,CEN Infotecnica API,"Technical data of plants, substations and transmission circuits (ratings); no key needed",https://api-infotecnica.coordinador.cl/,Not stated (CEN terms of use),Spanish,,,
+CL,CNE gross generation,"Electricity generation statistics (CSV) from the national energy commission (CNE)",https://datos.gob.cl/dataset/generacion-bruta,CC BY,Spanish,,,
+CL,CNE installed capacity,"Installed capacity statistics (CSV) from CNE",https://datos.gob.cl/dataset/capacidad-instalada,CC BY,Spanish,,,
+CL,CNE emission factor,"Emission factor statistics (CSV) from CNE",https://datos.gob.cl/dataset/factor-emision,CC BY,Spanish,,,
