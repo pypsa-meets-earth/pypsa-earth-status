@@ -20,14 +20,8 @@ def clean_generation_ember(df_ember):
     """
     Clean generation data from Ember.
     """
-    df = df_ember.copy()
-
-    # Filter to generation by specific fuel subcategory (in TWh)
-    df = df[
-        (df["Category"] == "Electricity generation")
-        & (df["Subcategory"] == "Fuel")
-        & (df["Unit"] == "TWh")
-    ]
+    # Exclude regional totals before converting country codes.
+    df = df_ember.loc[df_ember["Area type"] == "Country or economy"].copy()
 
     # Map variables to PyPSA carriers
     mapping = {
@@ -36,18 +30,18 @@ def clean_generation_ember(df_ember):
         "Gas": "gas",
         "Hydro": "hydro",
         "Nuclear": "nuclear",
-        "Other Fossil": "oil",
-        "Other Renewables": "geothermal",
+        "Other fossil": "oil",
+        "Other renewables": "geothermal",
         "Solar": "solar",
         "Wind": "onwind",
     }
-    df["Technology"] = df["Variable"].map(mapping)
+    df["Technology"] = df["Electricity source"].map(mapping)
 
     # Ember reports generation in TWh; convert to GWh to match the network side
-    df["generation"] = pd.to_numeric(df["Value"], errors="coerce") * 1e3
+    df["generation"] = pd.to_numeric(df["Generation (TWh)"], errors="coerce") * 1e3
 
-    # Drop unmapped technologies
-    df = df.dropna(subset=["Technology"])
+    # Exclude aggregate sources, demand, net imports, and missing observations.
+    df = df.dropna(subset=["Technology", "generation"])
 
     return df
 
@@ -60,8 +54,8 @@ def build_reference_generation_ember(inputs, outputs):
     fp_output = outputs["gen_ember"]
 
     df_ember = read_csv_nafix(fp_input)
-    df_ember["region"] = cc.pandas_convert(df_ember["ISO 3 code"], to="ISO2")
     df_ember = clean_generation_ember(df_ember)
+    df_ember["region"] = cc.pandas_convert(df_ember["ISO 3 code"], to="ISO2")
     df_ember = df_ember[["region", "Technology", "Year", "generation"]]
     df_ember = df_ember.set_index("region")
 

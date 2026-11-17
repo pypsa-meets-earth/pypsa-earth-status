@@ -12,9 +12,11 @@ SPDX-License-Identifier: CC-BY-4.0
 
 * [Add UNSD-based final energy consumption validation by sector and fuel for sector-coupled networks, and a `validate_all` target PR #6](https://github.com/open-energy-transition/pypsa-earth-status-kinetics/pull/6)
 
+* [Add EDGAR-based CO2 emissions validation for electricity-only and sector-coupled networks PR #86](https://github.com/pypsa-meets-earth/pypsa-earth-status/pull/86)
+
 * [Add OSM-based transmission topology, voltage representation, and capacity-preservation validation PR #85](https://github.com/pypsa-meets-earth/pypsa-earth-status/pull/85)
 
-* [Add EDGAR-based CO2 emissions validation for electricity-only and sector-coupled networks PR #86](https://github.com/pypsa-meets-earth/pypsa-earth-status/pull/86)
+* [Add Chilean reference datasets to the data inventory PR #81](https://github.com/pypsa-meets-earth/pypsa-earth-status/pull/81)
 
 * [Support electricity validation for sector-coupled networks PR #70](https://github.com/pypsa-meets-earth/pypsa-earth-status/pull/70)
 
@@ -47,6 +49,8 @@ SPDX-License-Identifier: CC-BY-4.0
 * [Add Read the Docs badge to README.md PR #35](https://github.com/pypsa-meets-earth/pypsa-earth-status/pull/35)
 
 * [Handle empty networks and make validation plots robust to missing data PR #34](https://github.com/pypsa-meets-earth/pypsa-earth-status/pull/34)
+
+* [Bugfix Ember datasource to new API PR #84](https://github.com/pypsa-meets-earth/pypsa-earth-status/pull/84)
 
 ## Version v0.0.1 - Initial Release
 
