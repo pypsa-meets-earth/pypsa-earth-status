@@ -32,6 +32,8 @@ SPDX-License-Identifier: CC-BY-4.0
 
 * [Add functionality to plot OSM electrical grid network plus circuit values and csv export of osm grid line voltages and their lengths PR #38](https://github.com/pypsa-meets-earth/pypsa-earth-status/pull/38)
 
+* [Implement a generalized data cleaning and aggregation approach, starting by IRENA PR #51](https://github.com/pypsa-meets-earth/pypsa-earth-status/pull/51)
+
 ### Minor Changes and bug-fixing
 
 * [Adjust a high-level project description PR #71](https://github.com/pypsa-meets-earth/pypsa-earth-status/pull/71)
