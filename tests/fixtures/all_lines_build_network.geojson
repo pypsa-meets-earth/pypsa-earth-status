@@ -1,0 +1,53 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "line_id": "osm_line_0",
+        "bus0": "osm_0",
+        "bus1": "osm_1",
+        "voltage": 220000,
+        "circuits": 1,
+        "dc": false
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            9.52257596986,
+            52.3604090558
+          ],
+          [
+            9.11321007473,
+            52.5438533224
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "line_id": "osm_line_1",
+        "bus0": "osm_0",
+        "bus1": "osm_2",
+        "voltage": 380000,
+        "circuits": 1,
+        "dc": false
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            9.52257596986,
+            52.3604090558
+          ],
+          [
+            9.82158380229,
+            52.4248552546
+          ]
+        ]
+      }
+    }
+  ]
+}
