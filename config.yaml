@@ -64,5 +64,6 @@ fuel_validation:
   pypsa_earth_path: "../pypsa-earth"
   unsd_path: "../pypsa-earth/data/demand/unsd/data"
   transactions_path: "../pypsa-earth/data/unsd_transactions.csv"
-  shift_coal_to_elec: false  # must match the PyPSA-Earth config used for the model
+  shift_coal_to_elec: true  # must match sector.coal.shift_to_elec of the PyPSA-Earth run (upstream default: true)
+  stale_observation_warning_years: 5  # warn when a UNSD commodity's latest observation is older than this, relative to the model year
   include_other_industries: true  # PyPSA-Earth keeps the unspecified ('other') industries in the model even with other_industries: false

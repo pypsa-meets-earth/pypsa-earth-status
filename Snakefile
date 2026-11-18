@@ -420,6 +420,7 @@ rule visualize_data:
         co2_carrier_plot=f"{results_dir}/figures/co2_emissions_by_carrier.png",
         co2_comparison_plot=f"{results_dir}/figures/co2_emissions_comparison.png",
         fuel_by_asset=f"{results_dir}/tables/fuel_consumption_by_asset.csv",
+        fuel_by_carrier=f"{results_dir}/tables/fuel_consumption_by_carrier.csv",
         fuel_reference=f"{results_dir}/tables/fuel_consumption_reference.csv",
         fuel_comparison=f"{results_dir}/tables/fuel_consumption_comparison.csv",
         fuel_comparison_by_sector=f"{results_dir}/tables/fuel_consumption_comparison_by_sector.csv",
@@ -651,9 +652,12 @@ rule build_reference_fuel_unsd:
         ),
         countries=config["network_validation"]["countries"],
         year=years[0],
+        stale_warning_years=fuel_validation_config.get(
+            "stale_observation_warning_years", 5
+        ),
         shift_coal=(
             "--shift-coal-to-elec"
-            if fuel_validation_config.get("shift_coal_to_elec", False)
+            if fuel_validation_config.get("shift_coal_to_elec", True)
             else ""
         ),
         other_industries=(
@@ -663,13 +667,14 @@ rule build_reference_fuel_unsd:
         ),
     shell:
         """
-        python {input.script:q} --pypsa-earth-path {params.pypsa_earth_path:q} --unsd-path {params.unsd_path:q} --transactions-path {params.transactions_path:q} --year {params.year} --countries {params.countries} {params.shift_coal} {params.other_industries} --output {output.reference:q}
+        python {input.script:q} --pypsa-earth-path {params.pypsa_earth_path:q} --unsd-path {params.unsd_path:q} --transactions-path {params.transactions_path:q} --year {params.year} --countries {params.countries} {params.shift_coal} {params.other_industries} --stale-warning-years {params.stale_warning_years} --output {output.reference:q}
         """
 
 
 rule validate_fuel_consumption:
     input:
         f"{results_dir}/tables/fuel_consumption_by_asset.csv",
+        f"{results_dir}/tables/fuel_consumption_by_carrier.csv",
         f"{results_dir}/tables/fuel_consumption_reference.csv",
         f"{results_dir}/tables/fuel_consumption_comparison.csv",
         f"{results_dir}/tables/fuel_consumption_comparison_by_sector.csv",

@@ -22,6 +22,7 @@ FUEL_COLORS = {
     "coal": "#8c564b",
     "biomass": "#2ca02c",
     "hydrogen": "#17becf",
+    "heat": "#d62728",
     "unclassified": "#bbbbbb",
 }
 

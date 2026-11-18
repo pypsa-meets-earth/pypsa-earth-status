@@ -17,7 +17,8 @@ fuel_validation:
   pypsa_earth_path: "../pypsa-earth"
   unsd_path: "../pypsa-earth/data/demand/unsd/data"
   transactions_path: "../pypsa-earth/data/unsd_transactions.csv"
-  shift_coal_to_elec: false
+  shift_coal_to_elec: true
+  stale_observation_warning_years: 5
   include_other_industries: true
 ```
 
@@ -26,7 +27,8 @@ fuel_validation:
 | `pypsa_earth_path` | PyPSA-Earth checkout; `scripts/_helpers.py` is read from it. |
 | `unsd_path` | Folder with the raw UNSD `.txt` files. PyPSA-Earth downloads them when it builds the base energy totals. |
 | `transactions_path` | PyPSA-Earth list of UNSD industry transactions. |
-| `shift_coal_to_elec` | Count residential and services coal as electricity. Must match the `shift_coal_to_elec` option of the PyPSA-Earth run that produced the network. |
+| `shift_coal_to_elec` | Count residential and services coal as electricity. Must match `sector.coal.shift_to_elec` of the PyPSA-Earth run that produced the network; the PyPSA-Earth default is `true`. |
+| `stale_observation_warning_years` | Log a warning for every UNSD commodity whose latest observation is older than this many years, relative to the model year. The observation is still used. |
 | `include_other_industries` | Include the unspecified ("other") industries in the industry reference. Keep `true` unless the network was built without them. |
 
 If any of the three paths is missing, the workflow does not fail: a warning is logged, the reference table is empty and every comparison is reported as `unavailable`.
@@ -52,15 +54,22 @@ The workflow uses the network, year and countries configured in `network_validat
 **Model.** Consumption is the snapshot-weighted annual energy, in TWh, of:
 
 - Loads connected to a fuel bus (for example electricity, gas, oil or biomass).
-- The input of Links that deliver energy to an end-use bus, such as a gas boiler supplying a heat bus.
+- The input of Links that deliver energy to an end-use bus, such as a gas boiler supplying a household heat bus.
+- Loads connected to a district heating bus (`urban central heat`), counted as fuel `heat`.
 
-Loads on end-use buses (heat, water tanks, vehicle batteries) are skipped, because their supply is already counted at the Link input. Links between fuel buses, such as power plants, are energy transformations and are not counted. This avoids double counting.
+Loads on end-use buses (decentral heat, water tanks, vehicle batteries) are skipped, because their supply is already counted at the Link input. Links between fuel buses, such as power plants, are energy transformations and are not counted. This avoids double counting.
+
+Three cases need more care:
+
+- **Links with several outputs.** For a micro CHP feeding electricity to the grid and heat to a household heat bus, only the share of the fuel input that ends up as heat on the end-use bus is counted, in proportion to the output energy. The electricity is counted where it is consumed.
+- **District heating.** As in UNSD, the fuel burned in CHPs and central boilers, and the electricity of central heat pumps, is an energy transformation and is not counted. The heat delivered to each load on the district heating bus is counted instead, in that load's sector.
+- **Heat buses shared by several sectors.** PyPSA-Earth places industrial low-temperature heat on the district heating bus or, where there is none, on the services decentral heat bus. The input of a Link supplying a shared bus is split between sectors in proportion to the annual energy of the loads on that bus.
 
 The sector is taken from the `sector` metadata of each component. When that is missing, the carrier name is used as a fallback (`carrier_sectors` in the mapping file). In sector-coupled networks the remaining `AC` loads are assigned to the residential sector (`sector_coupled_carrier_sectors`). Components that match none of these are reported as `unclassified` rather than guessed. The fuel is taken from the carrier of the supplying bus.
 
 **Reference.** UNSD quantities are converted to TWh with the PyPSA-Earth conversion factors and grouped into gas, oil, biomass, coal, heat and electricity with the PyPSA-Earth fuel lists. The sectors are residential, services, agriculture, transport (road and rail) and industry. The values are the historical statistics, before any scenario-dependent growth, efficiency or electrification assumption.
 
-**Reference year.** For each commodity, the latest observation not later than the model year is used. UNSD reports the commodities of one fuel up to different years, so a fuel total can combine neighbouring years; `reference_year` gives the most recent one. A commodity whose last observation is more than two years older than the newest of its fuel group is treated as discontinued and left out.
+**Reference year.** For each commodity, the latest observation not later than the model year is used. UNSD reports the commodities of one fuel up to different years, so a fuel total can combine neighbouring years; `reference_year` gives the most recent one. An old last observation may only reflect missing or delayed reporting, so it is never discarded: when it is older than `stale_observation_warning_years`, a warning names the commodity, its year and its value, and it is still included in the totals.
 
 ## Output files
 
@@ -111,6 +120,6 @@ The national and aggregated values are **like-for-like subtotals of the compared
 - The model year and the UNSD reference year usually differ by one or two years, so small deviations are expected.
 - In sector-coupled networks the remaining `AC` loads are counted as residential electricity, because PyPSA-Earth scales them to the UNSD residential electricity demand. In electricity-only networks they are the total demand and stay `unclassified`.
 - No UNSD reference is built for aviation and navigation; their model consumption is reported as `reference_unavailable`.
-- UNSD "heat" has no fuel-bus counterpart in the model. Fuel burned in boilers to supply heat demand is counted under that fuel.
+- The PyPSA-Earth `urban central heat` load combines residential and services district heating, plus distribution losses. It is reported as `unclassified` heat, so the UNSD residential and services heat is not compared. Decentral boilers and heat pumps are counted under the fuel they use, as in UNSD.
 - Electricity-only networks contain no sector-specific loads; the comparison is then `unavailable`.
 - A successful Snakemake run does not imply that every sector and fuel was comparable; inspect `status` and the coverage indicators.

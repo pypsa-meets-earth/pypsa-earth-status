@@ -38,8 +38,9 @@ ENERGY_SECTORS = {
 }
 COAL_SHIFT_SECTORS = {"residential", "services"}
 INDUSTRY_OTHER_COLUMN = "other"
-# A commodity may lag this many years behind the latest year of its fuel group.
-MAX_SERIES_LAG_YEARS = 2
+# Warn when a commodity's latest observation is older than this many years,
+# relative to the model year. The observation is still used.
+STALE_OBSERVATION_WARNING_YEARS = 5
 
 
 def import_pypsa_earth_helpers(pypsa_earth_path):
@@ -220,7 +221,30 @@ def industry_rows(df, transactions, model_year, include_other):
     return select_latest_year(data, model_year)
 
 
-def aggregate(rows, fuels, model_year, shift_coal_to_elec):
+def warn_stale_observations(rows, model_year, warning_years):
+    """Log the commodities whose latest observation is old; they are kept."""
+    stale = rows[rows["Year"] < model_year - warning_years]
+    for _, row in stale.sort_values(["country", "sector", "Year"]).iterrows():
+        logger.warning(
+            "UNSD %s / %s / %s: latest observation is %s, %s years before the "
+            "model year %s (%.3f TWh). It is kept in the reference.",
+            row["country"],
+            row["sector"],
+            row["Commodity - Transaction"],
+            int(row["Year"]),
+            int(model_year - row["Year"]),
+            model_year,
+            row["Quantity_TWh"],
+        )
+
+
+def aggregate(
+    rows,
+    fuels,
+    model_year,
+    shift_coal_to_elec,
+    stale_warning_years=STALE_OBSERVATION_WARNING_YEARS,
+):
     """Sum TWh by country, sector, fuel; keep the reference year used."""
     rows = rows.copy()
     rows["fuel"] = rows["Commodity"].map(fuels)
@@ -235,15 +259,12 @@ def aggregate(rows, fuels, model_year, shift_coal_to_elec):
         rows = rows.loc[~unmapped]
 
     # UNSD reports the commodities of one fuel up to different years (e.g. diesel
-    # one year behind gasoline). Take the latest observation of every series, so
-    # that a lagging commodity is not dropped from the fuel total.
+    # one year behind gasoline), and an old last observation may only be a
+    # reporting gap. Take the latest observation of every series and keep it,
+    # warning when it is old.
     series = ["country", "sector", "Commodity - Transaction"]
     rows = rows[rows["Year"].eq(rows.groupby(series)["Year"].transform("max"))]
-
-    # Series that stopped long before the others of the same fuel are treated as
-    # discontinued, not as lagging.
-    latest = rows.groupby(["country", "sector", "fuel"])["Year"].transform("max")
-    rows = rows[rows["Year"].ge(latest - MAX_SERIES_LAG_YEARS)]
+    warn_stale_observations(rows, model_year, stale_warning_years)
 
     if shift_coal_to_elec:
         shift = rows["fuel"].eq("coal") & rows["sector"].isin(COAL_SHIFT_SECTORS)
@@ -297,7 +318,13 @@ def build_reference(args, countries):
     industry = industry_rows(df, transactions, args.year, args.include_other_industries)
     rows = to_twh(pd.concat([energy, industry], ignore_index=True), conversion)
 
-    return aggregate(rows, fuel_mapping(helpers), args.year, args.shift_coal_to_elec)
+    return aggregate(
+        rows,
+        fuel_mapping(helpers),
+        args.year,
+        args.shift_coal_to_elec,
+        args.stale_warning_years,
+    )
 
 
 def main():
@@ -309,6 +336,9 @@ def main():
     parser.add_argument("--countries", nargs="+", required=True)
     parser.add_argument("--shift-coal-to-elec", action="store_true")
     parser.add_argument("--include-other-industries", action="store_true")
+    parser.add_argument(
+        "--stale-warning-years", type=int, default=STALE_OBSERVATION_WARNING_YEARS
+    )
     parser.add_argument("--output", required=True)
     args = parser.parse_args()
 

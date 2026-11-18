@@ -275,68 +275,62 @@ def test_reference_keeps_commodities_reported_in_an_earlier_year():
     assert row.reference_year == 2022
 
 
-def test_reference_drops_discontinued_commodities():
-    stale_year = 2022 - ref.MAX_SERIES_LAG_YEARS - 1
+def test_reference_keeps_old_observations_and_warns(caplog):
     rows = unsd_rows(
         [
             ("Motor Gasoline", "Consumption by road", 2022, 400.0),
-            ("Fuel oil", "Consumption by road", stale_year, 30.0),
+            # Last reported six years before the model year: kept, with a warning.
+            ("Fuel oil", "Consumption by road", 2017, 30.0),
         ]
     )
-    table = ref.aggregate(rows, OIL_FUELS, 2023, shift_coal_to_elec=False)
+    with caplog.at_level("WARNING", logger=ref.logger.name):
+        table = ref.aggregate(
+            rows, OIL_FUELS, 2023, shift_coal_to_elec=False, stale_warning_years=5
+        )
 
-    assert table.iloc[0].reference_twh == pytest.approx(400.0)
+    assert table.iloc[0].reference_twh == pytest.approx(400.0 + 30.0)
+    assert table.iloc[0].reference_year == 2022
+
+    warnings = [r.getMessage() for r in caplog.records]
+    assert len(warnings) == 1
+    assert "Fuel oil - Consumption by road" in warnings[0]
+    assert "2017" in warnings[0] and "6 years" in warnings[0]
 
 
-def unsd_rows(observations):
-    """UNSD-like rows from (commodity, transaction, year, TWh) tuples."""
-    return pd.DataFrame(
+def test_reference_does_not_warn_within_threshold(caplog):
+    rows = unsd_rows([("Motor Gasoline", "Consumption by road", 2018, 400.0)])
+    with caplog.at_level("WARNING", logger=ref.logger.name):
+        ref.aggregate(
+            rows, OIL_FUELS, 2023, shift_coal_to_elec=False, stale_warning_years=5
+        )
+
+    assert not caplog.records
+
+
+def test_reference_shifts_residential_and_services_coal_to_electricity():
+    rows = pd.DataFrame(
         [
             {
                 "country": "JP",
-                "sector": "transport",
-                "Commodity": commodity,
-                "Commodity - Transaction": f"{commodity} - {transaction}",
-                "Year": year,
-                "Quantity_TWh": value,
+                "sector": sector,
+                "Commodity": "Hard coal",
+                "Commodity - Transaction": f"Hard coal - {sector}",
+                "Year": 2022,
+                "Quantity_TWh": 1.0,
             }
-            for commodity, transaction, year, value in observations
+            for sector in ["residential", "services", "industry"]
         ]
     )
+    fuels = {"Hard coal": "coal"}
 
+    shifted = ref.aggregate(rows, fuels, 2023, shift_coal_to_elec=True)
+    pairs = set(zip(shifted.sector, shifted.fuel))
 
-OIL_FUELS = {"Motor Gasoline": "oil", "Gas Oil/ Diesel Oil": "oil", "Fuel oil": "oil"}
-
-
-def test_reference_keeps_commodities_reported_in_an_earlier_year():
-    rows = unsd_rows(
-        [
-            ("Motor Gasoline", "Consumption by road", 2021, 390.0),
-            ("Motor Gasoline", "Consumption by road", 2022, 400.0),
-            # Diesel lags one year behind gasoline: it must not be dropped.
-            ("Gas Oil/ Diesel Oil", "Consumption by road", 2020, 240.0),
-            ("Gas Oil/ Diesel Oil", "Consumption by road", 2021, 250.0),
-        ]
-    )
-    table = ref.aggregate(rows, OIL_FUELS, 2023, shift_coal_to_elec=False)
-
-    row = table.iloc[0]
-    assert len(table) == 1
-    assert row.reference_twh == pytest.approx(400.0 + 250.0)
-    assert row.reference_year == 2022
-
-
-def test_reference_drops_discontinued_commodities():
-    stale_year = 2022 - ref.MAX_SERIES_LAG_YEARS - 1
-    rows = unsd_rows(
-        [
-            ("Motor Gasoline", "Consumption by road", 2022, 400.0),
-            ("Fuel oil", "Consumption by road", stale_year, 30.0),
-        ]
-    )
-    table = ref.aggregate(rows, OIL_FUELS, 2023, shift_coal_to_elec=False)
-
-    assert table.iloc[0].reference_twh == pytest.approx(400.0)
+    assert pairs == {
+        ("residential", "electricity"),
+        ("services", "electricity"),
+        ("industry", "coal"),
+    }
 
 
 def test_reference_industry_other_is_optional():
@@ -391,3 +385,202 @@ def test_ac_load_is_residential_only_in_sector_coupled_networks():
     n.add("Load", "total elec", bus="elec", carrier="AC", p_set=3.0)
     detail, _ = stats.build_statistics(n, 2023, MAPPING)
     assert detail.iloc[0].sector == stats.UNCLASSIFIED
+
+
+def make_industry_transport_network():
+    """PyPSA-Earth industry and transport components, without sector metadata."""
+    n = pypsa.Network()
+    n.set_snapshots(range(N_SNAPSHOTS))
+    n.snapshot_weightings.loc[:, :] = HOURS / N_SNAPSHOTS
+
+    buses = {
+        "elec": "AC",
+        "low voltage": "low voltage",
+        "gas": "gas",
+        "gas for industry": "gas for industry",
+        "biomass": "biomass",
+        "solid biomass for industry": "solid biomass for industry",
+        "oil": "oil",
+        "H2": "H2",
+        "EV battery": "Li ion",
+    }
+    for name, carrier in buses.items():
+        n.add("Bus", name, carrier=carrier)
+    n.buses["country"] = "JP"
+
+    loads = {
+        "gas for industry": ("gas for industry", 5.0),
+        "solid biomass for industry": ("solid biomass for industry", 2.0),
+        "naphtha for industry": ("oil", 3.0),
+        "H2 for industry": ("H2", 1.0),
+        "land transport fuel cell": ("H2", 0.5),
+        "land transport EV": ("EV battery", 4.0),
+    }
+    for carrier, (bus, p_set) in loads.items():
+        n.add("Load", carrier, bus=bus, carrier=carrier, p_set=p_set)
+
+    # Transfer Links share their carrier name with the industry loads. They move
+    # fuel between buses and are not final consumption.
+    links = {
+        "gas for industry": ("gas", "gas for industry", 5.0),
+        "solid biomass for industry": ("biomass", "solid biomass for industry", 2.0),
+        "BEV charger": ("low voltage", "EV battery", 4.0 / 0.9),
+    }
+    for carrier, (bus0, bus1, p0) in links.items():
+        n.add("Link", carrier + " link", bus0=bus0, bus1=bus1, carrier=carrier)
+    n.links_t.p0 = pd.DataFrame(
+        {name + " link": p0 for name, (_, _, p0) in links.items()}, index=n.snapshots
+    )
+    n.links_t.p1 = -n.links_t.p0
+    return n
+
+
+def test_carrier_fallback_covers_industry_and_transport_carriers():
+    n = make_industry_transport_network()
+    detail, _ = stats.build_statistics(n, 2023, MAPPING)
+    rows = detail.set_index("asset")
+
+    expected = {
+        "gas for industry": ("industry", "gas", 5.0),
+        "solid biomass for industry": ("industry", "biomass", 2.0),
+        "naphtha for industry": ("industry", "oil", 3.0),
+        "H2 for industry": ("industry", "hydrogen", 1.0),
+        "land transport fuel cell": ("transport", "hydrogen", 0.5),
+        # The EV load sits on the battery bus; the charger input is counted.
+        "BEV charger link": ("transport", "electricity", 4.0 / 0.9),
+    }
+    for asset, (sector, fuel, mw) in expected.items():
+        assert rows.loc[asset, "sector"] == sector, asset
+        assert rows.loc[asset, "fuel"] == fuel, asset
+        assert rows.loc[asset, "consumption_twh"] == pytest.approx(twh(mw)), asset
+
+    assert stats.UNCLASSIFIED not in set(detail.sector)
+
+
+def test_transfer_links_are_not_final_consumption():
+    n = make_industry_transport_network()
+    detail, _ = stats.build_statistics(n, 2023, MAPPING)
+
+    # Same carrier as the industry loads, but only fuel transfers between buses.
+    assert "gas for industry link" not in set(detail.asset)
+    assert "solid biomass for industry link" not in set(detail.asset)
+    # The EV demand is covered by the charger input, not counted a second time.
+    assert "land transport EV" not in set(detail.asset)
+
+
+def make_heat_network():
+    """CHPs, district heating and a heat bus shared by services and industry."""
+    n = pypsa.Network()
+    n.set_snapshots(range(N_SNAPSHOTS))
+    n.snapshot_weightings.loc[:, :] = HOURS / N_SNAPSHOTS
+
+    buses = {
+        "elec": "AC",
+        "gas": "gas",
+        "co2 atmosphere": "co2 atmosphere",
+        "central heat": "urban central heat",
+        "res heat": "residential urban decentral heat",
+        "ser heat": "services urban decentral heat",
+    }
+    for name, carrier in buses.items():
+        n.add("Bus", name, carrier=carrier)
+    n.buses["country"] = "JP"
+
+    loads = {
+        # District heating: residential and services together, as in PyPSA-Earth.
+        "urban central heat": ("central heat", 6.0),
+        "industry heat central": ("central heat", 2.0),
+        "residential urban decentral heat": ("res heat", 5.0),
+        # A services heat bus also supplying industrial low-temperature heat.
+        "services urban decentral heat": ("ser heat", 3.0),
+        "industry heat decentral": ("ser heat", 1.0),
+    }
+    for name, (bus, p_set) in loads.items():
+        carrier = "low-temperature heat for industry" if "industry" in name else name
+        n.add("Load", name, bus=bus, carrier=carrier, p_set=p_set)
+
+    # name: (carrier, bus0, {port: (bus, output MW)}, input MW)
+    links = {
+        "central CHP": (
+            "urban central gas CHP",
+            "gas",
+            {1: ("elec", 4.0), 2: ("central heat", 4.0), 3: ("co2 atmosphere", 2.0)},
+            10.0,
+        ),
+        "central boiler": (
+            "urban central gas boiler",
+            "gas",
+            {1: ("central heat", 4.0)},
+            4.0 / 0.9,
+        ),
+        # Micro CHP: 3 MW electricity to the grid and 5 MW heat to the household.
+        "micro CHP": (
+            "residential urban decentral micro gas CHP",
+            "gas",
+            {1: ("elec", 3.0), 2: ("res heat", 5.0), 3: ("co2 atmosphere", 2.0)},
+            10.0,
+        ),
+        "services boiler": (
+            "services urban decentral gas boiler",
+            "gas",
+            {1: ("ser heat", 4.0)},
+            4.0 / 0.9,
+        ),
+    }
+    flows = {port: {} for port in range(4)}
+    for name, (carrier, bus0, outputs, p0) in links.items():
+        ports = {f"bus{port}": bus for port, (bus, _) in outputs.items()}
+        n.add("Link", name, bus0=bus0, carrier=carrier, **ports)
+        flows[0][name] = p0
+        for port, (_, mw) in outputs.items():
+            # The CO2 port is drawn into the atmosphere bus (negative = injected).
+            flows[port][name] = -mw
+    for port, values in flows.items():
+        n.links_t[f"p{port}"] = pd.DataFrame(values, index=n.snapshots)
+    return n
+
+
+@pytest.fixture
+def heat_statistics():
+    return stats.build_statistics(make_heat_network(), 2023, MAPPING)[0]
+
+
+def test_district_heating_is_counted_as_delivered_heat(heat_statistics):
+    detail = heat_statistics
+
+    # Fuel burned in central CHPs and boilers is an energy transformation.
+    assert "central CHP" not in set(detail.asset)
+    assert "central boiler" not in set(detail.asset)
+
+    heat = detail[detail.fuel.eq("heat")].set_index("asset")
+    assert heat.loc["industry heat central", "sector"] == "industry"
+    assert heat.loc["industry heat central", "consumption_twh"] == pytest.approx(
+        twh(2.0)
+    )
+    # The combined residential and services load cannot be split: unclassified.
+    assert heat.loc["urban central heat", "sector"] == stats.UNCLASSIFIED
+    assert set(heat.consumption_source) == {"load_district_heat"}
+
+
+def test_multi_output_link_counts_only_the_end_use_share(heat_statistics):
+    detail = heat_statistics
+    micro = detail[detail.asset.eq("micro CHP")]
+
+    # 10 MW of gas gives 3 MW electricity and 5 MW heat (CO2 is not an output):
+    # only the heat share of the gas is final consumption in the household.
+    assert len(micro) == 1
+    assert micro.iloc[0].sector == "residential"
+    assert micro.iloc[0].fuel == "gas"
+    assert micro.iloc[0].consumption_twh == pytest.approx(twh(10.0 * 5.0 / 8.0))
+
+
+def test_shared_heat_bus_is_split_by_load_sector(heat_statistics):
+    detail = heat_statistics
+    boiler = detail[detail.asset.eq("services boiler")].set_index("sector")
+
+    gas_in = twh(4.0 / 0.9)
+    # Services heat 3 MW and industrial heat 1 MW on the same bus.
+    assert set(boiler.index) == {"services", "industry"}
+    assert boiler.loc["services", "consumption_twh"] == pytest.approx(gas_in * 0.75)
+    assert boiler.loc["industry", "consumption_twh"] == pytest.approx(gas_in * 0.25)
+    assert set(boiler.fuel) == {"gas"}

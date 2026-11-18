@@ -13,12 +13,18 @@ sectors:
 
 # Fallback used only when a component has no usable 'sector' metadata.
 # Carriers not listed here stay 'unclassified'.
+# Listing a carrier here only assigns a sector: whether a component counts as
+# final consumption is decided by its buses. 'gas for industry' and 'solid biomass
+# for industry' are also the carriers of the transfer Links feeding those buses;
+# such Links do not deliver to an end-use bus and are never counted.
+# 'BEV charger' is the Link from low voltage into the EV battery ('Li ion' bus);
+# its electricity input is the final consumption of 'land transport EV'.
 carrier_sectors:
-  residential: [residential electricity, residential gas, residential oil, residential biomass]
-  services: [services electricity, services gas, services oil, services biomass]
+  residential: [residential electricity, residential gas, residential oil, residential biomass, residential rural heat, residential urban decentral heat]
+  services: [services electricity, services gas, services oil, services biomass, services rural heat, services urban decentral heat]
   agriculture: [agriculture electricity, agriculture oil]
-  industry: [industry electricity]
-  transport: [land transport oil, rail transport oil, rail transport electricity]
+  industry: [industry electricity, gas for industry, solid biomass for industry, naphtha for industry, H2 for industry, low-temperature heat for industry]
+  transport: [land transport oil, rail transport oil, rail transport electricity, land transport fuel cell, BEV charger, land transport EV]
   aviation: [kerosene for aviation]
   navigation: [shipping oil, H2 for shipping]
 
@@ -38,21 +44,33 @@ fuels:
   coal: [coal, lignite]
   biomass: [biomass, solid biomass for industry]
   hydrogen: [H2]
+  heat: [urban central heat]
 
-# End-use buses. Loads on them are skipped (their supply is counted at the link
-# inputs), and links that take energy from them are not final consumption.
+# End-use buses. Loads on them are skipped: their supply is counted at the inputs
+# of the links feeding them, split between sectors by the load energy when the bus
+# is shared (e.g. industrial low-temperature heat on a services heat bus). For
+# links with several outputs (e.g. micro CHP), only the input share that ends up on
+# end-use buses is counted. Links that take energy from them are not final
+# consumption.
 end_use_bus_carriers:
 - residential rural heat
 - residential urban decentral heat
 - services rural heat
 - services urban decentral heat
-- urban central heat
 - residential rural water tanks
 - residential urban decentral water tanks
 - services rural water tanks
 - services urban decentral water tanks
 - urban central water tanks
 - Li ion
+
+# District heating buses. As in UNSD, the fuel burned in CHPs and central boilers
+# (and the electricity of central heat pumps) is an energy transformation and is
+# not counted. The heat delivered to the loads is counted as fuel 'heat', in the
+# sector of each load. The 'urban central heat' load combines residential and
+# services demand in PyPSA-Earth, so it stays 'unclassified'.
+district_heating_bus_carriers:
+- urban central heat
 
 # Buses that never represent domestic final energy consumption.
 excluded_bus_carriers:

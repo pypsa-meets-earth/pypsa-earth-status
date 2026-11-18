@@ -75,6 +75,7 @@ def load_mapping(path):
             for carrier in carriers
         },
         "end_use": set(cfg.get("end_use_bus_carriers", [])),
+        "district_heating": set(cfg.get("district_heating_bus_carriers", [])),
         "excluded": set(cfg.get("excluded_bus_carriers", [])),
     }
 
@@ -96,6 +97,13 @@ def apply_sector_coupled_fallback(n, mapping):
 def bus_carriers(n, buses):
     """Return the carrier of each given bus name."""
     return buses.map(n.buses.carrier).fillna("").astype(str)
+
+
+def component_sectors(components, mapping):
+    """UNSD sector of each component; NaN when it cannot be classified."""
+    sector = metadata_column(components, "sector").map(mapping["sectors"])
+    # Metadata wins; the carrier list only fills components without it.
+    return sector.fillna(components.carrier.map(mapping["carrier_sectors"]))
 
 
 def create_detail(
@@ -120,9 +128,7 @@ def create_detail(
             .str.upper()
         )
 
-    sector = metadata_column(comps, "sector").map(mapping["sectors"])
-    # Metadata wins; the carrier list only fills components without it.
-    sector = sector.fillna(comps.carrier.map(mapping["carrier_sectors"]))
+    sector = component_sectors(comps, mapping)
     fuel = bus_carrier.loc[twh.index].map(mapping["fuels"])
 
     detail = pd.DataFrame(index=twh.index)
@@ -170,15 +176,20 @@ def load_profiles(n, names):
 
 
 def load_consumption(n, model_year, weights, mapping):
-    """Consumption of Loads on fuel buses; end-use bus Loads are skipped."""
+    """Consumption of Loads on fuel and district heating buses.
+
+    Loads on end-use buses are not counted here, because their supply is
+    counted at the Link inputs. Their annual energy is returned to split those
+    inputs between sectors and for the supply diagnostic.
+    """
+    empty = pd.DataFrame(columns=DETAIL_COLUMNS), pd.Series(dtype=float)
     if n.loads.empty:
-        return pd.DataFrame(columns=DETAIL_COLUMNS), pd.Series(dtype=float)
+        return (*empty, pd.Series(dtype=float))
 
     carrier = bus_carriers(n, n.loads.bus)
     excluded = carrier.isin(mapping["excluded"])
     end_use = carrier.isin(mapping["end_use"])
 
-    # Demand on end-use buses is kept only for the supply diagnostic below.
     end_use_names = n.loads.index[end_use & ~excluded]
     end_use_twh = (
         load_profiles(n, end_use_names).mul(weights, axis=0).sum(axis=0) * MWH_TO_TWH
@@ -187,56 +198,167 @@ def load_consumption(n, model_year, weights, mapping):
 
     names = n.loads.index[~end_use & ~excluded]
     if names.empty:
-        return pd.DataFrame(columns=DETAIL_COLUMNS), end_use_demand
+        return pd.DataFrame(columns=DETAIL_COLUMNS), end_use_demand, end_use_twh
 
     twh = load_profiles(n, names).mul(weights, axis=0).sum(axis=0) * MWH_TO_TWH
 
     detail = create_detail(
         n, n.loads, "Load", carrier, twh, model_year, mapping, "load_fuel_bus"
     )
+    # District heat is final energy where it is delivered, as in UNSD.
+    district = detail["bus_carrier"].isin(mapping["district_heating"])
+    detail.loc[district, "consumption_source"] = "load_district_heat"
 
-    return detail, end_use_demand
+    return detail, end_use_demand, end_use_twh
 
 
-def link_consumption(n, model_year, weights, mapping):
-    """Fuel entering links that deliver to an end-use bus (p0 side)."""
+def link_ports(n):
+    """Port numbers of the Link buses present in the network (0, 1, 2, ...)."""
+    ports = [
+        int(column[3:])
+        for column in n.links.columns
+        if column.startswith("bus") and column[3:].isdigit()
+    ]
+    return sorted(ports)
+
+
+def port_energy(n, port, names, weights):
+    """Annual energy in TWh at one Link port; positive means withdrawn."""
+    flows = n.links_t.get(f"p{port}", pd.DataFrame())
+    flows = flows.reindex(index=n.snapshots, columns=names).fillna(0.0)
+    return flows.mul(weights, axis=0).sum(axis=0) * MWH_TO_TWH
+
+
+def bus_sector_shares(n, end_use_twh, mapping):
+    """Share of each end-use bus's annual load energy by sector.
+
+    Buses whose loads have no classified sector are left out, so that the
+    supplying Link keeps its own sector.
+    """
+    if end_use_twh.empty:
+        return pd.DataFrame(columns=["bus", "sector", "share"])
+
+    loads = n.loads.loc[end_use_twh.index]
+    table = pd.DataFrame(
+        {
+            "bus": loads.bus,
+            "sector": component_sectors(loads, mapping).fillna(UNCLASSIFIED),
+            "twh": end_use_twh,
+        }
+    )
+    classified = table.groupby("bus")["sector"].transform(
+        lambda s: s.ne(UNCLASSIFIED).any()
+    )
+    table = table[classified & table["twh"].gt(0)]
+
+    shares = table.groupby(["bus", "sector"], as_index=False)["twh"].sum()
+    shares["share"] = shares["twh"] / shares.groupby("bus")["twh"].transform("sum")
+
+    shared = shares.groupby("bus")["sector"].nunique().gt(1)
+    if shared.any():
+        logger.info(
+            "Link inputs to %s end-use buses shared by several sectors are split "
+            "by the sectors' load energy, e.g. %s.",
+            shared.sum(),
+            list(shared[shared].index[:3]),
+        )
+
+    return shares[["bus", "sector", "share"]]
+
+
+def link_consumption(n, model_year, weights, mapping, end_use_twh):
+    """Fuel entering Links that deliver energy to end-use buses.
+
+    Only the share of the input that ends up on end-use buses is counted, in
+    proportion to the output energy: for a micro CHP feeding electricity to the
+    grid and heat to a household heat bus, only the heat share is final
+    consumption. Links into district heating are energy transformations and are
+    not counted; the heat is counted at the district heating loads instead.
+    """
     empty = pd.DataFrame(columns=DETAIL_COLUMNS), pd.Series(dtype=float)
 
     if n.links.empty:
         return empty
 
     input_carrier = bus_carriers(n, n.links.bus0)
-    output_carrier = bus_carriers(n, n.links.bus1)
+    not_final = mapping["end_use"] | mapping["district_heating"] | mapping["excluded"]
+    candidates = n.links.index[~input_carrier.isin(not_final)]
 
-    feeds_end_use = output_carrier.isin(mapping["end_use"])
+    useful = pd.Series(0.0, index=n.links.index)
+    deliveries = []
+    for port in link_ports(n)[1:]:
+        bus = n.links[f"bus{port}"].fillna("").astype(str)
+        carrier = bus_carriers(n, bus)
+        output = -port_energy(n, port, n.links.index, weights)
+
+        delivers = bus.ne("") & ~carrier.isin(mapping["excluded"]) & output.gt(0)
+        useful += output.where(delivers, 0.0)
+
+        to_end_use = delivers & carrier.isin(mapping["end_use"])
+        deliveries.append(
+            pd.DataFrame(
+                {
+                    "link": n.links.index[to_end_use],
+                    "bus": bus[to_end_use],
+                    "bus_carrier": carrier[to_end_use],
+                    "output_twh": output[to_end_use],
+                }
+            )
+        )
+
+    deliveries = pd.concat(deliveries, ignore_index=True)
 
     # Energy delivered to end-use buses, for the supply diagnostic.
-    p1 = n.links_t.p1.reindex(index=n.snapshots)
-    delivered_names = n.links.index[feeds_end_use].intersection(p1.columns)
-    delivered = (
-        (-p1[delivered_names].mul(weights, axis=0).sum(axis=0) * MWH_TO_TWH)
-        .groupby(output_carrier.loc[delivered_names])
-        .sum()
-    )
+    delivered = deliveries.groupby("bus_carrier")["output_twh"].sum()
 
-    counted = feeds_end_use & ~input_carrier.isin(mapping["end_use"])
-    counted &= ~input_carrier.isin(mapping["excluded"])
-    names = n.links.index[counted]
-
-    if names.empty:
+    deliveries = deliveries[deliveries["link"].isin(candidates)]
+    if deliveries.empty:
         return pd.DataFrame(columns=DETAIL_COLUMNS), delivered
 
+    names = pd.Index(deliveries["link"].unique())
     p0 = n.links_t.p0.reindex(index=n.snapshots, columns=names)
     if p0.isna().any().any():
         raise ValueError("Missing Link dispatch.")
+    input_twh = p0.mul(weights, axis=0).sum(axis=0) * MWH_TO_TWH
 
-    twh = p0.mul(weights, axis=0).sum(axis=0) * MWH_TO_TWH
-
-    detail = create_detail(
-        n, n.links, "Link", input_carrier, twh, model_year, mapping, "link_input"
+    deliveries["twh"] = (
+        deliveries["link"].map(input_twh)
+        * deliveries["output_twh"]
+        / deliveries["link"].map(useful)
     )
 
-    return detail, delivered
+    # Split by the sectors of the loads on the supplied bus.
+    shares = bus_sector_shares(n, end_use_twh, mapping)
+    allocation = deliveries.merge(shares, on="bus", how="left")
+    allocation["share"] = allocation["share"].fillna(1.0)
+    allocation["twh"] *= allocation["share"]
+    # Sector named by the supplied bus (e.g. 'residential rural heat').
+    allocation["bus_sector"] = allocation["bus_carrier"].map(mapping["carrier_sectors"])
+    allocation = allocation.groupby(
+        ["link", "sector", "bus_sector"], dropna=False, as_index=False
+    )["twh"].sum()
+
+    totals = allocation.groupby("link")["twh"].sum()
+    detail = create_detail(
+        n, n.links, "Link", input_carrier, totals, model_year, mapping, "link_input"
+    )
+
+    # One row per Link and supplied sector. Without classified loads on the
+    # supplied bus, the Link's own sector is used, then the bus's sector.
+    detail = detail.drop(columns="consumption_twh").merge(
+        allocation.rename(columns={"link": "asset", "sector": "load_sector"}),
+        on="asset",
+    )
+    link_sector = detail["sector"].mask(detail["sector"].eq(UNCLASSIFIED))
+    detail["sector"] = (
+        detail["load_sector"]
+        .fillna(link_sector)
+        .fillna(detail["bus_sector"])
+        .fillna(UNCLASSIFIED)
+    )
+    detail = detail.rename(columns={"twh": "consumption_twh"})
+
+    return detail[DETAIL_COLUMNS].reset_index(drop=True), delivered
 
 
 def log_end_use_supply(demand, delivered):
@@ -259,8 +381,10 @@ def build_statistics(n, model_year, mapping):
     weights = snapshot_weights(n)
     mapping = apply_sector_coupled_fallback(n, mapping)
 
-    loads, end_use_demand = load_consumption(n, model_year, weights, mapping)
-    links, delivered = link_consumption(n, model_year, weights, mapping)
+    loads, end_use_demand, end_use_twh = load_consumption(
+        n, model_year, weights, mapping
+    )
+    links, delivered = link_consumption(n, model_year, weights, mapping, end_use_twh)
 
     log_end_use_supply(end_use_demand, delivered)
 
