@@ -1,4 +1,4 @@
-﻿- country_code: "global"
+- country_code: "global"
   dataset_name: "ELECSTAT_20240808-144258"
   description: "Installed capacity"
   url: ""
