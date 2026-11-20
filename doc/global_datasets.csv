@@ -1,6 +1,0 @@
-country_code,dataset_name,description,url,lisense,language,implemented,file_name,code_link
-global,ELECSTAT_20240808-144258,"Installed capacity",,,English,yes,data/installed capacity/ELECSTAT_20240808-144258.csv,
-global,GTD-v1.1_regional_existing,"Global Transmission Database (existing)",,,English,yes,data/electricity-transmission-database/GTD-v1.1_regional_existing.csv,
-global,GTD-v1.1_regional_planned,"Global Transmission Database (planned)",,,English,yes,data/electricity-transmission-database/GTD-v1.1_regional_planned.csv,
-global,owid-energy-data,"Data on Energy by Our World in Data",,,English,yes,data/demands/owid-energy-data.csv,
-global,WEO2023,"World Energy Outlook 2023",,,English,yes,data/WEO2023_AnnexA_Free_Dataset_Regions.csv,
