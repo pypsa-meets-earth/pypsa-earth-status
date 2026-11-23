@@ -5,15 +5,14 @@
 """Build historical UNSD final energy consumption by country, sector and fuel."""
 
 import argparse
-import ast
 import logging
-import os
-import types
 from pathlib import Path
+from xml.etree import ElementTree as ET
 
-import country_converter as coco
 import numpy as np
 import pandas as pd
+import yaml
+from download_unsd_sdmx import country_to_unsd_area
 
 logger = logging.getLogger(__name__)
 
@@ -43,90 +42,111 @@ INDUSTRY_OTHER_COLUMN = "other"
 STALE_OBSERVATION_WARNING_YEARS = 5
 
 
-def import_pypsa_earth_helpers(pypsa_earth_path):
-    """Load only the needed functions from PyPSA-Earth's _helpers.py.
-
-    The module is not imported because it pulls in many unrelated dependencies.
-    The source of aggregate_fuels, get_conv_factors and read_csv_nafix (and the
-    constants they use) is extracted and executed in an isolated namespace.
-    """
-    source_file = Path(pypsa_earth_path) / "scripts" / "_helpers.py"
-    if not source_file.exists():
-        raise FileNotFoundError(f"PyPSA-Earth _helpers.py not found: {source_file}")
-
-    source = source_file.read_text()
-    tree = ast.parse(source)
-
-    wanted_functions = {"aggregate_fuels", "get_conv_factors", "read_csv_nafix"}
-    wanted_constants = {"NA_VALUES"}
-
-    nodes = []
-    for node in tree.body:
-        if isinstance(node, ast.FunctionDef) and node.name in wanted_functions:
-            nodes.append(node)
-        elif isinstance(node, ast.Assign) and any(
-            isinstance(t, ast.Name) and t.id in wanted_constants for t in node.targets
-        ):
-            nodes.append(node)
-
-    found = {n.name for n in nodes if isinstance(n, ast.FunctionDef)}
-    if missing := wanted_functions - found:
-        raise ImportError(f"Functions not found in {source_file}: {sorted(missing)}")
-
-    namespace = {
-        "pd": pd,
-        "np": np,
-        "os": os,
-        "logging": logging,
-        "Path": Path,
-        "logger": logger,
-        "_logger": logger,
+def read_sdmx_labels(root, codelist_id):
+    """Map official SDMX codes to their English descriptions."""
+    ns = {
+        "s": "http://www.sdmx.org/resources/sdmxml/schemas/v2_1/structure",
+        "c": "http://www.sdmx.org/resources/sdmxml/schemas/v2_1/common",
     }
-    module = ast.Module(body=nodes, type_ignores=[])
-    exec(compile(module, str(source_file), "exec"), namespace)
 
-    return types.SimpleNamespace(**{name: namespace[name] for name in wanted_functions})
-
-
-def load_unsd(unsd_dir, helpers):
-    """Read the raw UNSD files and add commodity, transaction and ISO2 country."""
-    files = sorted(Path(unsd_dir).glob("*.txt"))
-    if not files:
-        raise FileNotFoundError(f"No UNSD .txt files found in {unsd_dir}")
-
-    df = pd.concat(
-        (helpers.read_csv_nafix(f, encoding="utf8", sep=";") for f in files),
-        ignore_index=True,
+    codelist = root.find(
+        f".//s:Codelist[@id='{codelist_id}']",
+        ns,
     )
-    df[["Commodity", "Transaction", "extra"]] = df["Commodity - Transaction"].str.split(
-        " - ", expand=True
-    )
-    df = df.loc[~df["Commodity - Transaction"].isin(["Footnote", "Estimate"])]
 
-    # Rows without a country name (footnotes) cannot be assigned to a country.
-    df = df.dropna(subset=["Country or Area"])
+    if codelist is None:
+        raise ValueError(f"Missing UNSD codelist: {codelist_id}")
 
-    # Convert each distinct name once instead of every row.
-    logging.getLogger("country_converter").setLevel(logging.ERROR)
-    names = sorted(df["Country or Area"].astype(str).unique())
-    converter = coco.CountryConverter()
-    iso2, failed = {}, []
-    for name in names:
-        try:
-            code = converter.convert(names=name, to="ISO2", not_found="not found")
-        except (AttributeError, TypeError, ValueError):
-            failed.append(name)
-            code = "not found"
-        iso2[name] = ",".join(map(str, code)) if isinstance(code, list) else str(code)
-    if failed:
-        logger.warning(
-            "Country names that could not be converted and are skipped: %s", failed
+    return {
+        code.get("id"): code.findtext("c:Name", namespaces=ns)
+        for code in codelist.findall("s:Code", ns)
+    }
+
+
+def load_unsd(unsd_dir, countries):
+    """Read cached SDMX observations using the official UNSD classifications."""
+    root = ET.parse(Path(unsd_dir) / "structure.xml").getroot()
+
+    commodities = read_sdmx_labels(root, "CL_COMMODITY_NRG")
+    transactions = read_sdmx_labels(root, "CL_TRANSACTION_NRG")
+
+    frames = []
+
+    for country in countries:
+        code = country_to_unsd_area(country)
+        source = Path(unsd_dir) / f"{code}.csv"
+
+        df = pd.read_csv(
+            source,
+            dtype={
+                "COMMODITY": str,
+                "TRANSACTION": str,
+            },
+            low_memory=False,
         )
-    df["country"] = df["Country or Area"].astype(str).map(iso2)
-    # Drop former countries and areas that map to several ISO2 codes.
-    df = df[df["country"].ne("not found") & ~df["country"].str.contains(",", na=False)]
 
-    return df.reset_index(drop=True)
+        df = df[df["FREQ"].eq("A")].copy()
+
+        df["country"] = country
+        df["Commodity"] = df["COMMODITY"].map(commodities)
+
+        # Normalize SDMX labels to the existing PyPSA-Earth fuel mapping.
+        commodity_aliases = {
+            "7000": "Electricity",
+            "4680": "Fuel oil",
+            "0100": "Hard coal",
+            "0200": "Brown coal",
+            "4630": "Liquefied petroleum gas (LPG)",
+            "5140": "Black Liquor",
+            "5150": "Vegetal waste",
+            "0379": "Recovered gases",
+        }
+
+        df["Commodity"] = df["COMMODITY"].map(commodity_aliases).fillna(df["Commodity"])
+        df["Transaction"] = df["TRANSACTION"].map(transactions)
+        df["transaction_code"] = df["TRANSACTION"]
+        df["Year"] = pd.to_numeric(df["TIME_PERIOD"], errors="coerce")
+
+        # Apply the SDMX unit multiplier before unit conversion.
+        multiplier = pd.to_numeric(df["UNIT_MULT"], errors="coerce")
+        value = pd.to_numeric(df["OBS_VALUE"], errors="coerce")
+
+        df["Quantity"] = value * (10.0**multiplier)
+
+        unit = df["UNIT_MEASURE"].astype(str).str.upper()
+
+        units = {
+            "TN": "Metric tons,  thousand",
+            "M3": "Cubic metres, thousand",
+            "TJ": "Terajoules",
+            "GWHR": "Kilowatt-hours, million",
+            "KWH": "Kilowatt-hours, million",
+            "MWH": "Kilowatt-hours, million",
+            "GWH": "Kilowatt-hours, million",
+        }
+
+        df["Unit"] = unit.map(units)
+
+        # PyPSA-Earth conversion factors are expressed per thousand tonnes
+        # or thousand cubic metres.
+        mass_or_volume = unit.isin(["TN", "M3"])
+        df.loc[mass_or_volume, "Quantity"] /= 1000
+
+        # Normalize electricity observations to million kWh.
+        df.loc[unit.eq("KWH"), "Quantity"] /= 1e6
+        df.loc[unit.eq("MWH"), "Quantity"] /= 1e3
+
+        df["Commodity - Transaction"] = (
+            df["Commodity"].astype(str) + " - " + df["Transaction"].astype(str)
+        )
+
+        df = df.dropna(subset=["Commodity", "Transaction", "Year"])
+
+        df["Year"] = df["Year"].astype(int)
+
+        frames.append(df)
+
+    return pd.concat(frames, ignore_index=True)
 
 
 def to_twh(df, conversion):
@@ -158,21 +178,9 @@ def to_twh(df, conversion):
     return df.loc[~unconverted]
 
 
-def fuel_mapping(helpers):
-    """Map UNSD commodities to the PyPSA fuel categories."""
-    gas, oil, biomass, coal, heat, electricity = helpers.aggregate_fuels("industry")
-    return {
-        commodity: fuel
-        for fuel, commodities in [
-            ("gas", gas),
-            ("oil", oil),
-            ("biomass", biomass),
-            ("coal", coal),
-            ("heat", heat),
-            ("electricity", electricity),
-        ]
-        for commodity in commodities
-    }
+def fuel_mapping(mapping):
+    """Return the locally maintained UNSD commodity-to-fuel mapping."""
+    return mapping["fuels"]
 
 
 def select_latest_year(df, model_year):
@@ -206,19 +214,208 @@ def energy_sector_rows(df, model_year):
 
 
 def industry_rows(df, transactions, model_year, include_other):
-    """Select industry rows using the PyPSA-Earth industry transactions list."""
+    """Select industrial consumption using UNSD transaction codes."""
     data = df[df["Commodity"].ne("Other bituminous coal")].copy()
-    data["Transaction"] = data["Transaction"].fillna("NA").str.lower()
 
-    names = transactions.set_index("Transaction")["clean_name"].to_dict()
-    data = data[data["Transaction"].isin(names)]
-    data["clean_name"] = data["Transaction"].map(names)
+    names = transactions.copy()
+    names["Transaction"] = names["Transaction"].fillna("").str.strip().str.lower()
+    name_mapping = names.set_index("Transaction")["clean_name"].to_dict()
+
+    transaction_names = data["Transaction"].fillna("").str.strip().str.lower()
+
+    data["clean_name"] = transaction_names.map(name_mapping)
+
+    # The 121 hierarchy covers manufacturing, construction and
+    # non-fuel industry, including all its detailed subsectors.
+    if "transaction_code" in data.columns:
+        code = data["transaction_code"].fillna("")
+        industrial = code.str.startswith("121")
+    else:
+        code = pd.Series("", index=data.index)
+        industrial = pd.Series(False, index=data.index)
+
+    selected = industrial | data["clean_name"].notna()
+    data = data.loc[selected].copy()
 
     if not include_other:
-        data = data[data["clean_name"].ne(INDUSTRY_OTHER_COLUMN)]
+        unspecified = data["clean_name"].eq(INDUSTRY_OTHER_COLUMN)
+
+        # The 1214 aggregate represents actual manufacturing subsectors,
+        # not unspecified industrial consumption.
+        unspecified &= ~code.loc[data.index].str.startswith("1214")
+
+        data = data.loc[~unspecified]
 
     data["sector"] = "industry"
+
     return select_latest_year(data, model_year)
+
+
+def read_transaction_parents(structure_path):
+    """Read the UNSD transaction hierarchy from the official SDMX structure."""
+    root = ET.parse(structure_path).getroot()
+
+    ns = {
+        "s": "http://www.sdmx.org/resources/sdmxml/schemas/v2_1/structure",
+    }
+
+    codes = root.findall(
+        ".//s:Codelist[@id='CL_TRANSACTION_NRG']/s:Code",
+        ns,
+    )
+
+    if not codes:
+        raise ValueError("UNSD transaction codelist not found")
+
+    parents = {}
+
+    for code in codes:
+        parent = code.find("./s:Parent/Ref", ns)
+
+        if parent is not None:
+            parents[code.get("id")] = parent.get("id")
+
+    return parents
+
+
+def read_commodity_parents(structure_path):
+    """Read the commodity hierarchy from the official UNSD SDMX structure."""
+    root = ET.parse(structure_path).getroot()
+
+    ns = {
+        "s": "http://www.sdmx.org/resources/sdmxml/schemas/v2_1/structure",
+    }
+
+    codes = root.findall(
+        ".//s:Codelist[@id='CL_COMMODITY_NRG']/s:Code",
+        ns,
+    )
+
+    if not codes:
+        raise ValueError("UNSD commodity codelist not found")
+
+    parents = {}
+
+    for code in codes:
+        parent = code.find("./s:Parent/Ref", ns)
+
+        if parent is not None:
+            parents[code.get("id")] = parent.get("id")
+
+    return parents
+
+
+def reconcile_commodity_hierarchy(rows, parents):
+    """Prevent double counting of aggregate commodities and descendants."""
+    if not parents or not {"COMMODITY", "transaction_code"}.issubset(rows):
+        return rows
+
+    discarded = set()
+
+    for (country, sector, transaction), group in rows.groupby(
+        ["country", "sector", "transaction_code"]
+    ):
+        available = set(group["COMMODITY"].dropna())
+
+        for index, row in group.iterrows():
+            code = row["COMMODITY"]
+            ancestor = parents.get(code)
+            visited = set()
+
+            while ancestor and ancestor not in visited:
+                visited.add(ancestor)
+
+                if ancestor in available:
+                    parent_year = group.loc[
+                        group["COMMODITY"].eq(ancestor), "Year"
+                    ].max()
+
+                    if row["Year"] > parent_year:
+                        logger.warning(
+                            "UNSD commodity hierarchy %s / %s / %s: "
+                            "aggregate %s (%s) is older than "
+                            "subcategory %s (%s); retaining the aggregate "
+                            "to avoid double counting.",
+                            country,
+                            sector,
+                            transaction,
+                            ancestor,
+                            int(parent_year),
+                            code,
+                            int(row["Year"]),
+                        )
+
+                    discarded.add(index)
+                    break
+
+                ancestor = parents.get(ancestor)
+
+    if discarded:
+        logger.info(
+            "Excluded %s overlapping UNSD commodity observations.",
+            len(discarded),
+        )
+
+    return rows.drop(index=list(discarded))
+
+
+def reconcile_transaction_hierarchy(rows, parents):
+    """Avoid double-counting UNSD aggregates and their descendants."""
+    if not parents or "transaction_code" not in rows.columns:
+        return rows
+
+    def is_descendant(code, ancestor):
+        visited = set()
+
+        while code in parents and code not in visited:
+            visited.add(code)
+            code = parents[code]
+
+            if code == ancestor:
+                return True
+
+        return False
+
+    discarded = set()
+
+    for (country, sector, commodity), group in rows.groupby(
+        ["country", "sector", "Commodity"]
+    ):
+        codes = set(group["transaction_code"].dropna())
+
+        for parent_code in codes:
+            descendants = {
+                code
+                for code in codes
+                if code != parent_code and is_descendant(code, parent_code)
+            }
+
+            if not descendants:
+                continue
+
+            parent_rows = group[group["transaction_code"].eq(parent_code)]
+            child_rows = group[group["transaction_code"].isin(descendants)]
+
+            parent_year = parent_rows["Year"].max()
+            child_year = child_rows["Year"].max()
+
+            if parent_year >= child_year:
+                discarded.update(child_rows.index)
+                selected = parent_code
+            else:
+                discarded.update(parent_rows.index)
+                selected = "newer subcategories"
+
+            logger.info(
+                "UNSD hierarchy: %s / %s / %s: "
+                "using %s instead of overlapping transactions.",
+                country,
+                sector,
+                commodity,
+                selected,
+            )
+
+    return rows.drop(index=list(discarded))
 
 
 def warn_stale_observations(rows, model_year, warning_years):
@@ -244,6 +441,8 @@ def aggregate(
     model_year,
     shift_coal_to_elec,
     stale_warning_years=STALE_OBSERVATION_WARNING_YEARS,
+    transaction_parents=None,
+    commodity_parents=None,
 ):
     """Sum TWh by country, sector, fuel; keep the reference year used."""
     rows = rows.copy()
@@ -264,6 +463,8 @@ def aggregate(
     # warning when it is old.
     series = ["country", "sector", "Commodity - Transaction"]
     rows = rows[rows["Year"].eq(rows.groupby(series)["Year"].transform("max"))]
+    rows = reconcile_transaction_hierarchy(rows, transaction_parents)
+    rows = reconcile_commodity_hierarchy(rows, commodity_parents)
     warn_stale_observations(rows, model_year, stale_warning_years)
 
     if shift_coal_to_elec:
@@ -282,70 +483,109 @@ def aggregate(
 
 
 def build_reference(args, countries):
-    """Build the reference table; empty when the UNSD inputs are unavailable."""
+    """Build the UNSD reference from locally cached SDMX observations."""
     empty = pd.DataFrame(columns=OUTPUT_COLUMNS)
 
-    # The UNSD statistics live in a PyPSA-Earth checkout. Without it the fuel
-    # reference is unavailable, which must not stop the rest of the validation.
+    directory = Path(args.unsd_path)
+    mapping_path = Path(
+        getattr(args, "fuel_mapping_path", "config/unsd/fuel_mapping.yaml")
+    )
+
     required = [
-        Path(args.pypsa_earth_path) / "scripts" / "_helpers.py",
-        Path(args.unsd_path),
+        directory / "structure.xml",
         Path(args.transactions_path),
+        mapping_path,
     ]
-    if missing := [str(path) for path in required if not path.exists()]:
+
+    required.extend(
+        directory / f"{country_to_unsd_area(country)}.csv" for country in countries
+    )
+
+    missing = [str(source) for source in required if not source.exists()]
+
+    if missing:
         logger.warning(
-            "UNSD fuel reference unavailable; PyPSA-Earth inputs not found: %s",
+            "UNSD reference unavailable; missing inputs: %s",
             missing,
         )
         return empty
 
-    helpers = import_pypsa_earth_helpers(args.pypsa_earth_path)
+    mapping = yaml.safe_load(mapping_path.read_text())
 
-    df = load_unsd(args.unsd_path, helpers)
-    df = df[df["country"].isin(countries)]
-
-    for country in sorted(set(countries) - set(df["country"])):
-        logger.warning("No UNSD data at all for country %s.", country)
+    df = load_unsd(directory, countries)
 
     if df.empty or not (df["Year"] <= args.year).any():
-        logger.warning("No UNSD observations up to model year %s.", args.year)
+        logger.warning("No UNSD observations up to year %s.", args.year)
         return empty
 
-    transactions = helpers.read_csv_nafix(args.transactions_path, sep=";")
-    conversion = helpers.get_conv_factors("industry")
+    transactions = pd.read_csv(
+        args.transactions_path,
+        sep=";",
+        keep_default_na=False,
+    )
 
     energy = energy_sector_rows(df, args.year)
-    industry = industry_rows(df, transactions, args.year, args.include_other_industries)
-    rows = to_twh(pd.concat([energy, industry], ignore_index=True), conversion)
+    industry = industry_rows(
+        df,
+        transactions,
+        args.year,
+        args.include_other_industries,
+    )
+
+    rows = pd.concat([energy, industry], ignore_index=True)
+
+    rows = to_twh(
+        rows,
+        mapping["conversion_factors"],
+    )
+
+    parents = read_transaction_parents(directory / "structure.xml")
 
     return aggregate(
         rows,
-        fuel_mapping(helpers),
+        fuel_mapping(mapping),
         args.year,
         args.shift_coal_to_elec,
         args.stale_warning_years,
+        transaction_parents=parents,
+        commodity_parents=read_commodity_parents(directory / "structure.xml"),
     )
 
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--pypsa-earth-path", required=True)
-    parser.add_argument("--unsd-path", required=True)
-    parser.add_argument("--transactions-path", required=True)
+
+    parser.add_argument(
+        "--unsd-path",
+        default="data/unsd_sdmx",
+    )
+    parser.add_argument(
+        "--transactions-path",
+        default="config/unsd/industry_transactions.csv",
+    )
+    parser.add_argument(
+        "--fuel-mapping-path",
+        default="config/unsd/fuel_mapping.yaml",
+    )
     parser.add_argument("--year", type=int, required=True)
     parser.add_argument("--countries", nargs="+", required=True)
     parser.add_argument("--shift-coal-to-elec", action="store_true")
     parser.add_argument("--include-other-industries", action="store_true")
     parser.add_argument(
-        "--stale-warning-years", type=int, default=STALE_OBSERVATION_WARNING_YEARS
+        "--stale-warning-years",
+        type=int,
+        default=STALE_OBSERVATION_WARNING_YEARS,
     )
     parser.add_argument("--output", required=True)
+
     args = parser.parse_args()
 
     logging.basicConfig(level=logging.INFO)
 
-    countries = [c.upper() for c in args.countries]
-    table = build_reference(args, countries)
+    table = build_reference(
+        args,
+        [country.upper() for country in args.countries],
+    )
 
     output = Path(args.output)
     output.parent.mkdir(parents=True, exist_ok=True)
@@ -353,7 +593,7 @@ def main():
 
     if not table.empty:
         logger.info(
-            "UNSD reference years used:\n%s",
+            "UNSD reference years used:\\n%s",
             table.groupby(["region", "sector"])["reference_year"].max().to_string(),
         )
 

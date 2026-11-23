@@ -1,0 +1,129 @@
+# SPDX-FileCopyrightText: PyPSA-Earth and PyPSA-Eur Authors
+# SPDX-License-Identifier: CC0-1.0
+
+conversion_factors:
+  Additives and Oxygenates: 0.008333
+  Anthracite: 0.005
+  Aviation gasoline: 0.0123
+  Bagasse: 0.002144
+  Bio jet kerosene: 0.011111
+  Biodiesel: 0.01022
+  Biogasoline: 0.007444
+  Bitumen: 0.01117
+  Brown Coal Briquettes: 0.00575
+  Brown coal: 0.003889
+  Brown coal briquettes: 0.00575
+  Charcoal: 0.00819
+  Coal Tar: 0.007778
+  Coke Oven Coke: 0.0078334
+  Coke oven coke: 0.0078334
+  Coke-oven coke: 0.0078334
+  Coking coal: 0.007833
+  Conventional crude oil: 0.01175
+  Crude petroleum: 0.01175
+  Ethane: 0.01289
+  Fuel oil: 0.01122
+  Fuelwood: 0.00254
+  Gas Coke: 0.007326
+  Gas Oil/ Diesel Oil: 0.01194
+  Gas coke: 0.007326
+  Gasoline-type jet fuel: 0.0123
+  Hard coal: 0.007167
+  Hrad coal: 0.007167
+  Kerosene-type Jet Fuel: 0.01225
+  Lignite: 0.003889
+  Liquefied petroleum gas (LPG): 0.01313
+  Liquified Petroleum Gas (LPG): 0.01313
+  Lubricants: 0.01117
+  Motor Gasoline: 0.0123
+  Naphtha: 0.01236
+  Natural Gas Liquids: 0.01228
+  Natural gas liquids: 0.01228
+  Oil shale: 0.00247
+  Other bituminous coal: 0.005556
+  Other kerosene: 0.01216
+  Other oil products n.e.c.: 0.0118044444
+  Paraffin waxes: 0.01117
+  Patent fuel: 0.00575
+  Peat: 0.00271
+  Peat Products: 0.00271
+  Peat products: 0.00271
+  Petroleum Coke: 0.009028
+  Petroleum coke: 0.009028
+  Refinery Gas: 0.01375
+  Refinery gas: 0.01375
+  Sub-bituminous coal: 0.005555
+  White spirit and special boiling point industrial spirits: 0.0120021667
+  ammonia: 0.00517
+fuels:
+  Additives and Oxygenates: oil
+  Animal waste: biomass
+  Anthracite: coal
+  Aviation gasoline: oil
+  Bagasse: biomass
+  Bio jet kerosene: biomass
+  Biodiesel: biomass
+  Biogases: biomass
+  Biogasoline: biomass
+  Bitumen: oil
+  Black Liquor: biomass
+  Blast Furnace Gas: coal
+  Brown Coal Briquettes: coal
+  Brown coal: coal
+  Brown coal briquettes: coal
+  Charcoal: biomass
+  Coal Tar: coal
+  Coal coke: coal
+  Coke Oven Coke: coal
+  Coke Oven Gas: coal
+  Coke oven coke: coal
+  Coke-oven coke: coal
+  Coking coal: coal
+  Conventional crude oil: oil
+  Crude petroleum: oil
+  Direct use of geothermal heat: heat
+  Direct use of solar thermal heat: heat
+  Electricity: electricity
+  Ethane: oil
+  Fuel oil: oil
+  Fuelwood: biomass
+  Gas Coke: coal
+  Gas Oil/ Diesel Oil: oil
+  Gas coke: coal
+  Gasoline-type jet fuel: oil
+  Gasworks Gas: coal
+  Hard coal: coal
+  Heat: heat
+  Hrad coal: coal
+  Industrial Waste: biomass
+  Industrial waste: biomass
+  Kerosene-type Jet Fuel: oil
+  Lignite: coal
+  Liquefied petroleum gas (LPG): oil
+  Liquified Petroleum Gas (LPG): oil
+  Lubricants: oil
+  Motor Gasoline: oil
+  Municipal Wastes: biomass
+  Naphtha: oil
+  Natural Gas (including LNG): gas
+  Natural gas (including LNG): gas
+  Natural Gas Liquids: oil
+  Natural gas liquids: oil
+  Oil Shale: coal
+  Oil shale: coal
+  Other bituminous coal: coal
+  Other kerosene: oil
+  Other oil products n.e.c.: oil
+  Paraffin waxes: oil
+  Patent fuel: coal
+  Peat: coal
+  Peat Products: coal
+  Peat products: coal
+  Petroleum Coke: oil
+  Petroleum coke: oil
+  Recovered gases: coal
+  Refinery Gas: oil
+  Refinery gas: oil
+  Sub-bituminous coal: coal
+  Vegetal waste: biomass
+  White spirit and special boiling point industrial spirits: oil
