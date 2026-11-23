@@ -61,9 +61,8 @@ plot_osm_grid_network:
   plot_circuits: false  # whether to plot the number of circuits on the lines if available
 
 fuel_validation:
-  pypsa_earth_path: "../pypsa-earth"
-  unsd_path: "../pypsa-earth/data/demand/unsd/data"
-  transactions_path: "../pypsa-earth/data/unsd_transactions.csv"
+  unsd_cache_dir: "data/unsd_sdmx"
+  refresh_sdmx: false
   shift_coal_to_elec: true  # must match sector.coal.shift_to_elec of the PyPSA-Earth run (upstream default: true)
   stale_observation_warning_years: 5  # warn when a UNSD commodity's latest observation is older than this, relative to the model year
   include_other_industries: true  # PyPSA-Earth keeps the unspecified ('other') industries in the model even with other_industries: false

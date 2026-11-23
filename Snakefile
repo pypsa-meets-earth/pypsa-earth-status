@@ -12,6 +12,7 @@ from os.path import normpath, exists, isdir
 from shutil import copyfile, move
 
 from helpers import create_country_list
+from download_unsd_sdmx import country_to_unsd_area
 
 # Create a temporary backup of the validation results before Snakemake deletes it
 if exists("results/health_status.csv"):
@@ -70,6 +71,20 @@ rule clean:
             shell("snakemake -j 1 visualize_data --delete-all-output")
         except:
             pass
+
+
+FUEL_VALIDATION_OUTPUTS = [
+    f"{results_dir}/tables/fuel_consumption_by_asset.csv",
+    f"{results_dir}/tables/fuel_consumption_by_carrier.csv",
+    f"{results_dir}/tables/fuel_load_shedding.csv",
+    f"{results_dir}/tables/fuel_consumption_reference.csv",
+    f"{results_dir}/tables/fuel_consumption_comparison.csv",
+    f"{results_dir}/tables/fuel_consumption_comparison_by_sector.csv",
+    f"{results_dir}/tables/fuel_consumption_comparison_by_fuel.csv",
+    f"{results_dir}/tables/fuel_consumption_comparison_national.csv",
+    f"{results_dir}/figures/fuel_consumption_by_sector.png",
+    f"{results_dir}/figures/fuel_consumption_comparison.png",
+]
 
 
 rule download_ember_data:
@@ -419,15 +434,7 @@ rule visualize_data:
         co2_validation_summary=f"{results_dir}/tables/co2_emissions_validation_summary.csv",
         co2_carrier_plot=f"{results_dir}/figures/co2_emissions_by_carrier.png",
         co2_comparison_plot=f"{results_dir}/figures/co2_emissions_comparison.png",
-        fuel_by_asset=f"{results_dir}/tables/fuel_consumption_by_asset.csv",
-        fuel_by_carrier=f"{results_dir}/tables/fuel_consumption_by_carrier.csv",
-        fuel_reference=f"{results_dir}/tables/fuel_consumption_reference.csv",
-        fuel_comparison=f"{results_dir}/tables/fuel_consumption_comparison.csv",
-        fuel_comparison_by_sector=f"{results_dir}/tables/fuel_consumption_comparison_by_sector.csv",
-        fuel_comparison_by_fuel=f"{results_dir}/tables/fuel_consumption_comparison_by_fuel.csv",
-        fuel_comparison_national=f"{results_dir}/tables/fuel_consumption_comparison_national.csv",
-        fuel_by_sector_plot=f"{results_dir}/figures/fuel_consumption_by_sector.png",
-        fuel_comparison_plot=f"{results_dir}/figures/fuel_consumption_comparison.png",
+        fuel_validation=FUEL_VALIDATION_OUTPUTS,
         transmission_validation=rules.validate_transmission_network.input,
     output:
         plot_demand=f"{results_dir}/figures/demand_comparison.png",
@@ -560,11 +567,12 @@ rule build_network_fuel_statistics:
     output:
         summary=f"{results_dir}/tables/fuel_consumption_by_carrier.csv",
         detail=f"{results_dir}/tables/fuel_consumption_by_asset.csv",
+        shedding=f"{results_dir}/tables/fuel_load_shedding.csv",
     params:
         year=years[0],
     shell:
         """
-        python {input.script:q} --network {input.network:q} --year {params.year} --mapping {input.mapping:q} --output {output.summary:q} --detail-output {output.detail:q}
+        python {input.script:q} --network {input.network:q} --year {params.year} --mapping {input.mapping:q} --output {output.summary:q} --detail-output {output.detail:q} --shedding-output {output.shedding:q}
         """
 
 
@@ -589,68 +597,82 @@ rule compare_fuel_consumption:
 rule plot_fuel_consumption_by_sector:
     input:
         statistics=f"{results_dir}/tables/fuel_consumption_by_asset.csv",
+        shedding=f"{results_dir}/tables/fuel_load_shedding.csv",
         script="scripts/plot_fuel_consumption.py",
     output:
         figure=f"{results_dir}/figures/fuel_consumption_by_sector.png",
     shell:
         """
-        python {input.script:q} --input {input.statistics:q} --output {output.figure:q}
+        python {input.script:q} --input {input.statistics:q} --shedding {input.shedding:q} --output {output.figure:q}
         """
 
 
 rule plot_fuel_consumption_comparison:
     input:
         comparison=f"{results_dir}/tables/fuel_consumption_comparison.csv",
+        shedding=f"{results_dir}/tables/fuel_load_shedding.csv",
         script="scripts/plot_fuel_comparison.py",
     output:
         figure=f"{results_dir}/figures/fuel_consumption_comparison.png",
     shell:
         """
-        python {input.script:q} --input {input.comparison:q} --output {output.figure:q}
+        python {input.script:q} --input {input.comparison:q} --shedding {input.shedding:q} --output {output.figure:q}
         """
 
 
-def existing_fuel_reference_inputs(wildcards):
-    """Track available UNSD inputs while allowing missing reference data."""
-    earth_path = Path(fuel_validation_config.get("pypsa_earth_path", "../pypsa-earth"))
-    unsd_path = Path(
-        fuel_validation_config.get("unsd_path", "../pypsa-earth/data/demand/unsd/data")
-    )
-    transactions_path = Path(
-        fuel_validation_config.get(
-            "transactions_path", "../pypsa-earth/data/unsd_transactions.csv"
-        )
-    )
+unsd_cache_dir = fuel_validation_config.get("unsd_cache_dir", "data/unsd_sdmx")
 
-    sources = [
-        earth_path / "scripts/_helpers.py",
-        transactions_path,
-    ]
+unsd_country_files = expand(
+    f"{unsd_cache_dir}/{{code}}.csv",
+    code=[country_to_unsd_area(country) for country in countries],
+)
 
-    if unsd_path.is_dir():
-        sources.append(unsd_path)
-        sources.extend(sorted(unsd_path.glob("*.txt")))
 
-    return [str(source) for source in sources if source.exists()]
+rule download_unsd_structure:
+    input:
+        script="scripts/download_unsd_sdmx.py",
+    output:
+        structure=f"{unsd_cache_dir}/structure.xml",
+    params:
+        cache_dir=unsd_cache_dir,
+        refresh=(
+            "--refresh" if fuel_validation_config.get("refresh_sdmx", False) else ""
+        ),
+    shell:
+        """
+        python {input.script:q} --structure-only --output-dir {params.cache_dir:q} {params.refresh}
+        """
+
+
+rule download_unsd_country:
+    input:
+        script="scripts/download_unsd_sdmx.py",
+    output:
+        country=f"{unsd_cache_dir}/{{code}}.csv",
+    params:
+        cache_dir=unsd_cache_dir,
+        refresh=(
+            "--refresh" if fuel_validation_config.get("refresh_sdmx", False) else ""
+        ),
+    shell:
+        """
+        python {input.script:q} --country-code {wildcards.code:q} --output-dir {params.cache_dir:q} {params.refresh}
+        """
 
 
 rule build_reference_fuel_unsd:
     input:
         script="scripts/build_reference_fuel_unsd.py",
-        sources=existing_fuel_reference_inputs,
+        downloader="scripts/download_unsd_sdmx.py",
+        mapping="config/unsd/fuel_mapping.yaml",
+        transactions="config/unsd/industry_transactions.csv",
+        structure=rules.download_unsd_structure.output.structure,
+        observations=unsd_country_files,
     output:
         reference=f"{results_dir}/tables/fuel_consumption_reference.csv",
     params:
-        pypsa_earth_path=fuel_validation_config.get(
-            "pypsa_earth_path", "../pypsa-earth"
-        ),
-        unsd_path=fuel_validation_config.get(
-            "unsd_path", "../pypsa-earth/data/demand/unsd/data"
-        ),
-        transactions_path=fuel_validation_config.get(
-            "transactions_path", "../pypsa-earth/data/unsd_transactions.csv"
-        ),
-        countries=config["network_validation"]["countries"],
+        unsd_path=unsd_cache_dir,
+        countries=countries,
         year=years[0],
         stale_warning_years=fuel_validation_config.get(
             "stale_observation_warning_years", 5
@@ -667,21 +689,13 @@ rule build_reference_fuel_unsd:
         ),
     shell:
         """
-        python {input.script:q} --pypsa-earth-path {params.pypsa_earth_path:q} --unsd-path {params.unsd_path:q} --transactions-path {params.transactions_path:q} --year {params.year} --countries {params.countries} {params.shift_coal} {params.other_industries} --stale-warning-years {params.stale_warning_years} --output {output.reference:q}
+        python {input.script:q} --unsd-path {params.unsd_path:q} --transactions-path {input.transactions:q} --fuel-mapping-path {input.mapping:q} --year {params.year} --countries {params.countries:q} {params.shift_coal} {params.other_industries} --stale-warning-years {params.stale_warning_years} --output {output.reference:q}
         """
 
 
 rule validate_fuel_consumption:
     input:
-        f"{results_dir}/tables/fuel_consumption_by_asset.csv",
-        f"{results_dir}/tables/fuel_consumption_by_carrier.csv",
-        f"{results_dir}/tables/fuel_consumption_reference.csv",
-        f"{results_dir}/tables/fuel_consumption_comparison.csv",
-        f"{results_dir}/tables/fuel_consumption_comparison_by_sector.csv",
-        f"{results_dir}/tables/fuel_consumption_comparison_by_fuel.csv",
-        f"{results_dir}/tables/fuel_consumption_comparison_national.csv",
-        f"{results_dir}/figures/fuel_consumption_by_sector.png",
-        f"{results_dir}/figures/fuel_consumption_comparison.png",
+        FUEL_VALIDATION_OUTPUTS,
 
 
 rule validate_all:
@@ -689,7 +703,7 @@ rule validate_all:
         rules.visualize_data.output,
         rules.validate_transmission_network.input,
         rules.validate_co2_comparison.input,
-        rules.validate_fuel_consumption.input,
+        fuel_validation=FUEL_VALIDATION_OUTPUTS,
 
 
 rule create_example_DE:

@@ -70,7 +70,8 @@ def plot_by_sector(table, output, shedding=None):
         return
 
     regions = set(data["region"].dropna().astype(str))
-    regions.update(active_shed["region"].dropna().astype(str))
+    if not active_shed.empty:
+        regions.update(active_shed["region"].dropna().astype(str))
     multi_region = len(regions) > 1
 
     data["label"] = data["sector"].str.replace("_", " ").str.title()
