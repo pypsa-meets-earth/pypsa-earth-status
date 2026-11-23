@@ -584,3 +584,176 @@ def test_shared_heat_bus_is_split_by_load_sector(heat_statistics):
     assert boiler.loc["services", "consumption_twh"] == pytest.approx(gas_in * 0.75)
     assert boiler.loc["industry", "consumption_twh"] == pytest.approx(gas_in * 0.25)
     assert set(boiler.fuel) == {"gas"}
+
+
+def test_dedicated_load_shedding_reduces_final_consumption():
+    n, _ = make_network()
+    n.add("Bus", "industry biomass", carrier="solid biomass for industry")
+    n.buses.at["industry biomass", "country"] = "JP"
+    n.add(
+        "Load",
+        "dedicated biomass demand",
+        bus="industry biomass",
+        carrier="solid biomass for industry",
+        p_set=10.0,
+    )
+    n.add(
+        "Generator",
+        "biomass shedding",
+        bus="industry biomass",
+        carrier="load shedding",
+        p_nom=10.0,
+    )
+    shedding_mw = pd.Series([2.0, 0.0, 4.0, 1.0], index=n.snapshots)
+    n.generators_t.p = pd.DataFrame({"biomass shedding": shedding_mw})
+
+    detail, _ = stats.build_statistics(n, 2023, MAPPING)
+    row = detail.loc[detail.asset.eq("dedicated biomass demand")].iloc[0]
+    expected = (10.0 * HOURS - shedding_mw.sum() * HOURS / N_SNAPSHOTS) * TWH
+    assert row.sector == "industry"
+    assert row.fuel == "biomass"
+    assert row.consumption_twh == pytest.approx(expected)
+
+    shedding = stats.load_shedding_statistics(
+        n,
+        2023,
+        stats.snapshot_weights(n),
+        stats.apply_sector_coupled_fallback(n, MAPPING),
+    )
+    assert shedding.unserved_twh.sum() == pytest.approx(
+        shedding_mw.sum() * HOURS / N_SNAPSHOTS * TWH
+    )
+    assert shedding.iloc[0].sector == "industry"
+    assert shedding.iloc[0].fuel == "biomass"
+
+
+def test_shared_bus_shedding_is_unclassified_and_not_subtracted():
+    n, _ = make_network()
+    n.add("Bus", "shared low voltage", carrier="low voltage")
+    n.buses.at["shared low voltage", "country"] = "JP"
+    n.add(
+        "Load",
+        "shared industry",
+        bus="shared low voltage",
+        carrier="industry electricity",
+        p_set=3.0,
+    )
+    n.add(
+        "Load",
+        "shared services",
+        bus="shared low voltage",
+        carrier="services electricity",
+        p_set=4.0,
+    )
+    n.add(
+        "Generator",
+        "shared shedding",
+        bus="shared low voltage",
+        carrier="load shedding",
+        p_nom=10.0,
+    )
+    n.generators_t.p = pd.DataFrame(
+        {"shared shedding": [1.0, 2.0, 0.0, 1.0]}, index=n.snapshots
+    )
+
+    detail, _ = stats.build_statistics(n, 2023, MAPPING)
+    assert detail.loc[detail.asset.eq("shared industry"), "consumption_twh"].iloc[
+        0
+    ] == pytest.approx(twh(3.0))
+    assert detail.loc[detail.asset.eq("shared services"), "consumption_twh"].iloc[
+        0
+    ] == pytest.approx(twh(4.0))
+
+    shedding = stats.load_shedding_statistics(
+        n,
+        2023,
+        stats.snapshot_weights(n),
+        stats.apply_sector_coupled_fallback(n, MAPPING),
+    )
+    assert set(shedding.sector) == {stats.UNCLASSIFIED}
+    assert set(shedding.fuel) == {"electricity"}
+    assert shedding.unserved_twh.sum() == pytest.approx(twh(1.0))
+
+
+def test_decentralized_solar_thermal_is_counted_but_central_is_not():
+    n, _ = make_network()
+    n.add("Bus", "district heat", carrier="urban central heat")
+    n.buses.at["district heat", "country"] = "JP"
+    n.add(
+        "Load",
+        "central heat load",
+        bus="district heat",
+        carrier="urban central heat",
+        p_set=2.0,
+    )
+    n.add(
+        "Generator",
+        "res solar thermal",
+        bus="res heat",
+        carrier="residential rural solar thermal",
+        p_nom=5.0,
+    )
+    n.add(
+        "Generator",
+        "central solar thermal",
+        bus="district heat",
+        carrier="urban central solar thermal",
+        p_nom=5.0,
+    )
+    n.generators_t.p = pd.DataFrame(
+        {
+            "res solar thermal": [1.0] * N_SNAPSHOTS,
+            "central solar thermal": [2.0] * N_SNAPSHOTS,
+        },
+        index=n.snapshots,
+    )
+
+    detail, _ = stats.build_statistics(n, 2023, MAPPING)
+    solar = detail.loc[detail.consumption_source.eq("direct_solar_thermal")]
+    assert set(solar.asset) == {"res solar thermal"}
+    assert solar.consumption_twh.sum() == pytest.approx(twh(1.0))
+    central = detail.loc[detail.asset.eq("central heat load")]
+    assert central.consumption_twh.sum() == pytest.approx(twh(2.0))
+    assert set(central.consumption_source) == {"load_district_heat"}
+
+
+def test_electricity_only_plot_accepts_empty_shedding(tmp_path):
+    from plot_fuel_comparison import plot_comparison
+    from plot_fuel_consumption import plot_by_sector
+
+    n = pypsa.Network()
+    n.set_snapshots(range(N_SNAPSHOTS))
+    n.snapshot_weightings.loc[:, :] = HOURS / N_SNAPSHOTS
+    n.add("Carrier", "AC")
+    n.add("Bus", "electricity", carrier="AC")
+    n.buses["country"] = "DE"
+    n.add("Load", "total electricity", bus="electricity", carrier="AC", p_set=3.0)
+
+    detail, _ = stats.build_statistics(n, 2023, MAPPING)
+    shedding = stats.load_shedding_statistics(
+        n, 2023, stats.snapshot_weights(n), MAPPING
+    )
+    assert shedding.empty
+    assert set(detail.sector) == {stats.UNCLASSIFIED}
+
+    output = tmp_path / "electricity_only.png"
+    plot_by_sector(detail, output, shedding)
+    assert output.is_file()
+    assert output.stat().st_size > 0
+
+    empty_comparison = pd.DataFrame(
+        columns=[
+            "region",
+            "sector",
+            "fuel",
+            "model_year",
+            "reference_year",
+            "network_twh",
+            "reference_twh",
+            "status",
+        ]
+    )
+    comparison_output = tmp_path / "electricity_only_comparison.png"
+    plot_comparison(empty_comparison, comparison_output, shedding)
+    assert comparison_output.is_file()
+    assert comparison_output.stat().st_size > 0
