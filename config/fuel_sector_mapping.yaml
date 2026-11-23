@@ -42,7 +42,7 @@ fuels:
   gas: [gas, gas for industry, biogas]
   oil: [oil]
   coal: [coal, lignite]
-  biomass: [biomass, solid biomass for industry]
+  biomass: [biomass, solid biomass, solid biomass for industry]
   hydrogen: [H2]
   heat: [urban central heat]
 

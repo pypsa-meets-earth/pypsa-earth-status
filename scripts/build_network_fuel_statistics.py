@@ -10,12 +10,12 @@ from pathlib import Path
 
 import pandas as pd
 import pypsa
-import yaml
 from build_network_co2_statistics import (
     component_regions,
     metadata_column,
     snapshot_weights,
 )
+from network_capabilities import is_sector_coupled, load_mapping
 
 logger = logging.getLogger(__name__)
 
@@ -50,36 +50,6 @@ GROUP_COLUMNS = [
 SUMMARY_COLUMNS = GROUP_COLUMNS + ["consumption_twh"]
 
 
-def load_mapping(path):
-    """Read the sector and fuel mapping."""
-    with open(path) as f:
-        cfg = yaml.safe_load(f)
-
-    return {
-        "sectors": {
-            model: unsd for unsd, models in cfg["sectors"].items() for model in models
-        },
-        "carrier_sectors": {
-            carrier: unsd
-            for unsd, carriers in cfg.get("carrier_sectors", {}).items()
-            for carrier in carriers
-        },
-        "sector_coupled_carrier_sectors": {
-            carrier: unsd
-            for unsd, carriers in cfg.get("sector_coupled_carrier_sectors", {}).items()
-            for carrier in carriers
-        },
-        "fuels": {
-            carrier: fuel
-            for fuel, carriers in cfg["fuels"].items()
-            for carrier in carriers
-        },
-        "end_use": set(cfg.get("end_use_bus_carriers", [])),
-        "district_heating": set(cfg.get("district_heating_bus_carriers", [])),
-        "excluded": set(cfg.get("excluded_bus_carriers", [])),
-    }
-
-
 def apply_sector_coupled_fallback(n, mapping):
     """Add the sector-coupled carrier fallback when the network is sector-coupled.
 
@@ -88,7 +58,7 @@ def apply_sector_coupled_fallback(n, mapping):
     single sector instead of the total electricity demand.
     """
     extra = mapping.get("sector_coupled_carrier_sectors", {})
-    if not extra or not n.loads.carrier.isin(mapping["carrier_sectors"]).any():
+    if not extra or not is_sector_coupled(n, mapping):
         return mapping
 
     return {**mapping, "carrier_sectors": {**extra, **mapping["carrier_sectors"]}}
@@ -118,7 +88,7 @@ def create_detail(
     region = component_regions(n, comps, component_type)
     missing = region.eq("")
     if missing.any() and "country" in n.buses.columns:
-        bus_col = "bus" if component_type == "Load" else "bus0"
+        bus_col = "bus" if component_type in {"Load", "Generator"} else "bus0"
         region.loc[missing] = (
             comps.loc[missing, bus_col]
             .map(n.buses.country)
@@ -175,6 +145,102 @@ def load_profiles(n, names):
     return profiles
 
 
+def subtract_dedicated_load_shedding(n, profiles, weights, mapping):
+    """Exclude artificial supply from final Loads on unshared demand buses.
+
+    Do not allocate shedding on shared buses or buses with other withdrawals.
+    Positive Link port flow means withdrawal from that bus in PyPSA.
+    """
+    if profiles.empty or n.generators.empty:
+        return profiles
+
+    carrier = (
+        n.generators.carrier.fillna("")
+        .astype(str)
+        .str.casefold()
+        .str.replace("_", " ", regex=False)
+    )
+    shedding = n.generators.loc[carrier.eq("load shedding")]
+    if shedding.empty:
+        return profiles
+
+    load_sectors = component_sectors(n.loads.loc[profiles.columns], mapping)
+    loads_per_bus = n.loads.bus.value_counts()
+    shedding_buses = set(shedding.bus)
+
+    blocked_buses = set()
+    for component in (n.stores, n.storage_units):
+        blocked_buses.update(component.bus.dropna())
+    for component in (n.lines, n.transformers):
+        blocked_buses.update(component.bus0.dropna())
+        blocked_buses.update(component.bus1.dropna())
+
+    candidates = [
+        name
+        for name in profiles.columns
+        if n.loads.at[name, "bus"] in shedding_buses
+        and loads_per_bus.get(n.loads.at[name, "bus"], 0) == 1
+        and n.loads.at[name, "bus"] not in blocked_buses
+        and pd.notna(load_sectors.at[name])
+        and load_sectors.at[name] != UNCLASSIFIED
+    ]
+    if not candidates:
+        return profiles
+
+    # A Link can withdraw from any port, including on reversible Links.
+    candidate_buses = set(n.loads.loc[candidates, "bus"])
+    for port in link_ports(n):
+        bus_col = f"bus{port}"
+        attached = n.links.index[n.links[bus_col].isin(candidate_buses)]
+        if attached.empty:
+            continue
+        flow = n.links_t.get(f"p{port}", pd.DataFrame())
+        dispatch = flow.reindex(index=n.snapshots, columns=attached)
+        withdrawing_or_unknown = dispatch.isna().any() | dispatch.gt(1e-5).any()
+        blocked_buses.update(
+            n.links.loc[withdrawing_or_unknown[withdrawing_or_unknown].index, bus_col]
+        )
+
+    names = [
+        name for name in candidates if n.loads.at[name, "bus"] not in blocked_buses
+    ]
+    if not names:
+        return profiles
+
+    shedding_dispatch = n.generators_t.p.reindex(
+        index=n.snapshots, columns=shedding.index
+    )
+    if shedding_dispatch.isna().any().any():
+        raise ValueError("Missing load shedding generator dispatch.")
+    shedding_by_bus = shedding_dispatch.clip(lower=0).T.groupby(shedding.bus).sum().T
+
+    served = profiles.copy()
+    subtracted_twh = 0.0
+    corrected = 0
+    for name in names:
+        bus = n.loads.at[name, "bus"]
+        artificial_supply = shedding_by_bus[bus]
+        demand = profiles[name]
+        if (artificial_supply - demand).gt(1e-5).any():
+            logger.warning(
+                "Not subtracting load shedding on %s: dispatch exceeds "
+                "its only final Load in at least one snapshot.",
+                bus,
+            )
+            continue
+        served[name] = (demand - artificial_supply).clip(lower=0)
+        subtracted_twh += artificial_supply.mul(weights).sum() * MWH_TO_TWH
+        corrected += 1
+
+    if corrected:
+        logger.info(
+            "Subtracted %.6f TWh of load shedding from %d dedicated final Loads.",
+            subtracted_twh,
+            corrected,
+        )
+    return served
+
+
 def load_consumption(n, model_year, weights, mapping):
     """Consumption of Loads on fuel and district heating buses.
 
@@ -200,7 +266,9 @@ def load_consumption(n, model_year, weights, mapping):
     if names.empty:
         return pd.DataFrame(columns=DETAIL_COLUMNS), end_use_demand, end_use_twh
 
-    twh = load_profiles(n, names).mul(weights, axis=0).sum(axis=0) * MWH_TO_TWH
+    profiles = load_profiles(n, names)
+    profiles = subtract_dedicated_load_shedding(n, profiles, weights, mapping)
+    twh = profiles.mul(weights, axis=0).sum(axis=0) * MWH_TO_TWH
 
     detail = create_detail(
         n, n.loads, "Load", carrier, twh, model_year, mapping, "load_fuel_bus"
@@ -376,6 +444,138 @@ def log_end_use_supply(demand, delivered):
     )
 
 
+SHEDDING_COLUMNS = [
+    "region",
+    "sector",
+    "fuel",
+    "bus_carrier",
+    "model_year",
+    "unserved_twh",
+    "load_demand_twh",
+    "unserved_pct",
+]
+
+
+def solar_thermal_consumption(n, model_year, weights, mapping):
+    """Count solar heat delivered directly to decentralized end-use heat buses."""
+    if n.generators.empty:
+        return pd.DataFrame(columns=DETAIL_COLUMNS)
+
+    carrier = (
+        n.generators.carrier.fillna("")
+        .astype(str)
+        .str.casefold()
+        .str.replace("_", " ", regex=False)
+    )
+    bus_carrier = bus_carriers(n, n.generators.bus)
+    valid = (
+        carrier.str.contains(r"solar.*thermal", regex=True)
+        & bus_carrier.isin(mapping["end_use"])
+        & ~bus_carrier.isin(mapping["district_heating"])
+    )
+    selected = n.generators.index[valid]
+    if selected.empty:
+        return pd.DataFrame(columns=DETAIL_COLUMNS)
+
+    dispatch = n.generators_t.p.reindex(index=n.snapshots, columns=selected)
+    if dispatch.isna().any().any():
+        raise ValueError("Missing solar thermal generator dispatch.")
+    annual = dispatch.mul(weights, axis=0).sum(axis=0) * MWH_TO_TWH
+    annual = annual[annual.gt(0)]
+    if annual.empty:
+        return pd.DataFrame(columns=DETAIL_COLUMNS)
+
+    detail = create_detail(
+        n,
+        n.generators,
+        "Generator",
+        bus_carrier,
+        annual,
+        model_year,
+        mapping,
+        "direct_solar_thermal",
+    )
+    detail["sector"] = (
+        detail["bus_carrier"].map(mapping["carrier_sectors"]).fillna(detail["sector"])
+    )
+    detail["fuel"] = "heat"
+    return detail[DETAIL_COLUMNS]
+
+
+def load_shedding_statistics(n, model_year, weights, mapping):
+    """Summarize unmet demand without treating load shedding as a fuel."""
+    if n.generators.empty:
+        return pd.DataFrame(columns=SHEDDING_COLUMNS)
+
+    carriers = (
+        n.generators.carrier.fillna("")
+        .astype(str)
+        .str.casefold()
+        .str.replace("_", " ", regex=False)
+    )
+    names = n.generators.index[carriers.eq("load shedding")]
+    if names.empty:
+        return pd.DataFrame(columns=SHEDDING_COLUMNS)
+
+    dispatch = n.generators_t.p.reindex(index=n.snapshots, columns=names)
+    if dispatch.isna().any().any():
+        raise ValueError("Missing load shedding dispatch.")
+    annual = dispatch.clip(lower=0).mul(weights, axis=0).sum(axis=0) * MWH_TO_TWH
+    active = annual.index[annual.gt(0)]
+    if active.empty:
+        return pd.DataFrame(columns=SHEDDING_COLUMNS)
+
+    generators = n.generators.loc[active]
+    per_bus = pd.DataFrame(
+        {
+            "region": component_regions(n, generators, "Generator"),
+            "bus": generators.bus,
+            "unserved_twh": annual.loc[active],
+        }
+    )
+    per_bus = per_bus.groupby(["region", "bus"], as_index=False)["unserved_twh"].sum()
+    per_bus["bus_carrier"] = per_bus["bus"].map(n.buses.carrier).fillna("")
+    per_bus["sector"] = (
+        per_bus["bus_carrier"].map(mapping["carrier_sectors"]).fillna(UNCLASSIFIED)
+    )
+    per_bus["fuel"] = per_bus["bus_carrier"].map(mapping["fuels"])
+    heat_buses = per_bus["bus_carrier"].str.casefold().str.endswith(" heat")
+    per_bus.loc[heat_buses, "fuel"] = "heat"
+    per_bus["fuel"] = per_bus["fuel"].fillna(UNCLASSIFIED)
+    per_bus["model_year"] = int(model_year)
+
+    # Only quote an unmet-demand share when same-bus final Loads identify demand.
+    relevant = per_bus.loc[per_bus.sector.ne(UNCLASSIFIED), "bus"]
+    names = n.loads.index[n.loads.bus.isin(relevant)]
+    demand = pd.Series(dtype=float)
+    if len(names):
+        annual_load = (
+            load_profiles(n, names).clip(lower=0).mul(weights, axis=0).sum(axis=0)
+            * MWH_TO_TWH
+        )
+        demand = annual_load.groupby(n.loads.loc[names, "bus"]).sum()
+    per_bus["load_demand_twh"] = per_bus["bus"].map(demand)
+    per_bus.loc[per_bus.sector.eq(UNCLASSIFIED), "load_demand_twh"] = float("nan")
+
+    grouped = per_bus.groupby(
+        ["region", "sector", "fuel", "bus_carrier", "model_year"],
+        as_index=False,
+        dropna=False,
+    ).agg(
+        unserved_twh=("unserved_twh", "sum"),
+        load_demand_twh=(
+            "load_demand_twh",
+            lambda values: values.sum() if values.notna().all() else float("nan"),
+        ),
+    )
+    grouped["unserved_pct"] = (
+        100
+        * grouped["unserved_twh"]
+        / grouped["load_demand_twh"].where(grouped["load_demand_twh"].gt(0))
+    )
+    return grouped[SHEDDING_COLUMNS]
+
+
 def build_statistics(n, model_year, mapping):
     """Build asset-level and aggregated final energy consumption statistics."""
     weights = snapshot_weights(n)
@@ -388,7 +588,8 @@ def build_statistics(n, model_year, mapping):
 
     log_end_use_supply(end_use_demand, delivered)
 
-    detail = pd.concat([loads, links], ignore_index=True)[DETAIL_COLUMNS]
+    solar = solar_thermal_consumption(n, model_year, weights, mapping)
+    detail = pd.concat([loads, links, solar], ignore_index=True)[DETAIL_COLUMNS]
 
     if detail.empty:
         logger.warning("No final energy consumption found in the network.")
@@ -427,6 +628,7 @@ def main():
     parser.add_argument("--mapping", required=True)
     parser.add_argument("--output", required=True)
     parser.add_argument("--detail-output")
+    parser.add_argument("--shedding-output")
     args = parser.parse_args()
 
     logging.basicConfig(level=logging.INFO)
@@ -443,6 +645,18 @@ def main():
         detail_output = Path(args.detail_output)
         detail_output.parent.mkdir(parents=True, exist_ok=True)
         detail.to_csv(detail_output, index=False)
+
+    if args.shedding_output:
+        shedding = load_shedding_statistics(
+            n,
+            args.year,
+            snapshot_weights(n),
+            apply_sector_coupled_fallback(n, mapping),
+        )
+        shedding_path = Path(args.shedding_output)
+        shedding_path.parent.mkdir(parents=True, exist_ok=True)
+        shedding.to_csv(shedding_path, index=False)
+        logger.info("Annual load shedding: %.3f TWh", shedding.unserved_twh.sum())
 
     if not summary.empty:
         totals = summary.groupby(["region", "sector"])["consumption_twh"].sum()
