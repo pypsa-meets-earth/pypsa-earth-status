@@ -541,6 +541,36 @@ rule validate_co2_comparison:
         f"{results_dir}/figures/co2_emissions_comparison.png",
 
 
+rule build_network_heat_statistics:
+    input:
+        network=network_path,
+        script="scripts/build_network_heat_statistics.py",
+    output:
+        statistics=f"{results_dir}/tables/heat_statistics_by_carrier.csv",
+    shell:
+        """
+        python {input.script:q} --network {input.network:q} --output {output.statistics:q}
+        """
+
+
+rule plot_heat_statistics:
+    input:
+        statistics=f"{results_dir}/tables/heat_statistics_by_carrier.csv",
+        script="scripts/plot_heat_statistics.py",
+    output:
+        figure=f"{results_dir}/figures/heat_statistics_by_carrier.png",
+    shell:
+        """
+        python {input.script:q} --input {input.statistics:q} --output {output.figure:q}
+        """
+
+
+rule validate_heat:
+    input:
+        f"{results_dir}/tables/heat_statistics_by_carrier.csv",
+        f"{results_dir}/figures/heat_statistics_by_carrier.png",
+
+
 rule create_example_DE:
     output:
         "resources/example_DE.nc",
