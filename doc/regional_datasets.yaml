@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
+#
+# SPDX-License-Identifier: CC0-1.0
+
 - country_code: "TR"
   dataset_name: "Collection of TSO reports"
   description: "PDF provided by TSO of Türkiye from 2021 to 2024"
