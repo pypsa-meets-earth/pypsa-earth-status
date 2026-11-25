@@ -40,7 +40,10 @@ def plot_by_sector(table, output, shedding=None):
     output = Path(output)
     output.parent.mkdir(parents=True, exist_ok=True)
 
-    data = table.dropna(subset=["consumption_twh"]).copy()
+    data = table.copy()
+    # pandas 3 can return object dtype when empty tables are concatenated.
+    data["consumption_twh"] = pd.to_numeric(data["consumption_twh"], errors="coerce")
+    data = data.dropna(subset=["consumption_twh"])
     for column in ("sector", "fuel"):
         data[column] = (
             data[column].fillna("unclassified").astype(str).replace("", "unclassified")
