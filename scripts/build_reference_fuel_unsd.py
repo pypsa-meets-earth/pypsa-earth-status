@@ -241,17 +241,54 @@ def industry_rows(df, transactions, model_year, include_other):
     selected = industrial | data["clean_name"].notna()
     data = data.loc[selected].copy()
 
-    if not include_other:
-        # Drop the unspecified industry and the UNSD totals that contain it,
-        # so industry is built from the specified subsectors only.
-        unspecified = data["clean_name"].eq(INDUSTRY_OTHER_COLUMN)
-        unspecified |= code.loc[data.index].isin(INDUSTRY_OTHER_CODES)
-
-        data = data.loc[~unspecified]
-
     data["sector"] = "industry"
+    data = select_latest_year(data, model_year)
 
-    return select_latest_year(data, model_year)
+    if not include_other:
+        data = exclude_other_industries(data)
+
+    return data
+
+
+def exclude_other_industries(rows, transaction_parents=None):
+    """Exclude unspecified industry without reviving obsolete subsectors."""
+    unspecified = rows["clean_name"].eq(INDUSTRY_OTHER_COLUMN)
+
+    if "transaction_code" not in rows.columns:
+        return rows.loc[~unspecified]
+
+    unspecified |= rows["transaction_code"].isin(INDUSTRY_OTHER_CODES)
+
+    discarded = set()
+
+    if transaction_parents:
+        for _, group in rows.groupby(["country", "COMMODITY"]):
+            latest_years = group.groupby("transaction_code")["Year"].max()
+
+            for code, observations in group.groupby("transaction_code"):
+                ancestor = transaction_parents.get(code)
+                visited = set()
+
+                while ancestor and ancestor not in visited:
+                    visited.add(ancestor)
+
+                    if (
+                        ancestor in INDUSTRY_OTHER_CODES
+                        and ancestor in latest_years.index
+                    ):
+                        older = observations["Year"].lt(latest_years.loc[ancestor])
+                        discarded.update(observations.index[older])
+
+                    ancestor = transaction_parents.get(ancestor)
+
+    if discarded:
+        logger.info(
+            "Excluded %s historical industrial observations superseded "
+            "by newer UNSD transaction aggregates.",
+            len(discarded),
+        )
+
+    return rows.loc[~unspecified].drop(index=list(discarded), errors="ignore")
 
 
 def read_transaction_parents(structure_path):
@@ -532,7 +569,7 @@ def build_reference(args, countries):
         df,
         transactions,
         args.year,
-        args.include_other_industries,
+        include_other=True,
     )
 
     rows = pd.concat([energy, industry], ignore_index=True)
@@ -543,6 +580,15 @@ def build_reference(args, countries):
     )
 
     parents = read_transaction_parents(directory / "structure.xml")
+
+    if not args.include_other_industries:
+        industrial = rows["sector"].eq("industry")
+        rows = pd.concat(
+            [
+                rows.loc[~industrial],
+                exclude_other_industries(rows.loc[industrial], parents),
+            ]
+        )
 
     return aggregate(
         rows,

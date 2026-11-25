@@ -385,6 +385,81 @@ def test_reference_industry_other_drops_sdmx_totals():
     assert set(without_other.transaction_code) == {"1211", "1214A"}
 
 
+def test_reference_industry_other_respects_aggregate_years():
+    """Excluded aggregates must still constrain historical subsectors."""
+    parents = {
+        "1211": "121",
+        "1213": "121",
+        "1214": "121",
+        "1214A": "1214",
+        "1214D": "1214",
+        "1214O": "1214",
+    }
+
+    observations = [
+        # Recent aggregates with complete subsector coverage.
+        ("Blast Furnace Gas", "121", 2023, 100.0),
+        ("Blast Furnace Gas", "1211", 2023, 80.0),
+        ("Blast Furnace Gas", "1214", 2023, 20.0),
+        ("Blast Furnace Gas", "1214A", 2023, 15.0),
+        ("Blast Furnace Gas", "1214O", 2023, 5.0),
+        ("Blast Furnace Gas", "1214D", 1992, 10.0),
+        # Older commodity with a consistent historical aggregate.
+        ("Coal Tar", "121", 2020, 2.0),
+        ("Coal Tar", "1211", 2020, 2.0),
+        ("Coal Tar", "1213", 2001, 4.0),
+        # Historical commodity without an available aggregate.
+        ("Fuel oil", "1213", 2018, 3.0),
+    ]
+
+    rows = pd.DataFrame(
+        observations,
+        columns=["Commodity", "transaction_code", "Year", "Quantity_TWh"],
+    )
+
+    rows["country"] = "JP"
+    rows["sector"] = "industry"
+    rows["COMMODITY"] = rows["Commodity"]
+    rows["Commodity - Transaction"] = (
+        rows["Commodity"] + " - " + rows["transaction_code"]
+    )
+    rows["clean_name"] = ""
+
+    fuels = {
+        "Blast Furnace Gas": "coal",
+        "Coal Tar": "coal",
+        "Fuel oil": "oil",
+    }
+
+    with_other = ref.aggregate(
+        rows,
+        fuels,
+        2023,
+        shift_coal_to_elec=False,
+        transaction_parents=parents,
+    ).set_index("fuel")
+
+    filtered = ref.exclude_other_industries(rows, parents)
+
+    without_other = ref.aggregate(
+        filtered,
+        fuels,
+        2023,
+        shift_coal_to_elec=False,
+        transaction_parents=parents,
+    ).set_index("fuel")
+
+    assert with_other.loc["coal", "reference_twh"] == pytest.approx(102.0)
+    assert without_other.loc["coal", "reference_twh"] == pytest.approx(97.0)
+
+    assert without_other.loc["oil", "reference_twh"] == pytest.approx(3.0)
+    assert without_other.loc["oil", "reference_year"] == 2018
+
+    assert not filtered["Year"].isin([1992, 2001]).any()
+    assert filtered["Year"].isin([2018, 2020]).any()
+    assert not filtered["transaction_code"].isin(ref.INDUSTRY_OTHER_CODES).any()
+
+
 def test_reference_is_empty_when_pypsa_earth_is_missing(tmp_path):
     args = argparse.Namespace(
         pypsa_earth_path=str(tmp_path / "pypsa-earth"),
