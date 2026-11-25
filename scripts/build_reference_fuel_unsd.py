@@ -37,6 +37,10 @@ ENERGY_SECTORS = {
 }
 COAL_SHIFT_SECTORS = {"residential", "services"}
 INDUSTRY_OTHER_COLUMN = "other"
+# UNSD transaction codes of the unspecified industry (1214O) and of the totals
+# that include it: manufacturing, construction and non-fuel industry (121) and
+# other manufacturing, construction and non-fuel industry (1214).
+INDUSTRY_OTHER_CODES = {"121", "1214", "1214O"}
 # Warn when a commodity's latest observation is older than this many years,
 # relative to the model year. The observation is still used.
 STALE_OBSERVATION_WARNING_YEARS = 5
@@ -238,11 +242,10 @@ def industry_rows(df, transactions, model_year, include_other):
     data = data.loc[selected].copy()
 
     if not include_other:
+        # Drop the unspecified industry and the UNSD totals that contain it,
+        # so industry is built from the specified subsectors only.
         unspecified = data["clean_name"].eq(INDUSTRY_OTHER_COLUMN)
-
-        # The 1214 aggregate represents actual manufacturing subsectors,
-        # not unspecified industrial consumption.
-        unspecified &= ~code.loc[data.index].str.startswith("1214")
+        unspecified |= code.loc[data.index].isin(INDUSTRY_OTHER_CODES)
 
         data = data.loc[~unspecified]
 

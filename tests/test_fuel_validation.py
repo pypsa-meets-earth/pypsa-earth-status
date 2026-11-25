@@ -355,6 +355,36 @@ def test_reference_industry_other_is_optional():
     assert set(without_other.clean_name) == {"iron and steel"}
 
 
+def test_reference_industry_other_drops_sdmx_totals():
+    """The UNSD totals 121 and 1214 include the unspecified industry 1214O."""
+    codes = {
+        "121": "Consumption by manufacturing, construction and non-fuel industry",
+        "1211": "Consumption by iron and steel",
+        "1214": "Consumption by other manuf., const. and non-fuel ind.",
+        "1214A": "Consumption by non-ferrous metals",
+        "1214O": "Consumption not elsewhere specified (industry)",
+    }
+    df = pd.DataFrame(
+        {
+            "Commodity": "Fuel oil",
+            "Transaction": list(codes.values()),
+            "transaction_code": list(codes),
+            "Year": 2022,
+        }
+    )
+    transactions = pd.read_csv(
+        Path(__file__).parents[1] / "config" / "unsd" / "industry_transactions.csv",
+        sep=";",
+        keep_default_na=False,
+    )
+
+    with_other = ref.industry_rows(df, transactions, 2023, include_other=True)
+    without_other = ref.industry_rows(df, transactions, 2023, include_other=False)
+
+    assert set(with_other.transaction_code) == set(codes)
+    assert set(without_other.transaction_code) == {"1211", "1214A"}
+
+
 def test_reference_is_empty_when_pypsa_earth_is_missing(tmp_path):
     args = argparse.Namespace(
         pypsa_earth_path=str(tmp_path / "pypsa-earth"),
