@@ -716,6 +716,12 @@ rule create_example_DE:
 
         n = pypsa.examples.scigrid_de()
         n.buses["country"] = "DE"
+        # Solve the example network to provide dispatch for validation.
+        status, condition = n.optimize(solver_name="highs")
+        if status != "ok" or condition != "optimal":
+            raise RuntimeError(
+                f"Example network optimization failed: {status}, {condition}"
+            )
         n.export_to_netcdf(output[0])
         print(f"Created example network at {output[0]}")
 
