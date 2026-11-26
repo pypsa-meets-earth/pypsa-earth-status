@@ -9,7 +9,6 @@ import logging
 import numpy as np
 import pandas as pd
 import pypsa
-
 from helpers import configure_logging
 
 logger = logging.getLogger(__name__)
@@ -32,7 +31,6 @@ COLUMNS = [
 ]
 
 
-
 def add_operational_diagnostics(network, region_map, add):
     """Report transmission constraints and significant unmet demand."""
     dc_carriers = {"dc", "dc link", "hvdc", "b2b"}
@@ -42,9 +40,7 @@ def add_operational_diagnostics(network, region_map, add):
         ("Line", network.lines, network.lines_t.p0, "s_nom", "MVA"),
         (
             "Link",
-            network.links.loc[
-                network.links.carrier.str.lower().isin(dc_carriers)
-            ],
+            network.links.loc[network.links.carrier.str.lower().isin(dc_carriers)],
             network.links_t.p0,
             "p_nom",
             "MW",
@@ -73,8 +69,12 @@ def add_operational_diagnostics(network, region_map, add):
                 and expansion > EXPANSION_THRESHOLD * original
             ):
                 add(
-                    "info", "transmission_expansion",
-                    branch.bus0, branch.bus1, expansion, unit,
+                    "info",
+                    "transmission_expansion",
+                    branch.bus0,
+                    branch.bus1,
+                    expansion,
+                    unit,
                     "scenario.ll; transmission expansion limits",
                     f"{name}: nominal capacity {original:.2f}; "
                     f"optimized capacity {optimized:.2f}.",
@@ -92,21 +92,21 @@ def add_operational_diagnostics(network, region_map, add):
         if component == "Line":
             parameter = "s_max_pu"
 
-            upper = network.get_switchable_as_dense(
-                component, parameter
-            ).reindex(columns=active)
+            upper = network.get_switchable_as_dense(component, parameter).reindex(
+                columns=active
+            )
 
             factor = upper
             parameters = "lines.s_max_pu; nominal line capacity"
 
         else:
-            upper = network.get_switchable_as_dense(
-                component, "p_max_pu"
-            ).reindex(columns=active)
+            upper = network.get_switchable_as_dense(component, "p_max_pu").reindex(
+                columns=active
+            )
 
-            lower = network.get_switchable_as_dense(
-                component, "p_min_pu"
-            ).reindex(columns=active)
+            lower = network.get_switchable_as_dense(component, "p_min_pu").reindex(
+                columns=active
+            )
 
             factor = upper.where(flow >= 0, -lower)
             parameters = "links.p_max_pu; links.p_min_pu; nominal link capacity"
@@ -131,9 +131,12 @@ def add_operational_diagnostics(network, region_map, add):
                 )
 
             add(
-                "warning", "transmission_congestion",
-                branch.bus0, branch.bus1,
-                100 * values.max(), "%",
+                "warning",
+                "transmission_congestion",
+                branch.bus0,
+                branch.bus1,
+                100 * values.max(),
+                "%",
                 parameters,
                 f"{name}: {saturated} saturated snapshots; "
                 f"peak at {peak}; "
@@ -147,18 +150,14 @@ def add_operational_diagnostics(network, region_map, add):
     electrical_regions = region_map.to_dict()
 
     for carrier in ["electricity distribution grid", "bev charger"]:
-        links = network.links.loc[
-            network.links.carrier.str.lower().eq(carrier)
-        ]
+        links = network.links.loc[network.links.carrier.str.lower().eq(carrier)]
 
         for link in links.itertuples():
             if link.bus0 in electrical_regions:
                 electrical_regions[link.bus1] = electrical_regions[link.bus0]
 
     generators = network.generators
-    shedding = generators.loc[
-        generators.carrier.str.lower().eq("load shedding")
-    ]
+    shedding = generators.loc[generators.carrier.str.lower().eq("load shedding")]
 
     dispatch = network.generators_t.p
     active = shedding.index.intersection(dispatch.columns)
@@ -167,9 +166,9 @@ def add_operational_diagnostics(network, region_map, add):
         logger.info("No load shedding dispatch available.")
         return
 
-    unmet = dispatch.loc[:, active].mul(
-        shedding.loc[active, "sign"], axis=1
-    ).clip(lower=0)
+    unmet = (
+        dispatch.loc[:, active].mul(shedding.loc[active, "sign"], axis=1).clip(lower=0)
+    )
 
     by_bus = unmet.T.groupby(shedding.loc[active, "bus"]).sum().T
 
@@ -192,13 +191,15 @@ def add_operational_diagnostics(network, region_map, add):
             if values.get(peak_snapshot, 0.0) >= UTILIZATION_THRESHOLD
         ]
 
-        congestion_context = (
-            ", ".join(coincident) if coincident else "none detected"
-        )
+        congestion_context = ", ".join(coincident) if coincident else "none detected"
 
         add(
-            "warning", "load_shedding",
-            region, bus, peak, "MW",
+            "warning",
+            "load_shedding",
+            region,
+            bus,
+            peak,
+            "MW",
             "transmission; distribution; local supply; demand",
             f"{carrier}: peak unmet demand {peak:.2f} MW; "
             f"weighted unserved energy {weighted_energy.at[bus]:.2f} MWh; "
@@ -213,35 +214,53 @@ def build_diagnostics(network, corridors, capacity, mapping, region_map):
     records = []
 
     def add(severity, category, bus0, bus1, value, unit, parameters, description):
-        records.append(dict(zip(COLUMNS, [
-            severity, category, bus0, bus1, value, unit,
-            parameters, description,
-        ])))
+        records.append(
+            dict(
+                zip(
+                    COLUMNS,
+                    [
+                        severity,
+                        category,
+                        bus0,
+                        bus1,
+                        value,
+                        unit,
+                        parameters,
+                        description,
+                    ],
+                )
+            )
+        )
 
     # Identify corridors consisting exclusively of B2B converters.
-    b2b = network.links[
-        network.links.carrier.str.lower().eq("b2b")
-    ].copy()
+    b2b = network.links[network.links.carrier.str.lower().eq("b2b")].copy()
 
     b2b["region0"] = b2b.bus0.map(region_map)
     b2b["region1"] = b2b.bus1.map(region_map)
 
     b2b_counts = (
-        b2b.dropna(subset=["region0", "region1"])
-        .apply(
-            lambda row: tuple(sorted([row.region0, row.region1])),
-            axis=1,
+        (
+            b2b.dropna(subset=["region0", "region1"])
+            .apply(
+                lambda row: tuple(sorted([row.region0, row.region1])),
+                axis=1,
+            )
+            .value_counts()
         )
-        .value_counts()
-    ) if not b2b.empty else pd.Series(dtype=int)
+        if not b2b.empty
+        else pd.Series(dtype=int)
+    )
 
     for row in corridors.itertuples(index=False):
         pair = tuple(sorted([row.bus0, row.bus1]))
 
         if row.status == "osm_only":
             add(
-                "warning", "missing_corridor", *pair,
-                row.osm_line_count, "lines",
+                "warning",
+                "missing_corridor",
+                *pair,
+                row.osm_line_count,
+                "lines",
                 "base_network; clustering.simplify_network",
                 "OSM corridor not represented in the evaluated network.",
             )
@@ -260,9 +279,11 @@ def build_diagnostics(network, corridors, capacity, mapping, region_map):
                 row.pypsa_dc_branch_count + row.pypsa_ac_branch_count,
                 "branches",
                 "base_network; links",
-                "B2B converter without a direct OSM line counterpart."
-                if only_b2b else
-                "PyPSA corridor without a matching OSM corridor.",
+                (
+                    "B2B converter without a direct OSM line counterpart."
+                    if only_b2b
+                    else "PyPSA corridor without a matching OSM corridor."
+                ),
             )
 
     # Compare nominal capacities rather than optimized capacities.
@@ -274,8 +295,12 @@ def build_diagnostics(network, corridors, capacity, mapping, region_map):
 
         if ratio < CAPACITY_RATIO_MIN or ratio > CAPACITY_RATIO_MAX:
             add(
-                "warning", "capacity_discrepancy",
-                row.bus0, row.bus1, ratio, "ratio",
+                "warning",
+                "capacity_discrepancy",
+                row.bus0,
+                row.bus1,
+                ratio,
+                "ratio",
                 "lines.ac_types; lines.use_country_specific_types; clustering",
                 "Nominal AC capacity differs from the OSM-derived estimate.",
             )
@@ -287,11 +312,17 @@ def build_diagnostics(network, corridors, capacity, mapping, region_map):
 
         add(
             "info" if status == "outside_transmission_regions" else "warning",
-            status, "", "", len(group), "buses",
+            status,
+            "",
+            "",
+            len(group),
+            "buses",
             "clustering.simplify_network",
-            "OSM buses mapped outside transmission regions."
-            if status == "outside_transmission_regions" else
-            "OSM buses without a valid region assignment.",
+            (
+                "OSM buses mapped outside transmission regions."
+                if status == "outside_transmission_regions"
+                else "OSM buses without a valid region assignment."
+            ),
         )
 
     add_operational_diagnostics(network, region_map, add)
@@ -313,13 +344,11 @@ if __name__ == "__main__":
     capacity = pd.read_csv(snakemake.input["capacity"])
     mapping = pd.read_csv(snakemake.input["osm_mapping"], dtype=str)
 
-    region_map = pd.read_csv(
-        snakemake.input["bus_region_map"], dtype=str
-    ).set_index("bus")["region_id"]
+    region_map = pd.read_csv(snakemake.input["bus_region_map"], dtype=str).set_index(
+        "bus"
+    )["region_id"]
 
-    result = build_diagnostics(
-        network, corridors, capacity, mapping, region_map
-    )
+    result = build_diagnostics(network, corridors, capacity, mapping, region_map)
 
     result.to_csv(snakemake.output["diagnostics"], index=False)
 
@@ -328,6 +357,11 @@ if __name__ == "__main__":
 
         log(
             "%s [%s - %s]: %s Value: %s %s. Check: %s",
-            row.category, row.bus0, row.bus1, row.description,
-            row.value, row.unit, row.parameters_to_check,
+            row.category,
+            row.bus0,
+            row.bus1,
+            row.description,
+            row.value,
+            row.unit,
+            row.parameters_to_check,
         )

@@ -107,10 +107,9 @@ def build_osm_corridors(
             bus_regions,
         )
     else:
-        bus_to_region = (
-            assignments.dropna(subset=["region_id"])
-            .set_index("bus_id")["region_id"]
-        )
+        bus_to_region = assignments.dropna(subset=["region_id"]).set_index("bus_id")[
+            "region_id"
+        ]
 
     lines = osm_lines.copy()
 

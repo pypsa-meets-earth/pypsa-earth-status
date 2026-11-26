@@ -64,9 +64,7 @@ def assign_osm_buses_to_regions(osm_buses, regions, busmap=None):
         predicate="intersects",
     )
 
-    return joined.sort_values(
-        ["bus_id", "region_id"]
-    ).drop_duplicates("bus_id")
+    return joined.sort_values(["bus_id", "region_id"]).drop_duplicates("bus_id")
 
 
 def read_busmap(path):
@@ -97,9 +95,7 @@ def compose_busmaps(paths, osm_bus_ids, final_bus_ids):
 
         missing = set(mapping.dropna()) - set(next_mapping.index)
         if missing:
-            raise ValueError(
-                f"{len(missing)} intermediate buses missing from {path}"
-            )
+            raise ValueError(f"{len(missing)} intermediate buses missing from {path}")
 
         mapping = mapping.map(next_mapping)
 
@@ -108,9 +104,7 @@ def compose_busmaps(paths, osm_bus_ids, final_bus_ids):
 
     missing = original_ids - set(mapping.index)
     if missing:
-        raise ValueError(
-            f"{len(missing)} OSM buses missing from the original busmap."
-        )
+        raise ValueError(f"{len(missing)} OSM buses missing from the original busmap.")
 
     invalid = set(mapping.dropna()) - final_ids
     if invalid:

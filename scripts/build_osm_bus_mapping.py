@@ -9,7 +9,6 @@ import logging
 import geopandas as gpd
 import pandas as pd
 import pypsa
-
 from helpers import configure_logging
 from transmission_mapping import (
     assign_osm_buses_to_regions,
@@ -34,9 +33,7 @@ def build_mapping(network, network_path, osm_buses, osm_path, regions, region_ma
         final_bus_mapping = mapping.copy()
         mapping = mapping.map(region_map)
 
-        assignments = assign_osm_buses_to_regions(
-            osm_buses, regions, busmap=mapping
-        )
+        assignments = assign_osm_buses_to_regions(osm_buses, regions, busmap=mapping)
 
         method = "topological"
         logger.info("Using PyPSA-Earth busmaps: %s", paths)
@@ -52,12 +49,9 @@ def build_mapping(network, network_path, osm_buses, osm_path, regions, region_ma
     assignments["mapping_status"] = "unassigned"
 
     if method == "topological":
-        assignments["mapped_bus"] = assignments["bus_id"].map(
-            final_bus_mapping
-        )
+        assignments["mapped_bus"] = assignments["bus_id"].map(final_bus_mapping)
         assignments.loc[
-            assignments["mapped_bus"].notna()
-            & assignments["region_id"].isna(),
+            assignments["mapped_bus"].notna() & assignments["region_id"].isna(),
             "mapping_status",
         ] = "outside_transmission_regions"
 
@@ -88,9 +82,9 @@ if __name__ == "__main__":
     osm_buses = gpd.read_file(snakemake.input["osm_buses"])
     regions = gpd.read_file(snakemake.input["bus_regions"])
 
-    region_map = pd.read_csv(
-        snakemake.input["bus_region_map"], dtype=str
-    ).set_index("bus")["region_id"]
+    region_map = pd.read_csv(snakemake.input["bus_region_map"], dtype=str).set_index(
+        "bus"
+    )["region_id"]
 
     mapping = build_mapping(
         network,
