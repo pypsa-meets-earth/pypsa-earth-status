@@ -44,6 +44,16 @@ network_validation:
   #     countries: ["ZA", "BW", "LS", "MW", "MZ"]
 
 
+# Optional OSM inputs for transmission topology, voltage representation,
+# and capacity-preservation validation. These must be post-build OSM network
+# files containing electrical buses and line bus0/bus1 topology.
+# If omitted, the files are resolved from plot_osm_grid_network.grid_path.
+#
+# transmission_validation:
+#   osm_lines: "path/to/all_lines_build_network.geojson"
+#   osm_buses: "path/to/all_buses_build_network.geojson"
+
+
 plot_osm_grid_network:
   grid_path: "tests/fixtures"
   line_voltages: [132., 220., 300., 380., 500., 750.]
