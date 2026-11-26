@@ -12,23 +12,9 @@ import numpy as np
 import pandas as pd
 import pypsa
 from helpers import configure_logging
+from transmission_mapping import assign_osm_buses_to_regions, normalize_id
 
 logger = logging.getLogger(__name__)
-
-
-def normalize_id(value):
-    """Normalize bus identifiers read from GeoJSON."""
-    if pd.isna(value):
-        return None
-
-    try:
-        numeric = float(value)
-        if numeric.is_integer():
-            return str(int(numeric))
-    except (TypeError, ValueError):
-        pass
-
-    return str(value)
 
 
 def parse_bool(value):
@@ -99,58 +85,12 @@ def get_linetype(
     return mapping[voltage_key]
 
 
-def assign_osm_buses_to_regions(
-    osm_buses,
-    regions,
-):
-    """Assign OSM buses to evaluated-network transmission regions."""
-    osm_buses = osm_buses.copy()
-    regions = regions.copy()
-
-    osm_buses["bus_id"] = osm_buses["bus_id"].map(normalize_id)
-
-    regions["region_id"] = regions["region_id"].astype(str)
-
-    osm_buses = osm_buses.to_crs(regions.crs)
-
-    columns = [
-        "bus_id",
-        "geometry",
-    ]
-
-    if "country" in osm_buses.columns:
-        columns.insert(1, "country")
-
-    joined = gpd.sjoin(
-        osm_buses[columns],
-        regions[
-            [
-                "region_id",
-                "geometry",
-            ]
-        ],
-        how="left",
-        predicate="intersects",
-    )
-
-    joined = joined.sort_values(
-        [
-            "bus_id",
-            "region_id",
-        ]
-    ).drop_duplicates(
-        subset="bus_id",
-        keep="first",
-    )
-
-    return joined
-
-
 def build_osm_capacity_reference(
     network,
     osm_lines,
     osm_buses,
     regions,
+    assignments=None,
 ):
     """Build OSM-derived AC capacity at evaluated-network resolution."""
     lines_config = get_lines_config(network)
@@ -165,10 +105,11 @@ def build_osm_capacity_reference(
         False,
     )
 
-    assignments = assign_osm_buses_to_regions(
-        osm_buses,
-        regions,
-    )
+    if assignments is None:
+        assignments = assign_osm_buses_to_regions(
+            osm_buses,
+            regions,
+        )
 
     region_map = (
         assignments.dropna(subset=["region_id"])
@@ -548,11 +489,19 @@ if __name__ == "__main__":
         },
     )
 
+    assignments = pd.read_csv(
+        snakemake.input["osm_mapping"],
+        dtype=str,
+        keep_default_na=False,
+        na_values=[""],
+    )
+
     osm_capacity = build_osm_capacity_reference(
         network,
         osm_lines,
         osm_buses,
         regions,
+        assignments=assignments,
     )
 
     osm_capacity_lines = build_osm_capacity_reference.lines

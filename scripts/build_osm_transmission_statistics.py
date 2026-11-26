@@ -16,6 +16,8 @@ import os
 import geopandas as gpd
 import pandas as pd
 from helpers import configure_logging
+from transmission_mapping import assign_osm_buses_to_regions as assign_regions
+from transmission_mapping import normalize_id
 
 logger = logging.getLogger(__name__)
 
@@ -50,64 +52,13 @@ def normalize_bus_pairs(df):
 
 
 def assign_osm_buses_to_regions(substations, bus_regions):
-    """Assign each OSM network bus to one solved-network bus region."""
-    if "bus_id" not in substations.columns:
-        raise ValueError("OSM substations must contain a 'bus_id' column.")
-
-    required_region_columns = {
-        "region_id",
-        "geometry",
-    }
-
-    missing = required_region_columns - set(bus_regions.columns)
-
-    if missing:
-        raise ValueError(
-            "Bus regions are missing required columns: " + ", ".join(sorted(missing))
-        )
-
-    substations = substations.copy()
-    bus_regions = bus_regions.copy()
-
-    if substations.crs is None:
-        raise ValueError("OSM substations have no CRS.")
-
-    if bus_regions.crs is None:
-        raise ValueError("Bus regions have no CRS.")
-
-    substations = substations.to_crs(bus_regions.crs)
-
-    # Cleaned OSM substations are normally points. Use a representative
-    # point as a safe fallback for polygon geometries.
-    substations["geometry"] = substations.geometry.apply(
-        lambda geometry: (
-            geometry
-            if geometry is None or geometry.is_empty or geometry.geom_type == "Point"
-            else geometry.representative_point()
-        )
+    """Return the shared OSM bus-to-region mapping."""
+    assignments = assign_regions(substations, bus_regions)
+    return (
+        assignments.dropna(subset=["region_id"])
+        .set_index("bus_id")["region_id"]
+        .astype(str)
     )
-
-    joined = gpd.sjoin(
-        substations[["bus_id", "geometry"]],
-        bus_regions[["region_id", "geometry"]],
-        how="left",
-        predicate="intersects",
-    )
-
-    # A point exactly on a Voronoi boundary may match more than one region.
-    # Keep one deterministic assignment.
-    joined["bus_id"] = joined["bus_id"].astype(str)
-    joined["region_id"] = joined["region_id"].astype("string")
-
-    joined = (
-        joined.dropna(subset=["region_id"])
-        .sort_values(["bus_id", "region_id"])
-        .drop_duplicates(subset=["bus_id"], keep="first")
-    )
-
-    mapping = joined.set_index("bus_id")["region_id"].astype(str)
-
-    return mapping
 
 
 def parse_numeric(series):
@@ -134,6 +85,7 @@ def build_osm_corridors(
     osm_lines,
     substations,
     bus_regions,
+    assignments=None,
 ):
     """Aggregate OSM network lines to undirected bus-region corridors."""
     required_line_columns = {
@@ -149,15 +101,21 @@ def build_osm_corridors(
             + ", ".join(sorted(missing))
         )
 
-    bus_to_region = assign_osm_buses_to_regions(
-        substations,
-        bus_regions,
-    )
+    if assignments is None:
+        bus_to_region = assign_osm_buses_to_regions(
+            substations,
+            bus_regions,
+        )
+    else:
+        bus_to_region = (
+            assignments.dropna(subset=["region_id"])
+            .set_index("bus_id")["region_id"]
+        )
 
     lines = osm_lines.copy()
 
-    lines["osm_bus0"] = lines["bus0"].astype(str)
-    lines["osm_bus1"] = lines["bus1"].astype(str)
+    lines["osm_bus0"] = lines["bus0"].map(normalize_id)
+    lines["osm_bus1"] = lines["bus1"].map(normalize_id)
 
     lines["bus0"] = lines["osm_bus0"].map(bus_to_region)
     lines["bus1"] = lines["osm_bus1"].map(bus_to_region)
@@ -286,10 +244,18 @@ if __name__ == "__main__":
 
     bus_regions = gpd.read_file(snakemake.input["bus_regions"])
 
+    assignments = pd.read_csv(
+        snakemake.input["osm_mapping"],
+        dtype=str,
+        keep_default_na=False,
+        na_values=[""],
+    )
+
     corridors = build_osm_corridors(
         osm_lines,
         substations,
         bus_regions,
+        assignments=assignments,
     )
 
     os.makedirs(

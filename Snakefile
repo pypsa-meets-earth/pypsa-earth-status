@@ -269,11 +269,51 @@ rule build_transmission_statistics:
         "scripts/build_transmission_statistics.py"
 
 
+def transmission_busmap_inputs(wildcards):
+    """Track existing PyPSA-Earth busmaps as workflow inputs."""
+    import pypsa
+    from transmission_mapping import discover_busmaps
+
+    if not Path(network_path).is_file():
+        return []
+
+    network = pypsa.Network(network_path)
+
+    try:
+        return [
+            str(path)
+            for path in discover_busmaps(
+                network,
+                network_path,
+                transmission_osm_buses,
+                check_mtime=False,
+            )
+        ]
+    except ValueError:
+        return []
+
+
+rule build_osm_bus_mapping:
+    input:
+        network_path=network_path,
+        osm_buses=transmission_osm_buses,
+        bus_regions=rules.build_bus_regions.output.regions,
+        bus_region_map=rules.build_bus_regions.output.mapping,
+        busmaps=transmission_busmap_inputs,
+    output:
+        mapping=f"{network_statistics_dir}/osm_bus_mapping.csv",
+    log:
+        f"{logs_dir}/build_osm_bus_mapping.log",
+    script:
+        "scripts/build_osm_bus_mapping.py"
+
+
 rule build_osm_transmission_statistics:
     input:
         osm_lines=transmission_osm_lines,
         osm_buses=transmission_osm_buses,
         bus_regions=f"{network_statistics_dir}/bus_regions.geojson",
+        osm_mapping=rules.build_osm_bus_mapping.output.mapping,
     output:
         corridors=f"{reference_statistics_dir}/osm_transmission_corridors.csv",
     log:
@@ -301,6 +341,7 @@ rule build_transmission_capacity_comparison:
         osm_lines=transmission_osm_lines,
         osm_buses=transmission_osm_buses,
         bus_regions=rules.build_bus_regions.output.regions,
+        osm_mapping=rules.build_osm_bus_mapping.output.mapping,
         comparison=rules.compare_transmission_topology.output.comparison,
     output:
         capacity_comparison=(
