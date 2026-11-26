@@ -387,8 +387,24 @@ rule plot_transmission_validation:
         "scripts/plot_transmission_validation.py"
 
 
+rule build_transmission_diagnostics:
+    input:
+        network_path=network_path,
+        corridors=rules.compare_transmission_topology.output.comparison,
+        capacity=rules.build_transmission_capacity_comparison.output.capacity_comparison,
+        osm_mapping=rules.build_osm_bus_mapping.output.mapping,
+        bus_region_map=rules.build_bus_regions.output.mapping,
+    output:
+        diagnostics=f"{results_dir}/tables/transmission_diagnostics.csv",
+    log:
+        f"{logs_dir}/build_transmission_diagnostics.log",
+    script:
+        "scripts/build_transmission_diagnostics.py"
+
+
 rule validate_transmission_network:
     input:
+        diagnostics=rules.build_transmission_diagnostics.output.diagnostics,
         comparison=rules.compare_transmission_topology.output.comparison,
         summary=rules.compare_transmission_topology.output.summary,
         voltage_representation=(

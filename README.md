@@ -177,3 +177,55 @@ If you want to validate multiple solved networks (scenarios) across multiple cou
    2. **Tracking the accuracy status of the PyPSA-Earth workflow.** Because results persist across runs, the file builds up into an overall picture of how model output compares against reference data over time and across scenarios.
 
    To serve the second purpose, and unlike the other validation outputs, this file is not written to a per-validation subfolder. It is a global tracker kept at a single stable path so that results accumulate across scenarios and validation configurations: each run replaces only the rows for the scenario-country pairs it just validated and leaves all other rows untouched. Running the rule with no `networks:` configured therefore leaves any existing results unchanged.
+
+## OSM-based transmission network validation
+
+Run the transmission validation with:
+
+    snakemake validate_transmission_network --cores 4
+
+### OSM bus mapping
+
+The validation automatically uses the original PyPSA-Earth simplification
+and clustering busmaps when compatible files are available.
+
+Otherwise, it falls back to geographic assignment using Voronoi regions.
+No additional configuration is required.
+
+The selected mapping method and mapping coverage are reported in
+`osm_bus_mapping.csv` and the workflow logs.
+
+Busmap compatibility is checked using network metadata, bus identifiers,
+and file modification times. These checks do not guarantee full provenance.
+
+Topological mapping assesses network representation and capacity preservation
+after aggregation. It does not independently validate the physical grid.
+
+### Transmission diagnostics
+
+The `tables/transmission_diagnostics.csv` output provides actionable
+findings, affected buses, severity levels, and parameters to investigate.
+
+| Diagnostic | Reporting threshold |
+| --- | --- |
+| Missing or unmatched corridors | Any occurrence |
+| Nominal AC capacity discrepancy | Outside 80–120% of the OSM estimate |
+| Transmission utilization | At least 99% of the effective limit |
+| Transmission expansion | More than 20% and 1 MW or MVA |
+| Load shedding | Peak of at least 0.1 MW |
+
+B2B converters without direct OSM counterparts and buses mapped outside
+transmission regions are reported separately as informational findings.
+
+Load shedding diagnostics identify adjacent transmission branches
+congested at the peak shedding snapshot. This indicates a possible
+relationship, not necessarily causality.
+
+Unserved energy is calculated using network snapshot weightings.
+For representative periods, this may differ from physical elapsed-time energy.
+
+Operational diagnostics require dispatch results. Structural validation
+remains available for unsolved networks.
+
+The thresholds are screening criteria rather than physical validity limits.
+The validation does not modify the evaluated network or its configuration.
