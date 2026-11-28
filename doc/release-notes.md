@@ -10,6 +10,8 @@ SPDX-License-Identifier: CC-BY-4.0
 
 ### New Features and Major Changes
 
+* [Add UNSD-based final energy consumption validation by sector and fuel, with automatic UNSD SDMX download, load shedding reporting and a `validate_all` target PR #94](https://github.com/pypsa-meets-earth/pypsa-earth-status/pull/94)
+
 * [Add EDGAR-based CO2 emissions validation for electricity-only and sector-coupled networks PR #86](https://github.com/pypsa-meets-earth/pypsa-earth-status/pull/86)
 
 * [Add Chilean reference datasets to the data inventory PR #81](https://github.com/pypsa-meets-earth/pypsa-earth-status/pull/81)
