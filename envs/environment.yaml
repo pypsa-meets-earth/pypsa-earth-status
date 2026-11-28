@@ -19,6 +19,7 @@ dependencies:
 - pulp <2.8
 - pyproj
 - pypsa >=0.33,<2
+- pytest
 - pyyaml
 - shapely
 - snakemake-minimal >=9,<10
