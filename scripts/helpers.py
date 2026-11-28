@@ -169,13 +169,24 @@ def mock_snakemake(rulename, configfile=None, **wildcards):
     """
     Build a Snakemake object for running a rule script directly.
     """
+
     import snakemake as sm
 
     try:
         from pypsa.descriptors import Dict
     except ImportError:
         from pypsa.definitions.structures import Dict
+    from snakemake.api import Workflow
+    from snakemake.logging import LoggerManager
     from snakemake.script import Snakemake
+    from snakemake.settings.types import (
+        ConfigSettings,
+        DAGSettings,
+        OutputSettings,
+        ResourceSettings,
+        StorageSettings,
+        WorkflowSettings,
+    )
 
     script_dir = Path(__file__).parent.resolve()
     root_dir = script_dir.parent
@@ -190,25 +201,28 @@ def mock_snakemake(rulename, configfile=None, **wildcards):
         )
 
     try:
-        snakefile = None
-        for candidate in sm.SNAKEFILE_CHOICES:
-            if os.path.exists(candidate):
-                snakefile = candidate
-                break
-        if snakefile is None:
-            raise FileNotFoundError("No Snakefile found in repository root")
+        snakefile = root_dir / "Snakefile"
+        if not snakefile.is_file():
+            raise FileNotFoundError(f"Snakefile not found: {snakefile}")
 
-        overwrite_config = configfile
-        if isinstance(configfile, str):
-            with open(configfile, "r") as f:
-                overwrite_config = yaml.safe_load(f)
+        if isinstance(configfile, (str, Path)):
+            config_settings = ConfigSettings(configfiles=[Path(configfile)])
+        else:
+            config_settings = ConfigSettings(config=configfile or {})
 
-        workflow = sm.Workflow(
-            snakefile,
-            overwrite_configfiles=[],
-            rerun_triggers=[],
-            overwrite_config=overwrite_config,
+        workflow = Workflow(
+            config_settings=config_settings,
+            resource_settings=ResourceSettings(),
+            workflow_settings=WorkflowSettings(),
+            storage_settings=StorageSettings(),
+            dag_settings=DAGSettings(rerun_triggers=[]),
+            storage_provider_settings={},
+            logger_manager=LoggerManager(
+                logger=logger,
+                settings=OutputSettings(),
+            ),
         )
+
         workflow.include(snakefile)
         workflow.global_resources = {}
 
