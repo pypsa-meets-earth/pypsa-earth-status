@@ -193,3 +193,6 @@ doc/_build/
 
 # Retrieved IRENA electricity generation dataset
 data/electricity_generation/C-ELECGEN_20260713-113435.csv
+
+# UNSD SDMX cache
+data/unsd_sdmx/

@@ -49,3 +49,10 @@ plot_osm_grid_network:
   line_voltages: [132., 220., 300., 380., 500., 750.]
   voltage_colors: ["#deb887", "#ff7f50", "#cd5c5c", "#9400D3", "#00ced1", "#ffffff"]  # colors for each voltage level in line_voltages
   plot_circuits: false  # whether to plot the number of circuits on the lines if available
+
+fuel_validation:
+  unsd_cache_dir: "data/unsd_sdmx"
+  refresh_sdmx: false
+  shift_coal_to_elec: true  # must match sector.coal.shift_to_elec of the PyPSA-Earth run (upstream default: true)
+  stale_observation_warning_years: 5  # warn when a UNSD commodity's latest observation is older than this, relative to the model year
+  include_other_industries: true  # PyPSA-Earth keeps the unspecified ('other') industries in the model even with other_industries: false
